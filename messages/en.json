@@ -1,0 +1,283 @@
+{
+  "meta": {
+    "description": "Skyline Digital — websites, web & mobile apps, AI solutions and automation. Calculate your project cost online and get a commercial proposal."
+  },
+  "nav": {
+    "services": "Services",
+    "projects": "Projects",
+    "about": "About",
+    "contact": "Contact",
+    "calculate": "Calculate cost",
+    "menu": "Menu"
+  },
+  "footer": {
+    "tagline": "Full-cycle digital agency: from landing pages to AI products. Tashkent, working worldwide.",
+    "services": "Services",
+    "projects": "Projects",
+    "about": "About",
+    "contact": "Contact",
+    "cta": "Calculate cost",
+    "location": "Tashkent"
+  },
+  "home": {
+    "hero": {
+      "title": "Websites, apps and AI solutions that bring you clients",
+      "subtitle": "Skyline Digital designs and ships digital products: from corporate websites to AI assistants. Get your project estimate in 2 minutes.",
+      "ctaPrimary": "Calculate cost",
+      "ctaSecondary": "View projects"
+    },
+    "eyebrows": {
+      "services": "Services",
+      "projects": "Projects",
+      "about": "Agency",
+      "process": "Process",
+      "calculator": "Calculator",
+      "contact": "Contact"
+    },
+    "servicesTitle": "What we do",
+    "from": "from",
+    "projectsTitle": "Selected work",
+    "allProjects": "All projects",
+    "aboutTitle": "Small team, full cycle",
+    "aboutText": "We take the project end to end: research, design, development, launch and support. No middlemen and no lost context — you talk directly to the people building your product.",
+    "aboutLink": "More about us",
+    "processTitle": "How we work",
+    "process": {
+      "brief": { "title": "Brief", "text": "We discuss the task, audience and goals." },
+      "estimate": { "title": "Estimate", "text": "Scope, cost and timeline — fixed and transparent." },
+      "design": { "title": "Design", "text": "We design the interface and approve the layouts." },
+      "build": { "title": "Build", "text": "We write the code and show progress every week." },
+      "launch": { "title": "Launch", "text": "We deploy, test and hand over the project." }
+    },
+    "calcTitle": "Know your project cost before the first call",
+    "calcText": "Answer a few questions — the calculator estimates budget and timeline, and AI assembles a personal commercial proposal as a PDF.",
+    "finalTitle": "Have a project in mind? Let's talk it through.",
+    "finalCta": "Leave a request"
+  },
+  "services": {
+    "title": "Services",
+    "intro": "Full cycle: from idea and design to launch and support. Prices below are starting points — the calculator gives you the exact number.",
+    "from": "from",
+    "cta": "Calculate project cost",
+    "ctaHint": "2 minutes, no calls or emails",
+    "benefitsLabel": "What's included",
+    "examplesLabel": "Examples",
+    "items": {
+      "website": {
+        "title": "Websites",
+        "desc": "Landing pages, corporate websites and online stores that load fast and convert visitors into leads.",
+        "benefits": "Responsive layout·SEO structure·Admin panel if needed·Analytics",
+        "examples": "Corporate website·E-commerce store·Launch landing page"
+      },
+      "webApp": {
+        "title": "Web applications",
+        "desc": "Client portals, CRMs and internal tools — complex logic behind a clear interface.",
+        "benefits": "Architecture design·Roles and permissions·API integrations·Scalability",
+        "examples": "Sales CRM·Client portal·Internal platform"
+      },
+      "mobileApp": {
+        "title": "Mobile applications",
+        "desc": "iOS and Android from a single codebase: faster to market, cheaper to maintain.",
+        "benefits": "Cross-platform·Push notifications·Payments·Store publishing",
+        "examples": "Delivery app·Fitness tracker·Catalog with ordering"
+      },
+      "ai": {
+        "title": "AI solutions",
+        "desc": "Chatbots, knowledge-base search and document processing powered by modern language models.",
+        "benefits": "AI chatbot·RAG over your data·File processing·Process integration",
+        "examples": "Support assistant·Document search·Routine automation"
+      },
+      "automation": {
+        "title": "Automation",
+        "desc": "We connect CRMs, messengers and spreadsheets into one flow — less manual work, fewer mistakes.",
+        "benefits": "Service integrations·Telegram/WhatsApp bots·Reporting·Notifications",
+        "examples": "Lead intake bot·CRM sync·Automated reports"
+      },
+      "uiux": {
+        "title": "UI/UX design",
+        "desc": "Interfaces that make sense from the first screen: research, prototype, design system.",
+        "benefits": "Prototyping·Design system·Responsive layouts·Dev handoff",
+        "examples": "Product redesign·MVP design·Design system"
+      }
+    }
+  },
+  "projects": {
+    "title": "Projects",
+    "intro": "Selected work: web, mobile apps, AI and automation.",
+    "categories": {
+      "all": "All",
+      "web": "Web",
+      "mobile": "Mobile",
+      "ai": "AI",
+      "automation": "Automation"
+    },
+    "empty": "Nothing in this category yet."
+  },
+  "project": {
+    "back": "All projects",
+    "technologies": "Technologies",
+    "year": "Year",
+    "category": "Category",
+    "visit": "Visit website",
+    "ctaTitle": "Want something similar?",
+    "cta": "Calculate cost"
+  },
+  "about": {
+    "title": "About us",
+    "intro": "Skyline Digital is a full-cycle studio based in Tashkent. We design, build and launch digital products for clients worldwide.",
+    "p1": "We are a small team, and that is our advantage: you talk directly to the people building your project. No account managers in between and no context lost between departments.",
+    "p2": "We follow a clear process: scope and cost are fixed before we start, progress is shown weekly, and the project ships with documentation and support.",
+    "stackTitle": "Our stack",
+    "valuesTitle": "Principles",
+    "v1": { "title": "Transparent estimates", "text": "Cost is computed by rules, not by gut feeling — you see exactly what the price is made of." },
+    "v2": { "title": "Speed without cutting corners", "text": "A modern stack and a refined process let us ship fast." },
+    "v3": { "title": "Product over code", "text": "We think in your metrics: leads, sales, retention — not just technology." },
+    "cta": "Calculate project cost"
+  },
+  "contact": {
+    "title": "Leave a request",
+    "intro": "Tell us about your task — we reply within one business day.",
+    "form": {
+      "name": "Name",
+      "email": "Email",
+      "messenger": "Telegram / WhatsApp",
+      "messengerPlaceholder": "@username or phone",
+      "service": "Service",
+      "servicePlaceholder": "Choose a service",
+      "budget": "Budget",
+      "budgetPlaceholder": "e.g. $1,000–3,000",
+      "message": "Message",
+      "messagePlaceholder": "Describe the task: what you need and when",
+      "submit": "Send request",
+      "sending": "Sending…",
+      "success": "Request sent",
+      "successText": "Thank you! We will get back to you within one business day.",
+      "error": "Could not send. Try again or contact us directly.",
+      "required": "Required field",
+      "invalidEmail": "Invalid email"
+    },
+    "altTitle": "Not a fan of forms?",
+    "altText": "Estimate your project yourself — the calculator asks the right questions.",
+    "altCta": "Open the calculator"
+  },
+  "calc": {
+    "title": "Cost calculator",
+    "intro": "Five steps — and you get a budget estimate, a timeline and a commercial proposal as a PDF.",
+    "stepLabel": "Step",
+    "of": "of",
+    "next": "Next",
+    "back": "Back",
+    "submit": "Calculate & get proposal",
+    "calculating": "Calculating the estimate and preparing your proposal…",
+    "calculatingHint": "This usually takes 10–20 seconds",
+    "runningTotal": "Running estimate",
+    "weeks": "wks",
+    "steps": {
+      "type": "Project type",
+      "features": "Features",
+      "addons": "Extras",
+      "info": "About the project",
+      "estimate": "Estimate"
+    },
+    "types": {
+      "website": { "title": "Website", "desc": "Landing, corporate site, store" },
+      "webApp": { "title": "Web app", "desc": "Portals, CRMs, dashboards" },
+      "mobileApp": { "title": "Mobile app", "desc": "iOS and Android" },
+      "ai": { "title": "AI solution", "desc": "Chatbots, RAG, data processing" },
+      "automation": { "title": "Automation", "desc": "Integrations and bots" },
+      "uiux": { "title": "UI/UX design", "desc": "Prototypes and design systems" },
+      "other": { "title": "Other", "desc": "Tell us about it — we'll estimate" }
+    },
+    "features": {
+      "landing": "Landing page",
+      "corporate": "Corporate website",
+      "ecommerce": "E-commerce",
+      "personalAccount": "Personal account",
+      "adminPanel": "Admin panel",
+      "blog": "Blog",
+      "multilingual": "Multilingual",
+      "payment": "Payments",
+      "apiIntegration": "API integrations",
+      "animations": "Animations",
+      "aiChatbot": "AI chatbot",
+      "rag": "RAG (knowledge-base search)",
+      "knowledgeBase": "Knowledge base",
+      "fileProcessing": "File processing",
+      "voice": "Voice interface",
+      "imageUnderstanding": "Image understanding",
+      "aiAutomation": "AI automation",
+      "ios": "iOS",
+      "android": "Android",
+      "authentication": "Authentication",
+      "pushNotifications": "Push notifications",
+      "payments": "Payments",
+      "crmIntegration": "CRM integration",
+      "telegram": "Telegram bot",
+      "whatsapp": "WhatsApp bot",
+      "workflowAutomation": "Workflow automation",
+      "reporting": "Reporting",
+      "wireframes": "Wireframes",
+      "prototype": "Interactive prototype",
+      "designSystem": "Design system"
+    },
+    "noFeatures": "This project type has no preset features — describe the task at the \"About the project\" step.",
+    "addons": {
+      "design": "UI/UX design",
+      "branding": "Branding",
+      "seo": "SEO",
+      "analytics": "Analytics",
+      "support": "Support (3 mo.)"
+    },
+    "urgency": {
+      "label": "Urgency",
+      "normal": "Normal timeline",
+      "urgent": "Urgent (+35%)"
+    },
+    "info": {
+      "projectName": "Project name",
+      "projectNamePlaceholder": "e.g. \"Dental clinic website\"",
+      "description": "Brief description",
+      "descriptionPlaceholder": "What needs to be done, for whom, and why",
+      "deadline": "Desired deadline",
+      "deadlinePlaceholder": "e.g. by the end of October",
+      "budget": "Budget range",
+      "budgetPlaceholder": "e.g. $2,000–4,000",
+      "contactName": "Your name",
+      "email": "Email",
+      "messenger": "Telegram / WhatsApp",
+      "messengerPlaceholder": "@username or phone"
+    },
+    "errors": {
+      "required": "Please fill in the required fields",
+      "generic": "Something went wrong. Please try again.",
+      "selectType": "Choose a project type"
+    },
+    "result": {
+      "eyebrow": "Your estimate",
+      "investment": "Estimated investment",
+      "timeline": "Timeline",
+      "weeksShort": "weeks",
+      "summary": "Your project",
+      "scope": "Scope of work",
+      "features": "Selected features",
+      "stack": "Recommended stack",
+      "recommendations": "Recommendations",
+      "nextSteps": "Next steps",
+      "download": "Download commercial proposal",
+      "permanent": "Permanent link to this estimate",
+      "newCalc": "Calculate another project",
+      "disclaimer": "This is a preliminary estimate, not a binding offer. The final quote is fixed after a brief."
+    }
+  },
+  "estimate": {
+    "eyebrow": "Commercial proposal",
+    "notFoundTitle": "Estimate not found",
+    "notFoundText": "The link is outdated or invalid. Calculate your project again.",
+    "notFoundCta": "Open the calculator"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "text": "This page does not exist. Head back home.",
+    "cta": "Go home"
+  }
+}

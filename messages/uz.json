@@ -1,0 +1,283 @@
+{
+  "meta": {
+    "description": "Skyline Digital — saytlar, veb va mobil ilovalar, AI yechimlar va avtomatlashtirish. Loyiha narxini onlayn hisoblang va tijorat taklifini oling."
+  },
+  "nav": {
+    "services": "Xizmatlar",
+    "projects": "Loyihalar",
+    "about": "Biz haqimizda",
+    "contact": "Aloqa",
+    "calculate": "Narxni hisoblash",
+    "menu": "Menyu"
+  },
+  "footer": {
+    "tagline": "To'liq tsiklli raqamli agentlik: lendingdan AI mahsulotgacha. Toshkent, butun dunyo bo'ylab ishlaymiz.",
+    "services": "Xizmatlar",
+    "projects": "Loyihalar",
+    "about": "Biz haqimizda",
+    "contact": "Aloqa",
+    "cta": "Narxni hisoblash",
+    "location": "Toshkent"
+  },
+  "home": {
+    "hero": {
+      "title": "Mijoz olib keladigan saytlar, ilovalar va AI yechimlar",
+      "subtitle": "Skyline Digital raqamli mahsulotlarni loyihalaydi va ishga tushiradi: korporativ saytdan AI-yordamchigacha. Loyihangiz narxini 2 daqiqada bilib oling.",
+      "ctaPrimary": "Narxni hisoblash",
+      "ctaSecondary": "Loyihalarni ko'rish"
+    },
+    "eyebrows": {
+      "services": "Xizmatlar",
+      "projects": "Loyihalar",
+      "about": "Agentlik",
+      "process": "Jarayon",
+      "calculator": "Kalkulyator",
+      "contact": "Aloqa"
+    },
+    "servicesTitle": "Nima qilamiz",
+    "from": "dan",
+    "projectsTitle": "Tanlangan ishlar",
+    "allProjects": "Barcha loyihalar",
+    "aboutTitle": "Kichik jamoa, to'liq tsikl",
+    "aboutText": "Loyihani boshidan oxirigacha olamiz: tahlil, dizayn, dasturlash, ishga tushirish va qo'llab-quvvatlash. Vositachilarsiz — mahsulotni yaratayotgan odamlar bilan to'g'ridan-to'g'ri gaplashasiz.",
+    "aboutLink": "Biz haqimizda batafsil",
+    "processTitle": "Ish qanday kechadi",
+    "process": {
+      "brief": { "title": "Brif", "text": "Vazifa, auditoriya va maqsadlarni muhokama qilamiz." },
+      "estimate": { "title": "Smeta", "text": "Hajm, narx va muddatlarni shaffof belgilaymiz." },
+      "design": { "title": "Dizayn", "text": "Interfeysni loyihalaymiz va maketlarni tasdiqlaymiz." },
+      "build": { "title": "Dasturlash", "text": "Kod yozamiz, har hafta natijani ko'rsatamiz." },
+      "launch": { "title": "Ishga tushirish", "text": "Joylaymiz, sinovdan o'tkazamiz va topshiramiz." }
+    },
+    "calcTitle": "Birinchi qo'ng'iroqdan oldin loyiha narxini bilib oling",
+    "calcText": "Bir nechta savolga javob bering — kalkulyator byudjet va muddatni hisoblaydi, AI esa PDF ko'rinishida shaxsiy tijorat taklifini tayyorlaydi.",
+    "finalTitle": "Vazifangiz bormi? Muhokama qilib, yechim taklif qilamiz.",
+    "finalCta": "Ariza qoldirish"
+  },
+  "services": {
+    "title": "Xizmatlar",
+    "intro": "To'liq tsikl: g'oya va dizayndan ishga tushirish va qo'llab-quvvatlashgacha. Quyidagi narxlar boshlang'ich — anigini kalkulyator hisoblaydi.",
+    "from": "dan",
+    "cta": "Loyiha narxini hisoblash",
+    "ctaHint": "2 daqiqa, qo'ng'iroq va pochtasiz",
+    "benefitsLabel": "Nimalar kiradi",
+    "examplesLabel": "Misollar",
+    "items": {
+      "website": {
+        "title": "Saytlar",
+        "desc": "Tez yuklanadigan va tashrif buyuruvchilarni arizaga aylantiradigan lendinglar, korporativ saytlar va internet-do'konlar.",
+        "benefits": "Adaptiv dizayn·SEO tuzilma·Kerak bo'lsa admin-panel·Analitika",
+        "examples": "Korporativ sayt·Internet-do'kon·Lending"
+      },
+      "webApp": {
+        "title": "Veb-ilovalar",
+        "desc": "Shaxsiy kabinetlar, CRM va ichki vositalar — murakkab mantiq tushunarli interfeysda.",
+        "benefits": "Arxitektura loyihalash·Rollar va ruxsatlar·API integratsiyalar·Kengaytiriluvchanlik",
+        "examples": "Savdo CRM·Mijoz portali·Ichki platforma"
+      },
+      "mobileApp": {
+        "title": "Mobil ilovalar",
+        "desc": "Bitta kod bazasidan iOS va Android: bozorga tezroq chiqish, arzonroq qo'llab-quvvatlash.",
+        "benefits": "Krossplatforma·Push-bildirishnomalar·To'lovlar·Do'konlarga joylash",
+        "examples": "Yetkazib berish ilovasi·Fitnes-treker·Buyurtmali katalog"
+      },
+      "ai": {
+        "title": "AI yechimlar",
+        "desc": "Zamonaviy til modellari asosida chat-botlar, bilimlar bazasi bo'yicha qidiruv va hujjatlarni qayta ishlash.",
+        "benefits": "AI chat-bot·Ma'lumotlaringiz bo'yicha RAG·Fayllarni qayta ishlash·Jarayonlarga integratsiya",
+        "examples": "Qo'llab-quvvatlash yordamchisi·Hujjat qidiruvi·Rutinani avtomatlashtirish"
+      },
+      "automation": {
+        "title": "Avtomatlashtirish",
+        "desc": "CRM, messenjer va jadvallarni yagona jarayonga bog'laymiz — kamroq qo'l mehnati, kamroq xato.",
+        "benefits": "Servis integratsiyalari·Telegram/WhatsApp botlar·Hisobotlar·Bildirishnomalar",
+        "examples": "Ariza qabul boti·CRM sinxronizatsiya·Avtohisobotlar"
+      },
+      "uiux": {
+        "title": "UI/UX dizayn",
+        "desc": "Birinchi ekrandan tushunarli interfeyslar: tadqiqot, prototip, dizayn-tizim.",
+        "benefits": "Prototiplash·Dizayn-tizim·Adaptiv maketlar·Dasturchilarga topshirish",
+        "examples": "Mahsulot redizayni·MVP dizayni·Dizayn-tizim"
+      }
+    }
+  },
+  "projects": {
+    "title": "Loyihalar",
+    "intro": "Tanlangan ishlar: veb, mobil ilovalar, AI va avtomatlashtirish.",
+    "categories": {
+      "all": "Barchasi",
+      "web": "Veb",
+      "mobile": "Mobil",
+      "ai": "AI",
+      "automation": "Avtomatlashtirish"
+    },
+    "empty": "Bu kategoriyada hozircha hech narsa yo'q."
+  },
+  "project": {
+    "back": "Barcha loyihalar",
+    "technologies": "Texnologiyalar",
+    "year": "Yil",
+    "category": "Kategoriya",
+    "visit": "Saytni ochish",
+    "ctaTitle": "Shunga o'xshash loyiha kerakmi?",
+    "cta": "Narxni hisoblash"
+  },
+  "about": {
+    "title": "Biz haqimizda",
+    "intro": "Skyline Digital — Toshkentdagi to'liq tsiklli studiya. Butun dunyo mijozlari uchun raqamli mahsulotlarni loyihalaymiz, quramiz va ishga tushiramiz.",
+    "p1": "Biz kichik jamoamiz va bu bizning afzalligimiz: loyihangizni yaratayotgan odamlar bilan to'g'ridan-to'g'ri gaplashasiz. Oradagi menejerlar va bo'limlar orasida yo'qolgan kontekst yo'q.",
+    "p2": "Aniq jarayon bo'yicha ishlaymiz: hajm va narx boshlashdan oldin belgilanadi, natija har hafta ko'rsatiladi, loyiha hujjatlar va qo'llab-quvvatlash bilan topshiriladi.",
+    "stackTitle": "Bizning stek",
+    "valuesTitle": "Tamoyillar",
+    "v1": { "title": "Shaffof smeta", "text": "Narx qoidalar bo'yicha hisoblanadi — narx nimadan iboratligini ko'rasiz." },
+    "v2": { "title": "Sifatni yo'qotmasdan tezlik", "text": "Zamonaviy stek va ishlab chiqilgan jarayon loyihalarni tez ishga tushirish imkonini beradi." },
+    "v3": { "title": "Kod emas, mahsulot", "text": "Sizning ko'rsatkichlaringiz haqida o'ylaymiz: arizalar, sotuvlar, ushlab qolish — faqat texnologiya emas." },
+    "cta": "Loyiha narxini hisoblash"
+  },
+  "contact": {
+    "title": "Ariza qoldirish",
+    "intro": "Vazifangiz haqida yozing — ish kuni davomida javob beramiz.",
+    "form": {
+      "name": "Ism",
+      "email": "Email",
+      "messenger": "Telegram / WhatsApp",
+      "messengerPlaceholder": "@username yoki raqam",
+      "service": "Xizmat",
+      "servicePlaceholder": "Xizmatni tanlang",
+      "budget": "Byudjet",
+      "budgetPlaceholder": "Masalan, $1 000–3 000",
+      "message": "Xabar",
+      "messagePlaceholder": "Vazifani tasvirlab bering: nima kerak va qachongacha",
+      "submit": "Ariza yuborish",
+      "sending": "Yuborilmoqda…",
+      "success": "Ariza yuborildi",
+      "successText": "Rahmat! Ish kuni davomida siz bilan bog'lanamiz.",
+      "error": "Yuborib bo'lmadi. Qayta urinib ko'ring yoki to'g'ridan-to'g'ri yozing.",
+      "required": "Majburiy maydon",
+      "invalidEmail": "Email noto'g'ri"
+    },
+    "altTitle": "Formalarni yoqtirmaysizmi?",
+    "altText": "Loyiha narxini o'zingiz hisoblang — kalkulyator to'g'ri savollarni beradi.",
+    "altCta": "Kalkulyatorni ochish"
+  },
+  "calc": {
+    "title": "Narx kalkulyatori",
+    "intro": "Besh qadam — va siz byudjet bahosi, muddat va PDF ko'rinishidagi tijorat taklifini olasiz.",
+    "stepLabel": "Qadam",
+    "of": "/",
+    "next": "Keyingi",
+    "back": "Orqaga",
+    "submit": "Hisoblash va taklif olish",
+    "calculating": "Smeta hisoblanmoqda va taklif tayyorlanmoqda…",
+    "calculatingHint": "Odatda 10–20 soniya davom etadi",
+    "runningTotal": "Dastlabki baho",
+    "weeks": "hafta",
+    "steps": {
+      "type": "Loyiha turi",
+      "features": "Funksiyalar",
+      "addons": "Qo'shimcha",
+      "info": "Loyiha haqida",
+      "estimate": "Smeta"
+    },
+    "types": {
+      "website": { "title": "Sayt", "desc": "Lending, korporativ sayt, do'kon" },
+      "webApp": { "title": "Veb-ilova", "desc": "Kabinetlar, CRM, portallar" },
+      "mobileApp": { "title": "Mobil ilova", "desc": "iOS va Android" },
+      "ai": { "title": "AI yechim", "desc": "Chat-botlar, RAG, ma'lumotlar" },
+      "automation": { "title": "Avtomatlashtirish", "desc": "Integratsiyalar va botlar" },
+      "uiux": { "title": "UI/UX dizayn", "desc": "Prototiplar va dizayn-tizimlar" },
+      "other": { "title": "Boshqa", "desc": "Vazifani ayting — baholaymiz" }
+    },
+    "features": {
+      "landing": "Lending",
+      "corporate": "Korporativ sayt",
+      "ecommerce": "Internet-do'kon",
+      "personalAccount": "Shaxsiy kabinet",
+      "adminPanel": "Admin-panel",
+      "blog": "Blog",
+      "multilingual": "Ko'p tillilik",
+      "payment": "To'lov qabul qilish",
+      "apiIntegration": "API integratsiyalar",
+      "animations": "Animatsiyalar",
+      "aiChatbot": "AI chat-bot",
+      "rag": "RAG (bilimlar bazasi qidiruvi)",
+      "knowledgeBase": "Bilimlar bazasi",
+      "fileProcessing": "Fayllarni qayta ishlash",
+      "voice": "Ovozli interfeys",
+      "imageUnderstanding": "Tasvirlarni aniqlash",
+      "aiAutomation": "AI avtomatlashtirish",
+      "ios": "iOS",
+      "android": "Android",
+      "authentication": "Avtorizatsiya",
+      "pushNotifications": "Push-bildirishnomalar",
+      "payments": "To'lovlar",
+      "crmIntegration": "CRM integratsiya",
+      "telegram": "Telegram bot",
+      "whatsapp": "WhatsApp bot",
+      "workflowAutomation": "Jarayonlarni avtomatlashtirish",
+      "reporting": "Hisobotlar",
+      "wireframes": "Prototiplar",
+      "prototype": "Interaktiv prototip",
+      "designSystem": "Dizayn-tizim"
+    },
+    "noFeatures": "Bu loyiha turi uchun tayyor funksiyalar yo'q — vazifani \"Loyiha haqida\" qadamida tasvirlab bering.",
+    "addons": {
+      "design": "UI/UX dizayn",
+      "branding": "Brending",
+      "seo": "SEO",
+      "analytics": "Analitika",
+      "support": "Qo'llab-quvvatlash (3 oy)"
+    },
+    "urgency": {
+      "label": "Shoshilinchlik",
+      "normal": "Oddiy muddat",
+      "urgent": "Shoshilinch (+35%)"
+    },
+    "info": {
+      "projectName": "Loyiha nomi",
+      "projectNamePlaceholder": "Masalan, \"Stomatologiya sayti\"",
+      "description": "Vazifa haqida qisqacha",
+      "descriptionPlaceholder": "Nima qilish kerak, kim uchun, qanday maqsadlar",
+      "deadline": "Istalgan muddat",
+      "deadlinePlaceholder": "Masalan, oktabr oxirigacha",
+      "budget": "Byudjet mo'ljali",
+      "budgetPlaceholder": "Masalan, $2 000–4 000",
+      "contactName": "Ismingiz",
+      "email": "Email",
+      "messenger": "Telegram / WhatsApp",
+      "messengerPlaceholder": "@username yoki raqam"
+    },
+    "errors": {
+      "required": "Majburiy maydonlarni to'ldiring",
+      "generic": "Xatolik yuz berdi. Qayta urinib ko'ring.",
+      "selectType": "Loyiha turini tanlang"
+    },
+    "result": {
+      "eyebrow": "Sizning smetangiz",
+      "investment": "Byudjet bahosi",
+      "timeline": "Muddat",
+      "weeksShort": "hafta",
+      "summary": "Loyiha haqida",
+      "scope": "Ishlar hajmi",
+      "features": "Tanlangan funksiyalar",
+      "stack": "Tavsiya etilgan stek",
+      "recommendations": "Tavsiyalar",
+      "nextSteps": "Keyingi qadamlar",
+      "download": "Tijorat taklifini yuklab olish",
+      "permanent": "Smetaga doimiy havola",
+      "newCalc": "Boshqa loyihani hisoblash",
+      "disclaimer": "Bu dastlabki baho bo'lib, oferta hisoblanmaydi. Aniq smeta brifdan keyin belgilanadi."
+    }
+  },
+  "estimate": {
+    "eyebrow": "Tijorat taklifi",
+    "notFoundTitle": "Smeta topilmadi",
+    "notFoundText": "Havola eskirgan yoki noto'g'ri. Loyihani qaytadan hisoblang.",
+    "notFoundCta": "Kalkulyatorni ochish"
+  },
+  "notFound": {
+    "title": "Sahifa topilmadi",
+    "text": "Bunday sahifa yo'q. Bosh sahifaga qayting.",
+    "cta": "Bosh sahifaga"
+  }
+}

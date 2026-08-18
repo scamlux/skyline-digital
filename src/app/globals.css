@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+/* ————— Skyline design tokens: "Horizon over Tashkent" ————— */
+@theme inline {
+  --color-night: #1a2238;
+  --color-night-deep: #131a2c;
+  --color-day: #f5f7fa;
+  --color-surface: #ffffff;
+  --color-ink: #1c2130;
+  --color-muted: #5b6272;
+  --color-mist: #8b93a7;
+  --color-line: #dde2ea;
+  --color-line-night: #2c3550;
+  --color-apricot: #ffae5c;
+  --color-afterglow: #e8517c;
+
+  --font-display: var(--font-unbounded);
+  --font-sans: var(--font-golos);
+  --font-mono: var(--font-jetbrains);
+}
+
+body {
+  background: var(--color-day);
+  color: var(--color-ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-apricot);
+  color: var(--color-night);
+}
+
+/* Horizon gradient — the site's signature. Used for the line, the sun and CTAs. */
+.horizon-gradient {
+  background-image: linear-gradient(90deg, var(--color-apricot), var(--color-afterglow));
+}
+
+.sun-disc {
+  background: radial-gradient(circle at 38% 32%, var(--color-apricot), var(--color-afterglow) 72%);
+  border-radius: 9999px;
+}
+
+/* Hero sunrise: the disc climbs over the horizon on load. */
+@keyframes sunrise {
+  from {
+    transform: translateY(46%);
+    opacity: 0.4;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.animate-sunrise {
+  animation: sunrise 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Scroll reveal (driven by .is-visible via IntersectionObserver). */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-sunrise {
+    animation: none;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  * {
+    scroll-behavior: auto !important;
+  }
+}
