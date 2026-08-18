@@ -36,12 +36,20 @@ export default async function AboutPage({
 
   return (
     <main>
-      <section className="bg-night text-day">
+      <section className="relative overflow-hidden bg-night text-day">
+        <div className="stars-far" aria-hidden />
         <div className="mx-auto max-w-6xl px-5 pb-16 pt-12 md:px-8 md:pb-24 md:pt-20">
-          <h1 className="font-display text-3xl font-medium md:text-5xl">{t("title")}</h1>
-          <p className="mt-5 max-w-2xl text-mist md:text-lg">{t("intro")}</p>
+          <h1 className="font-display animate-fade-up text-3xl font-medium md:text-5xl">
+            {t("title")}
+          </h1>
+          <p
+            className="animate-fade-up mt-5 max-w-2xl text-mist md:text-lg"
+            style={{ "--d": "150ms" } as React.CSSProperties}
+          >
+            {t("intro")}
+          </p>
         </div>
-        <div className="horizon-gradient h-px w-full opacity-80" aria-hidden />
+        <div className="horizon-gradient animate-line-draw h-px w-full opacity-80" aria-hidden />
       </section>
 
       <div className="bg-day">

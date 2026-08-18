@@ -57,16 +57,26 @@ export default async function ProjectPage({
       </section>
 
       <div className="bg-day">
-        <div className="mx-auto max-w-6xl px-5 pt-14 md:px-8 md:pt-20">
-          <div className="relative aspect-[16/9] overflow-hidden rounded-xl border border-line bg-night">
-            <Image
-              src={project.image}
-              alt={project.title}
-              fill
-              sizes="(max-width: 1152px) 100vw, 1152px"
-              className="object-cover object-top"
-              priority
-            />
+        <div className="group mx-auto max-w-6xl px-5 pt-14 md:px-8 md:pt-20">
+          <div className="overflow-hidden rounded-xl border border-line bg-night-deep shadow-[0_20px_60px_rgba(19,26,44,0.15)]">
+            <div className="flex items-center gap-2 border-b border-line-night bg-night px-4 py-3">
+              <span className="h-2.5 w-2.5 rounded-full bg-afterglow/70" />
+              <span className="h-2.5 w-2.5 rounded-full bg-apricot/70" />
+              <span className="h-2.5 w-2.5 rounded-full bg-mist/40" />
+              <span className="ml-3 truncate rounded-md bg-night-deep px-3 py-1 font-mono text-[10px] text-mist">
+                {project.url ? new URL(project.url).host : project.slug}
+              </span>
+            </div>
+            <div className="preview-pan relative aspect-[16/9] overflow-hidden">
+              <Image
+                src={project.image}
+                alt={project.title}
+                fill
+                sizes="(max-width: 1152px) 100vw, 1152px"
+                className="object-cover"
+                priority
+              />
+            </div>
           </div>
         </div>
         <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 md:grid-cols-3 md:px-8 md:py-20">

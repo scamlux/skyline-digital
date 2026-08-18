@@ -21,10 +21,15 @@
   },
   "home": {
     "hero": {
-      "title": "Websites, apps and AI solutions that bring you clients",
+      "title": "Websites, apps and *AI solutions* that bring you clients",
       "subtitle": "Skyline Digital designs and ships digital products: from corporate websites to AI assistants. Get your project estimate in 2 minutes.",
       "ctaPrimary": "Calculate cost",
       "ctaSecondary": "View projects"
+    },
+    "stats": {
+      "projects": { "value": "12+", "label": "projects" },
+      "years": { "value": "5", "label": "years of experience" },
+      "langs": { "value": "3", "label": "languages" }
     },
     "eyebrows": {
       "services": "Services",

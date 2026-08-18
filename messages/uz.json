@@ -21,10 +21,15 @@
   },
   "home": {
     "hero": {
-      "title": "Mijoz olib keladigan saytlar, ilovalar va AI yechimlar",
+      "title": "Mijoz olib keladigan saytlar, ilovalar va *AI yechimlar*",
       "subtitle": "Skyline Digital raqamli mahsulotlarni loyihalaydi va ishga tushiradi: korporativ saytdan AI-yordamchigacha. Loyihangiz narxini 2 daqiqada bilib oling.",
       "ctaPrimary": "Narxni hisoblash",
       "ctaSecondary": "Loyihalarni ko'rish"
+    },
+    "stats": {
+      "projects": { "value": "12+", "label": "loyiha" },
+      "years": { "value": "5", "label": "yillik tajriba" },
+      "langs": { "value": "3", "label": "til" }
     },
     "eyebrows": {
       "services": "Xizmatlar",

@@ -31,9 +31,17 @@ body {
   color: var(--color-night);
 }
 
-/* Horizon gradient — the site's signature. Used for the line, the sun and CTAs. */
+/* ————— Signature gradient ————— */
 .horizon-gradient {
   background-image: linear-gradient(90deg, var(--color-apricot), var(--color-afterglow));
+}
+
+/* Gradient-filled text (DigitalPro-style accent word). */
+.text-horizon {
+  background-image: linear-gradient(100deg, var(--color-apricot), var(--color-afterglow));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .sun-disc {
@@ -41,7 +49,30 @@ body {
   border-radius: 9999px;
 }
 
-/* Hero sunrise: the disc climbs over the horizon on load. */
+/* Aurora glow behind the sun (Sui-style light field). */
+.sun-aurora {
+  box-shadow:
+    0 0 60px 10px rgba(255, 174, 92, 0.35),
+    0 0 160px 60px rgba(232, 81, 124, 0.18);
+}
+
+/* Slow breathing of the sun — the site is alive. */
+@keyframes sun-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.03);
+    filter: brightness(1.08);
+  }
+}
+.animate-sun-breathe {
+  animation: sun-breathe 7s ease-in-out infinite;
+}
+
+/* Hero sunrise on load. */
 @keyframes sunrise {
   from {
     transform: translateY(46%);
@@ -53,29 +84,266 @@ body {
   }
 }
 .animate-sunrise {
-  animation: sunrise 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: sunrise 1.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Scroll reveal (driven by .is-visible via IntersectionObserver). */
+/* ————— Star field (wolf/Sui atmosphere) ————— */
+.stars,
+.stars-far {
+  position: absolute;
+  inset: -50% 0 0 0;
+  pointer-events: none;
+  background-repeat: repeat;
+}
+.stars {
+  background-image:
+    radial-gradient(1.2px 1.2px at 22px 34px, rgba(255, 255, 255, 0.55), transparent 60%),
+    radial-gradient(1.4px 1.4px at 130px 88px, rgba(255, 174, 92, 0.5), transparent 60%),
+    radial-gradient(1px 1px at 210px 150px, rgba(255, 255, 255, 0.4), transparent 60%),
+    radial-gradient(1.6px 1.6px at 300px 60px, rgba(232, 81, 124, 0.4), transparent 60%),
+    radial-gradient(1px 1px at 380px 190px, rgba(255, 255, 255, 0.35), transparent 60%);
+  background-size: 420px 240px;
+  animation: stars-drift 90s linear infinite;
+}
+.stars-far {
+  background-image:
+    radial-gradient(1px 1px at 60px 120px, rgba(255, 255, 255, 0.25), transparent 60%),
+    radial-gradient(1px 1px at 180px 40px, rgba(255, 255, 255, 0.2), transparent 60%),
+    radial-gradient(1px 1px at 320px 170px, rgba(255, 255, 255, 0.22), transparent 60%);
+  background-size: 380px 220px;
+  animation: stars-drift 160s linear infinite reverse;
+}
+@keyframes stars-drift {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(240px);
+  }
+}
+
+/* ————— Mouse spotlight on night sections ————— */
+.spotlight {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    560px circle at var(--spot-x, 70%) var(--spot-y, 30%),
+    rgba(255, 174, 92, 0.08),
+    transparent 65%
+  );
+  transition: background 0.2s ease-out;
+}
+
+/* ————— Hero word-by-word reveal ————— */
+@keyframes word-in {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+.hero-word {
+  display: inline-block;
+  animation: word-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--d, 0ms);
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-fade-up {
+  animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--d, 0ms);
+}
+
+/* ————— Horizon rule draw-in ————— */
+@keyframes line-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.animate-line-draw {
+  transform-origin: left;
+  animation: line-draw 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+
+/* ————— Scroll reveal ————— */
 .reveal {
   opacity: 0;
-  transform: translateY(14px);
+  transform: translateY(18px);
+  filter: blur(5px);
   transition:
-    opacity 0.6s ease,
-    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 0.7s ease,
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.7s ease;
 }
 .reveal.is-visible {
   opacity: 1;
   transform: none;
+  filter: blur(0);
 }
 
+/* ————— Marquee ————— */
+.marquee {
+  display: flex;
+  overflow: hidden;
+  user-select: none;
+  gap: 0;
+}
+.marquee-track {
+  display: flex;
+  flex-shrink: 0;
+  min-width: 100%;
+  justify-content: space-around;
+  animation: marquee-scroll 32s linear infinite;
+}
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* ————— Glow hovers for gradient CTAs (global, no per-file edits) ————— */
+a.horizon-gradient,
+button.horizon-gradient {
+  transition:
+    box-shadow 0.35s ease,
+    opacity 0.2s ease,
+    transform 0.15s ease;
+}
+a.horizon-gradient:hover,
+button.horizon-gradient:hover {
+  box-shadow:
+    0 0 26px rgba(255, 174, 92, 0.45),
+    0 0 60px rgba(232, 81, 124, 0.25);
+}
+a.horizon-gradient:active,
+button.horizon-gradient:active {
+  transform: scale(0.98);
+}
+
+/* ————— Project preview: browser frame + slow pan on hover ————— */
+.preview-pan img {
+  object-position: top;
+  transition: object-position 4.5s cubic-bezier(0.33, 0, 0.2, 1);
+}
+.group:hover .preview-pan img {
+  object-position: bottom;
+}
+
+/* ————— Page enter ————— */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+main {
+  animation: page-in 0.55s ease both;
+}
+
+/* ————— Loader ("sunrise curtain") ————— */
+@keyframes loader-line {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes loader-sun {
+  from {
+    transform: translate(-50%, 90%);
+    opacity: 0.3;
+  }
+  to {
+    transform: translate(-50%, -55%);
+    opacity: 1;
+  }
+}
+@keyframes loader-logo {
+  from {
+    opacity: 0;
+    letter-spacing: 0.35em;
+  }
+  to {
+    opacity: 1;
+    letter-spacing: 0.08em;
+  }
+}
+@keyframes loader-lift {
+  to {
+    transform: translateY(-100%);
+  }
+}
+.loader-overlay {
+  animation: loader-lift 0.7s cubic-bezier(0.7, 0, 0.3, 1) 1.55s both;
+}
+.loader-line {
+  transform-origin: center;
+  animation: loader-line 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+}
+.loader-sun {
+  animation: loader-sun 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both;
+}
+.loader-logo {
+  animation: loader-logo 0.9s ease 0.35s both;
+}
+
+/* ————— Reduced motion: everything lands instantly ————— */
 @media (prefers-reduced-motion: reduce) {
-  .animate-sunrise {
-    animation: none;
+  .animate-sunrise,
+  .animate-sun-breathe,
+  .animate-fade-up,
+  .animate-line-draw,
+  .hero-word,
+  .loader-line,
+  .loader-sun,
+  .loader-logo,
+  main {
+    animation: none !important;
+  }
+  .loader-overlay {
+    display: none !important;
+  }
+  .stars,
+  .stars-far,
+  .marquee-track {
+    animation: none !important;
   }
   .reveal {
     opacity: 1;
     transform: none;
+    filter: none;
+    transition: none;
+  }
+  .preview-pan img {
     transition: none;
   }
   * {

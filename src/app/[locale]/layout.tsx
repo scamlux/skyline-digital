@@ -6,6 +6,7 @@ import { Unbounded, Golos_Text, JetBrains_Mono } from "next/font/google";
 import { routing } from "@/i18n/routing";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { Loader } from "@/components/ui/Loader";
 import "../globals.css";
 
 const unbounded = Unbounded({
@@ -71,6 +72,7 @@ export default async function LocaleLayout({
     >
       <body className="flex min-h-full flex-col">
         <NextIntlClientProvider>
+          <Loader />
           <Header />
           <div className="flex-1">{children}</div>
           <Footer />
