@@ -3,6 +3,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Section } from "@/components/ui/Section";
 import { Reveal } from "@/components/ui/Reveal";
+import { localeUrl, languageAlternates } from "@/lib/seo";
 
 const STACK = [
   "Next.js",
@@ -22,7 +23,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "about" });
-  return { title: t("title"), description: t("intro") };
+  return {
+    title: t("title"),
+    description: t("intro"),
+    alternates: {
+      canonical: localeUrl(locale, "/about"),
+      languages: languageAlternates("/about"),
+    },
+  };
 }
 
 export default async function AboutPage({

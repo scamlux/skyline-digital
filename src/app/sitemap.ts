@@ -1,31 +1,27 @@
 import type { MetadataRoute } from "next";
-import { routing } from "@/i18n/routing";
 import { projects } from "@/data/projects";
-
-const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+import { localeUrl, languageAlternates } from "@/lib/seo";
+import { routing } from "@/i18n/routing";
 
 const STATIC_PATHS = ["", "/about", "/services", "/projects", "/contact", "/calculator"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = [];
 
-  for (const locale of routing.locales) {
-    const prefix = locale === routing.defaultLocale ? "" : `/${locale}`;
-    for (const path of STATIC_PATHS) {
+  const add = (path: string, priority: number, changeFrequency: "monthly" | "yearly") => {
+    // One entry per locale, each with hreflang alternates for the same path.
+    for (const locale of routing.locales) {
       entries.push({
-        url: `${BASE}${prefix}${path}`,
-        changeFrequency: "monthly",
-        priority: path === "" ? 1 : 0.7,
+        url: localeUrl(locale, path),
+        changeFrequency,
+        priority,
+        alternates: { languages: languageAlternates(path) },
       });
     }
-    for (const p of projects) {
-      entries.push({
-        url: `${BASE}${prefix}/projects/${p.slug}`,
-        changeFrequency: "yearly",
-        priority: 0.5,
-      });
-    }
-  }
+  };
+
+  for (const path of STATIC_PATHS) add(path, path === "" ? 1 : 0.7, "monthly");
+  for (const p of projects) add(`/projects/${p.slug}`, 0.5, "yearly");
 
   return entries;
 }

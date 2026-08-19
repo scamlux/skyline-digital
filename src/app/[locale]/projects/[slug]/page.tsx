@@ -5,6 +5,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { projects, getProjectBySlug } from "@/data/projects";
+import { localeUrl, languageAlternates, SITE_URL, SITE_NAME } from "@/lib/seo";
 
 export function generateStaticParams() {
   return routing.locales.flatMap((locale) =>
@@ -17,10 +18,26 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { locale, slug } = await params;
   const project = getProjectBySlug(slug);
   if (!project) return {};
-  return { title: project.title, description: project.description };
+  const path = `/projects/${slug}`;
+  return {
+    title: `${project.title} — ${project.category} project`,
+    description: project.description,
+    alternates: {
+      canonical: localeUrl(locale, path),
+      languages: languageAlternates(path),
+    },
+    openGraph: {
+      type: "article",
+      title: project.title,
+      description: project.description,
+      url: localeUrl(locale, path),
+      images: [{ url: project.image, alt: project.title }],
+    },
+    twitter: { card: "summary_large_image", images: [project.image] },
+  };
 }
 
 export default async function ProjectPage({
@@ -34,8 +51,24 @@ export default async function ProjectPage({
   const project = getProjectBySlug(slug);
   if (!project) notFound();
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CreativeWork",
+    name: project.title,
+    description: project.description,
+    url: localeUrl(locale, `/projects/${slug}`),
+    image: `${SITE_URL}${project.image}`,
+    dateCreated: String(project.year),
+    keywords: project.technologies.join(", "),
+    creator: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
+  };
+
   return (
     <main>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <section className="relative overflow-hidden bg-night text-day">
         <div className="mx-auto max-w-6xl px-5 pb-24 pt-12 md:px-8 md:pb-32 md:pt-20">
           <Link

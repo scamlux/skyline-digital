@@ -5,6 +5,7 @@ import { Section } from "@/components/ui/Section";
 import { Reveal } from "@/components/ui/Reveal";
 import { basePrices } from "@/lib/pricing/rules";
 import { formatUsd } from "@/lib/utils";
+import { localeUrl, languageAlternates } from "@/lib/seo";
 
 const SERVICE_KEYS = [
   "website",
@@ -22,7 +23,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "services" });
-  return { title: t("title"), description: t("intro") };
+  return {
+    title: t("title"),
+    description: t("intro"),
+    alternates: {
+      canonical: localeUrl(locale, "/services"),
+      languages: languageAlternates("/services"),
+    },
+  };
 }
 
 export default async function ServicesPage({

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Wizard } from "@/components/calculator/Wizard";
+import { localeUrl, languageAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -9,7 +10,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "calc" });
-  return { title: t("title"), description: t("intro") };
+  return {
+    title: t("title"),
+    description: t("intro"),
+    alternates: {
+      canonical: localeUrl(locale, "/calculator"),
+      languages: languageAlternates("/calculator"),
+    },
+  };
 }
 
 export default async function CalculatorPage({
