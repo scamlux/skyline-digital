@@ -27,9 +27,9 @@
       "ctaSecondary": "Посмотреть проекты"
     },
     "stats": {
-      "projects": { "value": "12+", "label": "проектов" },
+      "projects": { "value": "12+", "label": "проектов запущено" },
       "years": { "value": "5", "label": "лет опыта" },
-      "langs": { "value": "3", "label": "языка" }
+      "langs": { "value": "2 мин", "label": "до готовой сметы" }
     },
     "eyebrows": {
       "services": "Услуги",

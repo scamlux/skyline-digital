@@ -27,9 +27,9 @@
       "ctaSecondary": "Loyihalarni ko'rish"
     },
     "stats": {
-      "projects": { "value": "12+", "label": "loyiha" },
+      "projects": { "value": "12+", "label": "loyiha ishga tushirilgan" },
       "years": { "value": "5", "label": "yillik tajriba" },
-      "langs": { "value": "3", "label": "til" }
+      "langs": { "value": "2 daq", "label": "smeta uchun" }
     },
     "eyebrows": {
       "services": "Xizmatlar",

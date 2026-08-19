@@ -27,9 +27,9 @@
       "ctaSecondary": "View projects"
     },
     "stats": {
-      "projects": { "value": "12+", "label": "projects" },
+      "projects": { "value": "12+", "label": "projects shipped" },
       "years": { "value": "5", "label": "years of experience" },
-      "langs": { "value": "3", "label": "languages" }
+      "langs": { "value": "2 min", "label": "to your estimate" }
     },
     "eyebrows": {
       "services": "Services",
