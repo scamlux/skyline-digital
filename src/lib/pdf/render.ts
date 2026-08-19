@@ -21,8 +21,12 @@ export async function htmlToPdf(html: string): Promise<Uint8Array> {
   let args: string[];
 
   if (isServerless) {
-    const chromium = (await import("@sparticuz/chromium")).default;
-    executablePath = await chromium.executablePath();
+    // chromium-min ships no binary; fetch the matching brotli pack at runtime.
+    const chromium = (await import("@sparticuz/chromium-min")).default;
+    const pack =
+      process.env.CHROMIUM_PACK_URL ??
+      "https://github.com/Sparticuz/chromium/releases/download/v149.0.0/chromium-v149.0.0-pack.x64.tar";
+    executablePath = await chromium.executablePath(pack);
     args = chromium.args;
   } else {
     executablePath =
