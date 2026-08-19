@@ -66,6 +66,9 @@ export async function generateMetadata({
       canonical: localeUrl(locale),
       languages: languageAlternates(),
     },
+    verification: {
+      google: "K1irlh1clUwvZCKdyh2BXL3je9YFyj4kTZhv8ONsSLQ",
+    },
     robots: {
       index: true,
       follow: true,

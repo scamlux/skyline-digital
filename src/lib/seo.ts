@@ -11,10 +11,14 @@ export const seoByLocale: Record<
   { title: string; description: string; keywords: string[]; ogLocale: string }
 > = {
   ru: {
-    title: "Skyline Digital — веб-разработка, мобильные приложения и AI в Ташкенте",
+    title: "Skyline Digital (Скайлайн) — веб-разработка, приложения и AI в Ташкенте",
     description:
-      "Цифровое агентство Skyline Digital: разработка сайтов, веб- и мобильных приложений, AI-решения и автоматизация. Рассчитайте стоимость проекта онлайн за 2 минуты и получите коммерческое предложение.",
+      "Скайлайн Диджитал (Skyline Digital) — цифровое агентство: разработка сайтов, веб- и мобильных приложений, AI-решения и автоматизация. Рассчитайте стоимость проекта онлайн за 2 минуты и получите коммерческое предложение.",
     keywords: [
+      "скайлайн",
+      "скайлайн диджитал",
+      "skyline digital",
+      "скайлайн ташкент",
       "веб-разработка Ташкент",
       "разработка сайтов Узбекистан",
       "заказать сайт Ташкент",
@@ -87,6 +91,7 @@ export function organizationJsonLd(locale: string) {
         "@type": ["Organization", "ProfessionalService"],
         "@id": `${SITE_URL}/#organization`,
         name: SITE_NAME,
+        alternateName: ["Скайлайн Диджитал", "Скайлайн", "Skyline", "skyline-digital.uz"],
         url: SITE_URL,
         description: seo.description,
         logo: `${SITE_URL}/icon`,
