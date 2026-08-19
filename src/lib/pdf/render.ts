@@ -38,8 +38,10 @@ export async function htmlToPdf(html: string): Promise<Uint8Array> {
   try {
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: "load" });
+    // 16:9 slide deck — one .slide per page (1280×720 CSS px).
     const pdf = await page.pdf({
-      format: "A4",
+      width: "1280px",
+      height: "720px",
       printBackground: true,
       margin: { top: "0", right: "0", bottom: "0", left: "0" },
     });

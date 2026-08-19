@@ -42,3 +42,6 @@ next-env.d.ts
 
 # Skills symlinks (managed by 'skills add'; sources live in .agents/)
 .claude/skills/
+
+# Local reference proposals (not for the repo)
+КП — *
