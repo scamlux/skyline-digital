@@ -6,6 +6,7 @@ import { Marquee } from "@/components/ui/Marquee";
 import { Spotlight } from "@/components/ui/Spotlight";
 import { PreviewCard } from "@/components/projects/PreviewCard";
 import { TechStack } from "@/components/home/TechStack";
+import { ProcessSteps } from "@/components/home/ProcessSteps";
 import { projects } from "@/data/projects";
 import { basePrices } from "@/lib/pricing/rules";
 import { formatUsd } from "@/lib/utils";
@@ -18,8 +19,6 @@ const SERVICE_KEYS = [
   "automation",
   "uiux",
 ] as const;
-
-const PROCESS_STEPS = ["brief", "estimate", "design", "build", "launch"] as const;
 
 /**
  * Split the hero headline into words for the staggered reveal. Words wrapped
@@ -257,21 +256,7 @@ export default async function HomePage({
             {t("processTitle")}
           </h2>
         </Reveal>
-        <ol className="grid gap-8 md:grid-cols-5">
-          {PROCESS_STEPS.map((step, i) => (
-            <Reveal key={step} delay={i * 70}>
-              <li>
-                <span className="font-mono text-xs text-afterglow">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <h3 className="mt-2 font-medium">{t(`process.${step}.title`)}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted">
-                  {t(`process.${step}.text`)}
-                </p>
-              </li>
-            </Reveal>
-          ))}
-        </ol>
+        <ProcessSteps />
       </Section>
 
       {/* ——— Calculator CTA ——— */}

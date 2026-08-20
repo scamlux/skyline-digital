@@ -60,23 +60,33 @@
     "process": {
       "brief": {
         "title": "Brif",
-        "text": "Vazifa, auditoriya va maqsadlarni muhokama qilamiz."
+        "text": "Vazifa, auditoriya va maqsadlarni muhokama qilamiz.",
+        "badge": "1-kun",
+        "detail": "Qo'ng'iroq yoki yozishma — qulayiga qarab. Maqsad, auditoriya va byudjetni aniqlaymiz."
       },
       "estimate": {
         "title": "Smeta",
-        "text": "Hajm, narx va muddatlarni shaffof belgilaymiz."
+        "text": "Hajm, narx va muddatlarni shaffof belgilaymiz.",
+        "badge": "2 daqiqa",
+        "detail": "Kalkulyator narx oralig'ini darhol ko'rsatadi; bosqichli batafsil taklif — o'sha kuniyoq."
       },
       "design": {
         "title": "Dizayn",
-        "text": "Interfeysni loyihalaymiz va maketlarni tasdiqlaymiz."
+        "text": "Interfeysni loyihalaymiz va maketlarni tasdiqlaymiz.",
+        "badge": "Figma",
+        "detail": "Avval prototip, keyin yagona dizayn-tizimdagi maketlar. Tasdiqlangunicha tuzatamiz."
       },
       "build": {
         "title": "Dasturlash",
-        "text": "Kod yozamiz, har hafta natijani ko'rsatamiz."
+        "text": "Kod yozamiz, har hafta natijani ko'rsatamiz.",
+        "badge": "Sprintlar",
+        "detail": "Har hafta jonli stagingda demo. Kod birinchi kundan sizning repozitoriyingizda."
       },
       "launch": {
         "title": "Ishga tushirish",
-        "text": "Joylaymiz, sinovdan o'tkazamiz va topshiramiz."
+        "text": "Joylaymiz, sinovdan o'tkazamiz va topshiramiz.",
+        "badge": "Produksiya",
+        "detail": "Domen, analitika, SEO asoslari. Ishga tushirilgandan keyin bir oy qo'llab-quvvatlash."
       }
     },
     "calcTitle": "Birinchi qo'ng'iroqdan oldin loyiha narxini bilib oling",

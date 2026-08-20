@@ -60,23 +60,33 @@
     "process": {
       "brief": {
         "title": "Brief",
-        "text": "We discuss the task, audience and goals."
+        "text": "We discuss the task, audience and goals.",
+        "badge": "Day 1",
+        "detail": "A call or chat — whatever works. We define goals, audience and budget, and agree on success criteria."
       },
       "estimate": {
         "title": "Estimate",
-        "text": "Scope, cost and timeline — fixed and transparent."
+        "text": "Scope, cost and timeline — fixed and transparent.",
+        "badge": "2 minutes",
+        "detail": "The calculator gives a range instantly; a detailed proposal with stages lands the same day."
       },
       "design": {
         "title": "Design",
-        "text": "We design the interface and approve the layouts."
+        "text": "We design the interface and approve the layouts.",
+        "badge": "Figma",
+        "detail": "Prototype first, then screens in a single design system. Revisions until sign-off."
       },
       "build": {
         "title": "Build",
-        "text": "We write the code and show progress every week."
+        "text": "We write the code and show progress every week.",
+        "badge": "Sprints",
+        "detail": "Weekly demos on a live staging. The code lives in your repository from day one."
       },
       "launch": {
         "title": "Launch",
-        "text": "We deploy, test and hand over the project."
+        "text": "We deploy, test and hand over the project.",
+        "badge": "Production",
+        "detail": "Domain, analytics, SEO basics. One month of post-launch support included."
       }
     },
     "calcTitle": "Know your project cost before the first call",

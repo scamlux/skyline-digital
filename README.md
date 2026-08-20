@@ -48,3 +48,11 @@ the numbers (enforced in `src/lib/ai/client.ts`).
 Design-independent foundation is in place and builds. The visual layer
 (pages/components) and the PDF template design are pending the Figma file and
 the reference proposal PDF.
+
+
+---
+
+> 📚 **Каноничная документация проекта** — во «втором мозге»: `~/Desktop/Документации/skyline-digital/`
+> (обзор · стек · архитектура · деплой · статус). Держим её актуальной; сюда сверяемся и сюда пишем изменения.
+>
+> _Актуализировано: 2026-08-20._
