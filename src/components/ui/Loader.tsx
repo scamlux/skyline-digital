@@ -22,19 +22,22 @@ export function Loader() {
 
   return (
     <div
-      className="loader-overlay fixed inset-0 z-[100] flex items-center justify-center bg-night"
+      className="loader-overlay fixed inset-0 z-[100] flex flex-col items-center justify-center bg-night"
       aria-hidden
     >
-      <div className="relative w-64">
-        {/* Sun rising, clipped by the horizon line */}
-        <div className="absolute inset-x-0 -top-24 bottom-1/2 overflow-hidden">
-          <div className="loader-sun sun-disc sun-aurora absolute left-1/2 top-full h-16 w-16" />
+      {/* 1.5× larger than before (w-64→w-96, sun 64→96px) */}
+      <div className="relative w-96">
+        {/* Clip window sits ON the horizon line: its bottom edge is the line, so
+            anything below is hidden — the sun rises out from behind the line. */}
+        <div className="absolute inset-x-0 bottom-0 h-56 overflow-hidden">
+          <div className="loader-sun sun-disc sun-aurora absolute bottom-0 left-1/2 h-24 w-24" />
         </div>
-        <div className="loader-line horizon-gradient h-px w-full" />
-        <p className="loader-logo font-display mt-5 text-center text-sm font-medium text-day">
-          skyline<span className="text-apricot">.</span>digital
-        </p>
+        {/* Horizon line, drawn on top so the sun emerges from behind it */}
+        <div className="loader-line horizon-gradient relative z-10 h-px w-full" />
       </div>
+      <p className="loader-logo font-display mt-9 text-center text-lg font-medium text-day">
+        skyline<span className="text-apricot">.</span>digital
+      </p>
     </div>
   );
 }

@@ -297,12 +297,17 @@ main {
   }
 }
 @keyframes loader-sun {
-  from {
-    transform: translate(-50%, 90%);
-    opacity: 0.3;
+  /* Anchored with its bottom on the horizon line; starts fully below (behind
+     the line, clipped) and rises up so it emerges over the horizon. */
+  0% {
+    transform: translate(-50%, 120%);
+    opacity: 0.15;
   }
-  to {
-    transform: translate(-50%, -55%);
+  55% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -14%);
     opacity: 1;
   }
 }
