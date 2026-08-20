@@ -18,6 +18,7 @@
 - [ ] Приватный бакет `proposals` + signed URL (сейчас публичный, PDF по токену) — §11.
 - [ ] Распределённый rate-limit (Upstash/Vercel KV) вместо in-memory Map — §11.
 - [ ] Глобальный `:focus-visible` — §12 a11y.
+- [ ] **Измерить гейты §12** (пока НЕ проверялись): Lighthouse ≥90 на главной/`/projects/[slug]`/`/calculator`, LCP ≤2.5с (4G), CLS ≤0.1, iOS Safari + Android Chrome на реальных устройствах.
 
 ## Стек-решения (нужен ADR + сайн-офф владельца) 🔴
 - [ ] AI: OpenAI → Anthropic `claude-sonnet-4-6` (§2/§8) — либо официально принять OpenAI.
