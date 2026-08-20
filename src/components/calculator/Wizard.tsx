@@ -13,6 +13,7 @@ import {
 import type { PricingResult, ProjectType, Urgency } from "@/lib/pricing/types";
 import type { Proposal } from "@/lib/ai/schema";
 import { cn, formatUsd } from "@/lib/utils";
+import { getLeadContext } from "@/lib/leadContext";
 import { SunProgress } from "./SunProgress";
 
 const TYPES: ProjectType[] = [
@@ -33,7 +34,9 @@ interface InfoState {
   deadline: string;
   budget: string;
   contactName: string;
+  company: string;
   email: string;
+  phone: string;
   messenger: string;
 }
 
@@ -43,7 +46,9 @@ const EMPTY_INFO: InfoState = {
   deadline: "",
   budget: "",
   contactName: "",
+  company: "",
   email: "",
+  phone: "",
   messenger: "",
 };
 
@@ -51,6 +56,7 @@ interface EstimateResponse {
   token: string;
   pricing: PricingResult;
   proposal: Proposal;
+  leadNumber?: string;
 }
 
 const inputCls =
@@ -133,7 +139,8 @@ export function Wizard() {
             addons: [...addons],
             urgency,
           },
-          info: { ...info, company: "" },
+          info: { ...info, hp: "" },
+          context: getLeadContext(),
         }),
       });
       if (!res.ok) throw new Error(String(res.status));
@@ -328,6 +335,28 @@ export function Wizard() {
                   value={info.email}
                   onChange={(e) => setInfo({ ...info, email: e.target.value })}
                   maxLength={200}
+                  className={inputCls}
+                />
+              </label>
+              <label className="grid gap-1.5">
+                <span className="text-sm text-day">{t("info.phone")}</span>
+                <input
+                  type="tel"
+                  value={info.phone}
+                  onChange={(e) => setInfo({ ...info, phone: e.target.value })}
+                  placeholder="+998 90 123-45-67"
+                  maxLength={60}
+                  className={inputCls}
+                />
+              </label>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="grid gap-1.5">
+                <span className="text-sm text-day">{t("info.company")}</span>
+                <input
+                  value={info.company}
+                  onChange={(e) => setInfo({ ...info, company: e.target.value })}
+                  maxLength={120}
                   className={inputCls}
                 />
               </label>

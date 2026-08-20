@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { addonKeys, featuresByType } from "@/lib/pricing/rules";
+import { leadContextSchema } from "@/lib/validation/contact";
 
 const projectTypes = [
   "website",
@@ -40,16 +41,19 @@ export const projectInfoSchema = z.object({
   deadline: z.string().trim().max(120).optional().default(""),
   budget: z.string().trim().max(120).optional().default(""),
   contactName: z.string().trim().min(1).max(120),
+  company: z.string().trim().max(120).optional().default(""),
   email: z.string().trim().email().max(200),
+  phone: z.string().trim().max(60).optional().default(""),
   messenger: z.string().trim().max(200).optional().default(""),
   // Anti-spam honeypot: must stay empty.
-  company: z.string().max(0).optional().default(""),
+  hp: z.string().max(0).optional().default(""),
 });
 
 /** Full payload POSTed to /api/estimate. */
 export const estimateRequestSchema = z.object({
   configuration: projectConfigurationSchema,
   info: projectInfoSchema,
+  context: z.object(leadContextSchema).partial().optional(),
 });
 
 export type EstimateRequest = z.infer<typeof estimateRequestSchema>;

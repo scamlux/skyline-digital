@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
+import { getLeadContext } from "@/lib/leadContext";
 
 const SERVICES = [
   "website",
@@ -32,7 +33,7 @@ export function ContactForm() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, ...getLeadContext() }),
       });
       if (!res.ok) throw new Error(String(res.status));
       setStatus("success");
@@ -66,6 +67,16 @@ export function ContactForm() {
       </div>
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="grid gap-1.5">
+          <span className="text-sm font-medium">{t("phone")}</span>
+          <input
+            name="phone"
+            type="tel"
+            maxLength={60}
+            placeholder="+998 90 123-45-67"
+            className={inputCls}
+          />
+        </label>
+        <label className="grid gap-1.5">
           <span className="text-sm font-medium">{t("messenger")}</span>
           <input
             name="messenger"
@@ -74,6 +85,8 @@ export function ContactForm() {
             className={inputCls}
           />
         </label>
+      </div>
+      <div className="grid gap-5 sm:grid-cols-2">
         <label className="grid gap-1.5">
           <span className="text-sm font-medium">{t("service")}</span>
           <select name="service" defaultValue="" className={inputCls}>
@@ -87,16 +100,16 @@ export function ContactForm() {
             ))}
           </select>
         </label>
+        <label className="grid gap-1.5">
+          <span className="text-sm font-medium">{t("budget")}</span>
+          <input
+            name="budget"
+            maxLength={120}
+            placeholder={t("budgetPlaceholder")}
+            className={inputCls}
+          />
+        </label>
       </div>
-      <label className="grid gap-1.5">
-        <span className="text-sm font-medium">{t("budget")}</span>
-        <input
-          name="budget"
-          maxLength={120}
-          placeholder={t("budgetPlaceholder")}
-          className={inputCls}
-        />
-      </label>
       <label className="grid gap-1.5">
         <span className="text-sm font-medium">{t("message")} *</span>
         <textarea
@@ -111,7 +124,7 @@ export function ContactForm() {
       {/* Honeypot — hidden from real users, bots fill it in. */}
       <input
         type="text"
-        name="company"
+        name="hp"
         tabIndex={-1}
         autoComplete="off"
         className="absolute -left-[9999px] h-0 w-0 opacity-0"

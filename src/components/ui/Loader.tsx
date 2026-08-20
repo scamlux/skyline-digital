@@ -13,7 +13,9 @@ export function Loader() {
   useEffect(() => {
     if (sessionStorage.getItem("skyline-loaded")) return;
     sessionStorage.setItem("skyline-loaded", "1");
-    setShow(true);
+    // Defer out of the effect body (microtasks flush before paint, so no flash)
+    // to avoid the synchronous setState cascade the linter flags.
+    queueMicrotask(() => setShow(true));
     const t = setTimeout(() => setShow(false), 2400);
     return () => clearTimeout(t);
   }, []);

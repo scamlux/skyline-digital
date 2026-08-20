@@ -217,7 +217,8 @@
       "successText": "Спасибо! Мы свяжемся с вами в течение рабочего дня.",
       "error": "Не удалось отправить. Попробуйте ещё раз или напишите нам напрямую.",
       "required": "Обязательное поле",
-      "invalidEmail": "Некорректный email"
+      "invalidEmail": "Некорректный email",
+      "phone": "Телефон"
     },
     "altTitle": "Не любите формы?",
     "altText": "Рассчитайте стоимость проекта самостоятельно — калькулятор задаст правильные вопросы.",
@@ -329,7 +330,9 @@
       "contactName": "Ваше имя",
       "email": "Email",
       "messenger": "Telegram / WhatsApp",
-      "messengerPlaceholder": "@username или номер"
+      "messengerPlaceholder": "@username или номер",
+      "phone": "Телефон",
+      "company": "Компания"
     },
     "errors": {
       "required": "Заполните обязательные поля",

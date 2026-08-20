@@ -217,7 +217,8 @@
       "successText": "Thank you! We will get back to you within one business day.",
       "error": "Could not send. Try again or contact us directly.",
       "required": "Required field",
-      "invalidEmail": "Invalid email"
+      "invalidEmail": "Invalid email",
+      "phone": "Phone"
     },
     "altTitle": "Not a fan of forms?",
     "altText": "Estimate your project yourself — the calculator asks the right questions.",
@@ -329,7 +330,9 @@
       "contactName": "Your name",
       "email": "Email",
       "messenger": "Telegram / WhatsApp",
-      "messengerPlaceholder": "@username or phone"
+      "messengerPlaceholder": "@username or phone",
+      "phone": "Phone",
+      "company": "Company"
     },
     "errors": {
       "required": "Please fill in the required fields",

@@ -217,7 +217,8 @@
       "successText": "Rahmat! Ish kuni davomida siz bilan bog'lanamiz.",
       "error": "Yuborib bo'lmadi. Qayta urinib ko'ring yoki to'g'ridan-to'g'ri yozing.",
       "required": "Majburiy maydon",
-      "invalidEmail": "Email noto'g'ri"
+      "invalidEmail": "Email noto'g'ri",
+      "phone": "Telefon"
     },
     "altTitle": "Formalarni yoqtirmaysizmi?",
     "altText": "Loyiha narxini o'zingiz hisoblang — kalkulyator to'g'ri savollarni beradi.",
@@ -329,7 +330,9 @@
       "contactName": "Ismingiz",
       "email": "Email",
       "messenger": "Telegram / WhatsApp",
-      "messengerPlaceholder": "@username yoki raqam"
+      "messengerPlaceholder": "@username yoki raqam",
+      "phone": "Telefon",
+      "company": "Kompaniya"
     },
     "errors": {
       "required": "Majburiy maydonlarni to'ldiring",

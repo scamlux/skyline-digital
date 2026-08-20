@@ -2,18 +2,33 @@ import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { renderProposalHtml } from "@/templates/proposal/template";
 import { htmlToPdf } from "@/lib/pdf/render";
+import {
+  sendTelegramDocument,
+  formatProposalMessage,
+  type ProposalForTelegram,
+} from "@/lib/telegram";
+import { typeLabel } from "@/lib/leads";
 import type { Proposal } from "@/lib/ai/schema";
 import type { PricingResult, ProjectConfiguration } from "@/lib/pricing/types";
+import type { LeadRow, ProposalRow } from "@/lib/supabase/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-interface EstimateRow {
+const BUCKET = "proposals";
+
+interface EstimateJoined {
+  id: string;
+  lead_id: string | null;
   ai_result: Proposal;
   pricing_result: PricingResult;
   configuration: ProjectConfiguration;
   created_at: string;
-  leads: { name: string } | null;
+  leads: LeadRow | null;
+}
+
+function midTotal(min: number, max: number): number {
+  return Math.round((min + max) / 2 / 50) * 50;
 }
 
 export async function GET(
@@ -21,52 +36,181 @@ export async function GET(
   { params }: { params: Promise<{ token: string }> },
 ) {
   const { token } = await params;
+  const supabase = getSupabaseAdmin();
 
-  let row: EstimateRow;
+  // Load the estimate + its lead.
+  let est: EstimateJoined;
   try {
-    const supabase = getSupabaseAdmin();
     const { data, error } = await supabase
       .from("estimates")
-      .select("ai_result, pricing_result, configuration, created_at, leads(name)")
+      .select(
+        "id, lead_id, ai_result, pricing_result, configuration, created_at, leads(*)",
+      )
       .eq("token", token)
       .single();
     if (error || !data) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
-    row = data as unknown as EstimateRow;
+    est = data as unknown as EstimateJoined;
   } catch {
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 
+  // Idempotency: if a proposal PDF already exists for this estimate, serve it.
   try {
-    const date = new Date(row.created_at).toLocaleDateString("ru-RU", {
+    const { data: existing } = await supabase
+      .from("proposals")
+      .select("*")
+      .eq("estimate_id", est.id)
+      .not("file_url", "is", null)
+      .order("version", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (existing?.file_url) {
+      return NextResponse.redirect(existing.file_url, 302);
+    }
+  } catch (err) {
+    console.error("[proposal] lookup failed (continuing to generate):", err);
+  }
+
+  const lead = est.leads;
+  const price = midTotal(est.pricing_result.totalMin, est.pricing_result.totalMax);
+
+  // 1. Render the PDF.
+  let pdf: Uint8Array;
+  try {
+    const date = new Date(est.created_at).toLocaleDateString("ru-RU", {
       day: "numeric",
       month: "long",
       year: "numeric",
     });
     const html = renderProposalHtml({
-      proposal: row.ai_result,
-      pricing: row.pricing_result,
-      configuration: row.configuration,
+      proposal: est.ai_result,
+      pricing: est.pricing_result,
+      configuration: est.configuration,
       meta: {
         date,
-        projectName: row.ai_result.projectTitle,
-        clientName: row.leads?.name,
+        projectName: est.ai_result.projectTitle,
+        clientName: lead?.client_name ?? undefined,
       },
     });
-    const pdf = await htmlToPdf(html);
-
-    const filename = `proposal-${token}.pdf`;
-    return new NextResponse(Buffer.from(pdf), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${filename}"`,
-        "Cache-Control": "no-store",
-      },
-    });
+    pdf = await htmlToPdf(html);
   } catch (err) {
-    console.error("PDF generation failed:", err);
+    console.error("[proposal] PDF generation failed:", err);
     return NextResponse.json({ error: "PDF generation failed" }, { status: 500 });
   }
+
+  const filename = `proposal-${token}.pdf`;
+
+  // 2. Upload to Supabase Storage. If this fails, still return the PDF so the
+  //    user gets their КП; a later download will retry storage + Telegram.
+  let fileUrl: string | null = null;
+  try {
+    const path = `${token}.pdf`;
+    const { error: upErr } = await supabase.storage
+      .from(BUCKET)
+      .upload(path, Buffer.from(pdf), { contentType: "application/pdf", upsert: true });
+    if (upErr) throw upErr;
+    fileUrl = supabase.storage.from(BUCKET).getPublicUrl(path, {
+      download: filename,
+    }).data.publicUrl;
+    console.info("[proposal] PDF stored", path);
+  } catch (err) {
+    console.error("[proposal] storage upload failed:", err);
+    return pdfResponse(pdf, filename);
+  }
+
+  // 3. Create the Proposal record (versioned, linked to the lead).
+  let proposalRow: ProposalRow | null = null;
+  if (lead) {
+    try {
+      const { data: last } = await supabase
+        .from("proposals")
+        .select("version")
+        .eq("lead_id", lead.id)
+        .order("version", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const version = (last?.version ?? 0) + 1;
+
+      const validUntil = new Date();
+      validUntil.setDate(validUntil.getDate() + 14);
+
+      const { data: created, error: insErr } = await supabase
+        .from("proposals")
+        .insert({
+          lead_id: lead.id,
+          estimate_id: est.id,
+          version,
+          title: est.ai_result.projectTitle,
+          content: est.ai_result,
+          total_price: price,
+          currency: "USD",
+          valid_until: validUntil.toISOString().slice(0, 10),
+          file_url: fileUrl,
+          status: "CREATED",
+        })
+        .select("*")
+        .single();
+      if (insErr) throw insErr;
+      proposalRow = created as ProposalRow;
+      console.info("[proposal] created", lead.lead_number, `v${version}`);
+
+      await supabase
+        .from("leads")
+        .update({ proposal_id: proposalRow.id, status: "PROPOSAL_SENT" })
+        .eq("id", lead.id);
+    } catch (err) {
+      console.error("[proposal] creating proposal record failed:", err);
+    }
+  }
+
+  // 4. Send the PDF to Telegram (best-effort — never deletes PDF/Proposal).
+  if (lead && proposalRow && fileUrl) {
+    const payload: ProposalForTelegram = {
+      lead_number: lead.lead_number,
+      client_name: lead.client_name,
+      project_type: typeLabel(lead.project_type),
+      service: typeLabel(lead.service ?? lead.project_type),
+      total_price: price,
+      currency: "USD",
+      deadline: lead.deadline,
+      package: `${est.configuration.features.length} функц. · ${est.pricing_result.estimatedWeeks} нед.`,
+      ai_summary: lead.ai_summary ?? est.ai_result.summary,
+      version: proposalRow.version,
+      created_at: proposalRow.created_at,
+    };
+    const res = await sendTelegramDocument(fileUrl, formatProposalMessage(payload));
+    try {
+      if (res.ok) {
+        console.info("[telegram] proposal sent", lead.lead_number, res.messageId);
+        await supabase
+          .from("proposals")
+          .update({ status: "SENT", telegram_message_id: res.messageId, telegram_error: null })
+          .eq("id", proposalRow.id);
+      } else {
+        console.error("[telegram] proposal send failed", lead.lead_number, res.error);
+        await supabase
+          .from("proposals")
+          .update({ status: "SEND_FAILED", telegram_error: res.error })
+          .eq("id", proposalRow.id);
+      }
+    } catch (err) {
+      console.error("[proposal] failed to persist telegram status:", err);
+    }
+  }
+
+  // 5. Send the user to the stored file (or stream it if storage was skipped).
+  return fileUrl ? NextResponse.redirect(fileUrl, 302) : pdfResponse(pdf, filename);
+}
+
+function pdfResponse(pdf: Uint8Array, filename: string): NextResponse {
+  return new NextResponse(Buffer.from(pdf), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Cache-Control": "no-store",
+    },
+  });
 }
