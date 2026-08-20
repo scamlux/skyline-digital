@@ -47,3 +47,4 @@ next-env.d.ts
 КП — *
 kp_skyline.pdf
 *.pdf
+/reference/

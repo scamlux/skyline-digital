@@ -27,9 +27,18 @@
       "ctaSecondary": "View projects"
     },
     "stats": {
-      "projects": { "value": "12+", "label": "projects shipped" },
-      "years": { "value": "5", "label": "years of experience" },
-      "langs": { "value": "2 min", "label": "to your estimate" }
+      "projects": {
+        "value": "12+",
+        "label": "projects shipped"
+      },
+      "years": {
+        "value": "5",
+        "label": "years of experience"
+      },
+      "langs": {
+        "value": "2 min",
+        "label": "to your estimate"
+      }
     },
     "eyebrows": {
       "services": "Services",
@@ -37,7 +46,8 @@
       "about": "Agency",
       "process": "Process",
       "calculator": "Calculator",
-      "contact": "Contact"
+      "contact": "Contact",
+      "stack": "Stack"
     },
     "servicesTitle": "What we do",
     "from": "from",
@@ -48,16 +58,45 @@
     "aboutLink": "More about us",
     "processTitle": "How we work",
     "process": {
-      "brief": { "title": "Brief", "text": "We discuss the task, audience and goals." },
-      "estimate": { "title": "Estimate", "text": "Scope, cost and timeline — fixed and transparent." },
-      "design": { "title": "Design", "text": "We design the interface and approve the layouts." },
-      "build": { "title": "Build", "text": "We write the code and show progress every week." },
-      "launch": { "title": "Launch", "text": "We deploy, test and hand over the project." }
+      "brief": {
+        "title": "Brief",
+        "text": "We discuss the task, audience and goals."
+      },
+      "estimate": {
+        "title": "Estimate",
+        "text": "Scope, cost and timeline — fixed and transparent."
+      },
+      "design": {
+        "title": "Design",
+        "text": "We design the interface and approve the layouts."
+      },
+      "build": {
+        "title": "Build",
+        "text": "We write the code and show progress every week."
+      },
+      "launch": {
+        "title": "Launch",
+        "text": "We deploy, test and hand over the project."
+      }
     },
     "calcTitle": "Know your project cost before the first call",
     "calcText": "Answer a few questions — the calculator estimates budget and timeline, and AI assembles a personal commercial proposal as a PDF.",
     "finalTitle": "Have a project in mind? Let's talk it through.",
-    "finalCta": "Leave a request"
+    "finalCta": "Leave a request",
+    "stackTitle": "Technologies we build with",
+    "stackText": "A proven stack for web, mobile and AI — from prototype to production.",
+    "stack": {
+      "title": "Technologies we build with",
+      "categories": {
+        "all": "All",
+        "frontend": "Frontend",
+        "backend": "Backend",
+        "mobile": "Mobile",
+        "ai": "AI",
+        "devops": "DevOps",
+        "tools": "Tools"
+      }
+    }
   },
   "services": {
     "title": "Services",
@@ -134,9 +173,18 @@
     "p2": "We follow a clear process: scope and cost are fixed before we start, progress is shown weekly, and the project ships with documentation and support.",
     "stackTitle": "Our stack",
     "valuesTitle": "Principles",
-    "v1": { "title": "Transparent estimates", "text": "Cost is computed by rules, not by gut feeling — you see exactly what the price is made of." },
-    "v2": { "title": "Speed without cutting corners", "text": "A modern stack and a refined process let us ship fast." },
-    "v3": { "title": "Product over code", "text": "We think in your metrics: leads, sales, retention — not just technology." },
+    "v1": {
+      "title": "Transparent estimates",
+      "text": "Cost is computed by rules, not by gut feeling — you see exactly what the price is made of."
+    },
+    "v2": {
+      "title": "Speed without cutting corners",
+      "text": "A modern stack and a refined process let us ship fast."
+    },
+    "v3": {
+      "title": "Product over code",
+      "text": "We think in your metrics: leads, sales, retention — not just technology."
+    },
     "cta": "Calculate project cost"
   },
   "contact": {
@@ -185,13 +233,34 @@
       "estimate": "Estimate"
     },
     "types": {
-      "website": { "title": "Website", "desc": "Landing, corporate site, store" },
-      "webApp": { "title": "Web app", "desc": "Portals, CRMs, dashboards" },
-      "mobileApp": { "title": "Mobile app", "desc": "iOS and Android" },
-      "ai": { "title": "AI solution", "desc": "Chatbots, RAG, data processing" },
-      "automation": { "title": "Automation", "desc": "Integrations and bots" },
-      "uiux": { "title": "UI/UX design", "desc": "Prototypes and design systems" },
-      "other": { "title": "Other", "desc": "Tell us about it — we'll estimate" }
+      "website": {
+        "title": "Website",
+        "desc": "Landing, corporate site, store"
+      },
+      "webApp": {
+        "title": "Web app",
+        "desc": "Portals, CRMs, dashboards"
+      },
+      "mobileApp": {
+        "title": "Mobile app",
+        "desc": "iOS and Android"
+      },
+      "ai": {
+        "title": "AI solution",
+        "desc": "Chatbots, RAG, data processing"
+      },
+      "automation": {
+        "title": "Automation",
+        "desc": "Integrations and bots"
+      },
+      "uiux": {
+        "title": "UI/UX design",
+        "desc": "Prototypes and design systems"
+      },
+      "other": {
+        "title": "Other",
+        "desc": "Tell us about it — we'll estimate"
+      }
     },
     "features": {
       "landing": "Landing page",

@@ -5,6 +5,7 @@ import { Reveal } from "@/components/ui/Reveal";
 import { Marquee } from "@/components/ui/Marquee";
 import { Spotlight } from "@/components/ui/Spotlight";
 import { PreviewCard } from "@/components/projects/PreviewCard";
+import { TechStack } from "@/components/home/TechStack";
 import { projects } from "@/data/projects";
 import { basePrices } from "@/lib/pricing/rules";
 import { formatUsd } from "@/lib/utils";
@@ -198,6 +199,7 @@ export default async function HomePage({
                   title={p.title}
                   url={p.url}
                   sizes="(max-width: 640px) 100vw, 50vw"
+                  priority={i < 2}
                 />
                 <div className="mt-4 flex items-baseline justify-between gap-3">
                   <span className="font-display text-lg">{p.title}</span>
@@ -231,6 +233,21 @@ export default async function HomePage({
             </Link>
           </Reveal>
         </div>
+      </Section>
+
+      {/* ——— Tech stack (udevs-style category grid) ——— */}
+      <Section eyebrow={t("eyebrows.stack")}>
+        <div className="mb-10 grid gap-4 md:grid-cols-2 md:items-end">
+          <Reveal>
+            <h2 className="font-display text-2xl font-medium md:text-3xl">
+              {t("stackTitle")}
+            </h2>
+          </Reveal>
+          <Reveal delay={80}>
+            <p className="text-muted md:text-right">{t("stackText")}</p>
+          </Reveal>
+        </div>
+        <TechStack />
       </Section>
 
       {/* ——— Process ——— */}

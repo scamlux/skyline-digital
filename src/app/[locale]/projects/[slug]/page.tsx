@@ -100,13 +100,13 @@ export default async function ProjectPage({
                 {project.url ? new URL(project.url).host : project.slug}
               </span>
             </div>
-            <div className="preview-pan relative aspect-[16/9] overflow-hidden">
+            <div className="preview-zoom preview-loading relative aspect-video overflow-hidden">
               <Image
                 src={project.image}
                 alt={project.title}
                 fill
                 sizes="(max-width: 1152px) 100vw, 1152px"
-                className="object-cover"
+                className="object-cover object-top"
                 priority
               />
             </div>

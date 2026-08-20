@@ -40,13 +40,14 @@ export function ProjectsGrid() {
         <p className="mt-12 text-muted">{t("empty")}</p>
       ) : (
         <div className="mt-10 grid gap-10 sm:grid-cols-2">
-          {visible.map((p) => (
+          {visible.map((p, i) => (
             <Link key={p.slug} href={`/projects/${p.slug}`} className="group block">
               <PreviewCard
                 image={p.image}
                 title={p.title}
                 url={p.url}
                 sizes="(max-width: 640px) 100vw, 50vw"
+                priority={i < 2}
               />
               <div className="mt-4 flex items-baseline justify-between gap-3">
                 <span className="font-display text-lg">{p.title}</span>

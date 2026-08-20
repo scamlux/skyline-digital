@@ -1,21 +1,21 @@
 import Image from "next/image";
 
 /**
- * Project preview in a browser frame. The tall stitched screenshot slowly
- * pans from top to bottom on hover — like scrolling the live site.
+ * Project preview in a browser frame. Screenshots are clean 16:9 hero shots;
+ * on hover the frame lifts and the shot zooms in slightly.
  */
 export function PreviewCard({
   image,
   title,
   url,
-  aspect = "aspect-[16/11]",
   sizes,
+  priority = false,
 }: {
   image: string;
   title: string;
   url?: string;
-  aspect?: string;
   sizes: string;
+  priority?: boolean;
 }) {
   const host = url ? new URL(url).host : "skyline.digital";
   return (
@@ -29,8 +29,15 @@ export function PreviewCard({
           {host}
         </span>
       </div>
-      <div className={`preview-pan relative ${aspect} overflow-hidden`}>
-        <Image src={image} alt={title} fill sizes={sizes} className="object-cover" />
+      <div className="preview-zoom preview-loading relative aspect-video overflow-hidden">
+        <Image
+          src={image}
+          alt={title}
+          fill
+          sizes={sizes}
+          priority={priority}
+          className="object-cover object-top"
+        />
       </div>
     </div>
   );
