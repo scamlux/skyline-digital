@@ -259,8 +259,8 @@ export default async function HomePage({
         <ProcessSteps />
       </Section>
 
-      {/* ——— Calculator CTA ——— */}
-      <Section eyebrow={t("eyebrows.calculator")} tone="night">
+      {/* ——— Calculator CTA (hidden on mobile: hero already has this CTA) ——— */}
+      <Section eyebrow={t("eyebrows.calculator")} tone="night" className="hidden md:block">
         <div className="flex flex-col items-start gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <Reveal>

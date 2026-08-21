@@ -15,11 +15,11 @@ export function Footer() {
           <p className="font-display text-sm font-medium">
             skyline<span className="text-apricot">.</span>digital
           </p>
-          <p className="mt-3 max-w-xs text-sm leading-relaxed text-mist">
+          <p className="mt-3 hidden max-w-xs text-sm leading-relaxed text-mist md:block">
             {t("tagline")}
           </p>
         </div>
-        <nav className="flex flex-col gap-3 text-sm" aria-label="Footer">
+        <nav className="hidden flex-col gap-3 text-sm md:flex" aria-label="Footer">
           <Link href="/services" className="text-mist transition-colors hover:text-day">
             {t("services")}
           </Link>
@@ -36,7 +36,7 @@ export function Footer() {
         <div className="flex flex-col gap-3 text-sm md:items-end">
           <Link
             href="/calculator"
-            className="horizon-gradient w-fit rounded-full px-5 py-2.5 font-medium text-night transition-opacity hover:opacity-90"
+            className="horizon-gradient hidden w-fit rounded-full px-5 py-2.5 font-medium text-night transition-opacity hover:opacity-90 md:inline-block"
           >
             {t("cta")}
           </Link>
