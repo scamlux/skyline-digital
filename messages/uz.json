@@ -8,6 +8,7 @@
     "about": "Biz haqimizda",
     "contact": "Aloqa",
     "calculate": "Narxni hisoblash",
+    "contactUs": "Bog'lanish",
     "menu": "Menyu"
   },
   "footer": {
@@ -222,7 +223,17 @@
     },
     "altTitle": "Formalarni yoqtirmaysizmi?",
     "altText": "Loyiha narxini o'zingiz hisoblang — kalkulyator to'g'ri savollarni beradi.",
-    "altCta": "Kalkulyatorni ochish"
+    "altCta": "Kalkulyatorni ochish",
+    "directTitle": "To'g'ridan-to'g'ri aloqa"
+  },
+  "contactCard": {
+    "eyebrow": "Tashrifnoma",
+    "role": "Raqamli agentlik · Toshkent",
+    "emailLabel": "Pochta",
+    "phoneLabel": "Telefon",
+    "telegramLabel": "Telegram",
+    "note": "Butun dunyo bo'ylab ishlaymiz · Ish kuni davomida javob beramiz",
+    "close": "Yopish"
   },
   "calc": {
     "title": "Narx kalkulyatori",

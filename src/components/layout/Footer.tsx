@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { CONTACTS, CONTACT_LINKS, telegramHandle } from "@/lib/contact";
 
 export function Footer() {
   const t = useTranslations("footer");
@@ -39,6 +40,28 @@ export function Footer() {
           >
             {t("cta")}
           </Link>
+          <div className="flex flex-col gap-2 text-sm md:items-end">
+            <a
+              href={CONTACT_LINKS.email}
+              className="text-mist transition-colors hover:text-day"
+            >
+              {CONTACTS.email}
+            </a>
+            <a
+              href={CONTACT_LINKS.phone}
+              className="text-mist transition-colors hover:text-day"
+            >
+              {CONTACTS.phoneDisplay}
+            </a>
+            <a
+              href={CONTACT_LINKS.telegram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-mist transition-colors hover:text-day"
+            >
+              {telegramHandle}
+            </a>
+          </div>
           <p className="mt-auto font-mono text-xs text-mist">
             © {year} Skyline Digital · {t("location")}
           </p>

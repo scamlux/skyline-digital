@@ -1,4 +1,5 @@
 import { routing } from "@/i18n/routing";
+import { CONTACTS } from "@/lib/contact";
 
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://sky-digital-agency.vercel.app";
@@ -101,6 +102,15 @@ export function organizationJsonLd(locale: string) {
           "@type": "PostalAddress",
           addressLocality: "Tashkent",
           addressCountry: "UZ",
+        },
+        email: CONTACTS.email,
+        telephone: CONTACTS.phone,
+        contactPoint: {
+          "@type": "ContactPoint",
+          contactType: "sales",
+          email: CONTACTS.email,
+          telephone: CONTACTS.phone,
+          availableLanguage: ["ru", "en", "uz"],
         },
         knowsAbout: [
           "Web development",

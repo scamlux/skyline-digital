@@ -8,6 +8,7 @@
     "about": "About",
     "contact": "Contact",
     "calculate": "Calculate cost",
+    "contactUs": "Contact us",
     "menu": "Menu"
   },
   "footer": {
@@ -222,7 +223,17 @@
     },
     "altTitle": "Not a fan of forms?",
     "altText": "Estimate your project yourself — the calculator asks the right questions.",
-    "altCta": "Open the calculator"
+    "altCta": "Open the calculator",
+    "directTitle": "Direct contacts"
+  },
+  "contactCard": {
+    "eyebrow": "Business card",
+    "role": "Digital agency · Tashkent",
+    "emailLabel": "Email",
+    "phoneLabel": "Phone",
+    "telegramLabel": "Telegram",
+    "note": "Working worldwide · We reply within one business day",
+    "close": "Close"
   },
   "calc": {
     "title": "Cost calculator",

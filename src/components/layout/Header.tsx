@@ -5,6 +5,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
+import { ContactModal } from "@/components/contact/ContactModal";
 
 const NAV = [
   { href: "/services", key: "services" },
@@ -22,6 +23,7 @@ export function Header() {
   const locale = useLocale();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [cardOpen, setCardOpen] = useState(false);
 
   return (
     <header className="bg-night text-day">
@@ -51,12 +53,13 @@ export function Header() {
 
         <div className="hidden items-center gap-5 md:flex">
           <LocaleSwitcher current={locale} pathname={pathname} />
-          <Link
-            href="/calculator"
+          <button
+            type="button"
+            onClick={() => setCardOpen(true)}
             className="horizon-gradient rounded-full px-5 py-2.5 text-sm font-medium text-night transition-opacity hover:opacity-90"
           >
-            {t("calculate")}
-          </Link>
+            {t("contactUs")}
+          </button>
         </div>
 
         <button
@@ -86,16 +89,21 @@ export function Header() {
           </nav>
           <div className="flex items-center justify-between gap-4">
             <LocaleSwitcher current={locale} pathname={pathname} />
-            <Link
-              href="/calculator"
+            <button
+              type="button"
               className="horizon-gradient rounded-full px-5 py-2.5 text-sm font-medium text-night"
-              onClick={() => setOpen(false)}
+              onClick={() => {
+                setOpen(false);
+                setCardOpen(true);
+              }}
             >
-              {t("calculate")}
-            </Link>
+              {t("contactUs")}
+            </button>
           </div>
         </div>
       )}
+
+      {cardOpen && <ContactModal onClose={() => setCardOpen(false)} />}
     </header>
   );
 }

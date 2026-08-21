@@ -3,6 +3,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { localeUrl, languageAlternates } from "@/lib/seo";
+import { CONTACTS, CONTACT_LINKS, telegramHandle } from "@/lib/contact";
 
 export async function generateMetadata({
   params,
@@ -51,15 +52,48 @@ export default async function ContactPage({
       <div className="bg-day">
         <div className="mx-auto grid max-w-6xl gap-12 px-5 py-14 md:grid-cols-[3fr_2fr] md:px-8 md:py-20">
           <ContactForm />
-          <aside className="h-fit rounded-xl border border-line bg-surface p-8">
-            <h2 className="font-display text-lg font-medium">{t("altTitle")}</h2>
-            <p className="mt-3 text-sm leading-relaxed text-muted">{t("altText")}</p>
-            <Link
-              href="/calculator"
-              className="horizon-gradient mt-6 inline-block rounded-full px-6 py-3 text-sm font-medium text-night transition-opacity hover:opacity-90"
-            >
-              {t("altCta")}
-            </Link>
+          <aside className="flex h-fit flex-col gap-8">
+            <div className="rounded-xl border border-line bg-surface p-8">
+              <h2 className="font-display text-lg font-medium">{t("directTitle")}</h2>
+              <ul className="mt-4 flex flex-col gap-3 text-sm">
+                <li>
+                  <a
+                    href={CONTACT_LINKS.email}
+                    className="text-muted transition-colors hover:text-ink"
+                  >
+                    {CONTACTS.email}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href={CONTACT_LINKS.phone}
+                    className="text-muted transition-colors hover:text-ink"
+                  >
+                    {CONTACTS.phoneDisplay}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href={CONTACT_LINKS.telegram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted transition-colors hover:text-ink"
+                  >
+                    {telegramHandle}
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div className="rounded-xl border border-line bg-surface p-8">
+              <h2 className="font-display text-lg font-medium">{t("altTitle")}</h2>
+              <p className="mt-3 text-sm leading-relaxed text-muted">{t("altText")}</p>
+              <Link
+                href="/calculator"
+                className="horizon-gradient mt-6 inline-block rounded-full px-6 py-3 text-sm font-medium text-night transition-opacity hover:opacity-90"
+              >
+                {t("altCta")}
+              </Link>
+            </div>
           </aside>
         </div>
       </div>
