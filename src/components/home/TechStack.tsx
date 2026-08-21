@@ -10,11 +10,17 @@ import { cn } from "@/lib/utils";
  * Tech stack grid with category filter (udevs.io reference), rebuilt in the
  * Skyline design system: pill tabs + icon cards on the day surface.
  */
+/** How many tools to show before the "show full stack" toggle. */
+const DEFAULT_VISIBLE = 12;
+
 export function TechStack() {
   const t = useTranslations("home.stack");
   const [filter, setFilter] = useState<"all" | StackCategory>("all");
+  const [expanded, setExpanded] = useState(false);
 
-  const visible = filter === "all" ? stack : stack.filter((s) => s.category === filter);
+  const filtered = filter === "all" ? stack : stack.filter((s) => s.category === filter);
+  const hasMore = filtered.length > DEFAULT_VISIBLE;
+  const visible = expanded ? filtered : filtered.slice(0, DEFAULT_VISIBLE);
 
   return (
     <div>
@@ -25,7 +31,10 @@ export function TechStack() {
             type="button"
             role="tab"
             aria-selected={filter === cat}
-            onClick={() => setFilter(cat)}
+            onClick={() => {
+              setFilter(cat);
+              setExpanded(false);
+            }}
             className={cn(
               "rounded-full border px-4 py-2 font-mono text-xs uppercase tracking-wide transition-all",
               filter === cat
@@ -56,6 +65,35 @@ export function TechStack() {
           </div>
         ))}
       </div>
+
+      {hasMore && (
+        <div className="mt-8 flex justify-center">
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            aria-expanded={expanded}
+            className="inline-flex items-center gap-2 rounded-full border border-line px-6 py-2.5 text-sm font-medium text-muted transition-colors hover:border-ink hover:text-ink"
+          >
+            {expanded ? t("showLess") : t("showAll")}
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden
+              className={cn("transition-transform duration-300", expanded && "rotate-180")}
+            >
+              <path
+                d="m6 9 6 6 6-6"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

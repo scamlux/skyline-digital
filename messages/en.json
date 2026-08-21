@@ -98,6 +98,8 @@
     "stackText": "A proven stack for web, mobile and AI — from prototype to production.",
     "stack": {
       "title": "Technologies we build with",
+      "showAll": "Show full stack",
+      "showLess": "Show less",
       "categories": {
         "all": "All",
         "frontend": "Frontend",

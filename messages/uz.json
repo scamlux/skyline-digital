@@ -98,6 +98,8 @@
     "stackText": "Veb, mobil ilovalar va AI uchun tekshirilgan stek — prototipdan produksiyagacha.",
     "stack": {
       "title": "Biz quradigan texnologiyalar",
+      "showAll": "To'liq stekni ko'rsatish",
+      "showLess": "Yig'ish",
       "categories": {
         "all": "Barchasi",
         "frontend": "Frontend",
