@@ -16,7 +16,10 @@ export function Loader() {
     // Defer out of the effect body (microtasks flush before paint, so no flash)
     // to avoid the synchronous setState cascade the linter flags.
     queueMicrotask(() => setShow(true));
-    const t = setTimeout(() => setShow(false), 2400);
+    // Unmount just after the curtain finishes lifting (~1.2s in CSS) — keeps the
+    // sunrise intro but halves how long the screen is covered, for a better
+    // mobile Speed Index.
+    const t = setTimeout(() => setShow(false), 1300);
     return () => clearTimeout(t);
   }, []);
 
