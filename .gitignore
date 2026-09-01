@@ -48,3 +48,15 @@ next-env.d.ts
 kp_skyline.pdf
 *.pdf
 /reference/
+
+# --- Внутреннее: не публиковать в публичный репозиторий ---
+# Growth-стратегия и команда агентов — только локально / в second-brain
+/docs/GROWTH-PLAN.md
+/docs/GROWTH-SOURCES.md
+/docs/PLAYBOOK.md
+/docs/ROADMAP-GROWTH.md
+/docs/AGENT-TEAM.md
+/.claude/agents/
+# Рабочие артефакты сессии
+/skylineprodhardening.patch
+/skyline-prod-plan.md
