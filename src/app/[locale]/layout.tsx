@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Unbounded, Golos_Text, JetBrains_Mono } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { routing } from "@/i18n/routing";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -136,6 +137,7 @@ export default async function LocaleLayout({
           <div className="flex-1">{children}</div>
           <Footer />
         </NextIntlClientProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
