@@ -1,7 +1,11 @@
 import type { Proposal } from "@/lib/ai/schema";
 import type { PricingResult, ProjectConfiguration } from "@/lib/pricing/types";
 import { ROLE_LABELS } from "@/lib/pricing/roles";
+import { CONTACTS, CONTACT_LINKS, telegramHandle } from "@/lib/contact";
 import ruMessages from "../../../messages/ru.json";
+
+/** Public brand domain shown on the deck (not the deployment alias). */
+const BRAND_DOMAIN = "skyline-digital.uz";
 
 /**
  * Commercial proposal deck — 8 slides, 16:9, modeled on the reference
@@ -80,31 +84,77 @@ function midTotal(p: PricingResult): number {
   return Math.round((p.totalMin + p.totalMax) / 2 / 50) * 50;
 }
 
-/** Deterministic "infrastructure" rows built from the configuration. */
+/**
+ * Deterministic "infrastructure" rows built from the configuration. Framed
+ * around the client's real touchpoints — where they actually see and manage
+ * their data (admin/CMS, database, Telegram, CRM) — not abstract boxes, so the
+ * "как устроена система" slide reads logically to a non-technical reader.
+ */
 function infraRows(cfg: ProjectConfiguration, projectName: string) {
   const f = new Set(cfg.features);
+
+  // Who uses it.
   const visitors: string[] = [projectName];
-  if (f.has("multilingual")) visitors.push("3 языковые версии");
+  if (f.has("multilingual")) visitors.push("3 языка");
   visitors.push("Мобильная версия");
 
-  const data: string[] = ["Тексты и изображения"];
-  if (f.has("ecommerce") || f.has("payment") || f.has("payments")) data.push("Каталог и заказы");
-  if (f.has("personalAccount") || f.has("authentication")) data.push("Аккаунты пользователей");
-  if (f.has("rag") || f.has("knowledgeBase")) data.push("База знаний");
-  data.push("Архив заявок");
+  // Where the client manages content and sees their data.
+  const manage: string[] = [
+    f.has("adminPanel") || f.has("cms") ? "Админ-панель (CMS)" : "Админ-панель",
+    "База данных проекта",
+  ];
+  if (f.has("ecommerce") || f.has("payment") || f.has("payments"))
+    manage.push("Каталог и заказы");
+  if (f.has("personalAccount") || f.has("authentication"))
+    manage.push("Кабинеты клиентов");
+  if (f.has("rag") || f.has("knowledgeBase")) manage.push("База знаний");
 
-  const leads: string[] = ["Telegram-уведомления", "Электронная почта"];
+  // Where every incoming lead lands — and where the client reads it.
+  const leads: string[] = ["Telegram", "Электронная почта"];
   if (f.has("crmIntegration")) leads.push("CRM");
-  if (f.has("adminPanel")) leads.push("Админ-панель");
+  leads.push("Архив в админ-панели");
 
-  const runsOn: string[] = ["Сервер (hosting)", "Домен", "SSL-сертификат", "Ежедневные копии"];
+  // What we set up and keep running for them.
+  const runsOn: string[] = ["Хостинг + домен", "SSL (https)", "Ежедневные копии"];
 
   return [
-    { label: "Кто пользуется", items: visitors, note: "Ваши клиенты и менеджеры" },
-    { label: "Где хранятся данные", items: data, note: "Всё в одной системе" },
-    { label: "Куда уходят заявки", items: leads, note: "Ни одна заявка не теряется" },
-    { label: "На чём всё работает", items: runsOn, note: "Технологная основа" },
+    { label: "Кто пользуется", items: visitors, note: "Ваши клиенты" },
+    { label: "Где вы управляете", items: manage, note: "Заходите и видите всё сами" },
+    { label: "Где видите заявки", items: leads, note: "Ни одна не теряется" },
+    { label: "На чём всё работает", items: runsOn, note: "Настраиваем и поддерживаем" },
   ];
+}
+
+/**
+ * Deterministic tech story for the "Понимание задачи" slide: a few plain-language
+ * principles plus a simplified modern stack, tailored to the configuration.
+ * Intentionally NOT over-architected — the point is to show competence without
+ * scaring a non-technical client with jargon.
+ */
+function techApproach(cfg: ProjectConfiguration, aiStack: string[]) {
+  const f = new Set(cfg.features);
+  const principles = [
+    "Компонентный подход — переиспользуемые блоки, быстрее правки",
+    "Рендеринг на сервере: быстрая загрузка и хорошее SEO",
+    "Mobile-first — сначала мобильные, потом десктоп",
+  ];
+
+  const stack: string[] = ["Next.js / React", "TypeScript", "Tailwind CSS", "PostgreSQL"];
+  if (cfg.projectType === "ai" || f.has("rag") || f.has("knowledgeBase"))
+    stack.push("AI (Anthropic API)");
+  if (f.has("ecommerce") || f.has("payment") || f.has("payments"))
+    stack.push("Онлайн-оплата (Payme / Click)");
+  if (f.has("crmIntegration")) stack.push("Интеграция с CRM");
+  if (f.has("adminPanel") || f.has("cms")) stack.push("Админка на том же стеке");
+
+  // Fold in any distinct AI-suggested tech, but keep the list tight.
+  for (const s of aiStack) {
+    if (stack.length >= 8) break;
+    const norm = s.trim();
+    if (norm && !stack.some((x) => x.toLowerCase().includes(norm.toLowerCase())))
+      stack.push(norm);
+  }
+  return { principles, stack: stack.slice(0, 8) };
 }
 
 /** Deterministic 6-step client journey. */
@@ -193,9 +243,16 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
   // proposals still render.
   const breakdown = pricing.roleBreakdown ?? [];
   const subtotal = pricing.subtotal ?? midTotal(pricing);
-  const urgencyAmount = pricing.urgencyAmount ?? 0;
+  const rawUrgency = pricing.urgencyAmount ?? 0;
   const hasCustom = pricing.hasCustom ?? false;
-  const total = pricing.total ?? midTotal(pricing);
+  const rawTotal = pricing.total ?? midTotal(pricing);
+  // Tidy the headline: when there's an urgency surcharge (a soft %), round the
+  // total to a clean $10 and absorb the few-dollar delta into the urgency line.
+  // The role breakdown and its subtotal stay exact, so "часы × ставка → подытог"
+  // still adds up; only the elastic urgency figure moves. Without urgency we
+  // keep the exact figure (nothing to absorb into).
+  const total = rawUrgency > 0 ? Math.round(rawTotal / 10) * 10 : rawTotal;
+  const urgencyAmount = rawUrgency > 0 ? total - subtotal : 0;
   const totalUzs = total * FX_RATE;
   const market = marketTable(pricing);
   const savingPct = Math.max(0, Math.round((1 - totalUzs / market.total) * 100));
@@ -203,7 +260,14 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
   // it genuinely favours the client. Larger/urgent configs price above the
   // reference team, so a 0% "выгода" would undercut the pitch; hide it then.
   const showAnchor = savingPct > 0;
-  const half = total / 2;
+  // "Без скидки" comparison in USD, so it reads next to ВАША ЦЕНА in the same
+  // unit. Ceil to a clean $50 for a tidy strike-through figure.
+  const listUsd = Math.ceil(market.total / FX_RATE / 50) * 50;
+  // Payment split: round the prepayment to a clean $10 and let the balance be
+  // the exact remainder, so the two rows still sum to ВАША ЦЕНА (point 4).
+  const prepay = Math.round(total / 2 / 10) * 10;
+  const postpay = total - prepay;
+  const approach = techApproach(configuration, proposal.recommendedStack);
   const infra = infraRows(configuration, meta.projectName);
   const journey = journeySteps(configuration);
   const checklist = clientChecklist(configuration);
@@ -303,6 +367,8 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
   .market-total .strike { color: ${C.red}; text-decoration: line-through; }
   .price-card { border: 3px solid ${C.ink}; background: ${C.orange}; border-radius: 12px; color: #fff; width: 300px; padding: 24px 26px; text-align: center; }
   .price-card .cap { font-size: 14px; letter-spacing: 3px; margin-bottom: 12px; }
+  .price-card .was { font-size: 12px; color: rgba(255,255,255,0.9); letter-spacing: 1px; margin-bottom: 4px; }
+  .price-card .was .wasnum { font-size: 20px; text-decoration: line-through; text-decoration-thickness: 2px; margin-right: 7px; }
   .price-card .big { font-size: 46px; font-weight: bold; }
   .price-card .uzs { font-size: 16px; margin-top: 8px; }
   .price-card .save { display: inline-block; margin-top: 12px; background: rgba(255,255,255,0.25); font-size: 13px; font-weight: bold; padding: 5px 12px; border-radius: 6px; }
@@ -337,8 +403,9 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
   ${slideTitle("Как устроена система")}
   <div class="cols">
     <div class="col-l">
-      Как устроен продукт: кто им пользуется, где хранятся данные и куда уходят заявки.
-      <div class="muted small" style="margin-top:16px">Схема сгенерирована по конфигурации вашего проекта.</div>
+      Без технических терминов: кто пользуется системой, где вы сами управляете
+      контентом и в каком месте видите каждую заявку.
+      <div class="muted small" style="margin-top:16px">Схема собрана по конфигурации вашего проекта.</div>
     </div>
     <div class="col-r">
       <div class="diagram">
@@ -352,7 +419,7 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
         </div>`,
           )
           .join("")}
-        <div class="diagram-foot"><b>Главное простыми словами.</b> Посетители заходят, оставляют заявку — она мгновенно приходит вам и сохраняется в архиве. Ничего не теряется.</div>
+        <div class="diagram-foot"><b>Главное простыми словами.</b> Заявки приходят в Telegram и на почту, контент вы меняете сами в админ-панели, а все данные хранятся в базе и ежедневно копируются. Ничего не теряется.</div>
       </div>
     </div>
   </div>
@@ -374,8 +441,9 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
         <div class="chips">${featureList.map((f) => `<span class="chip">${esc(f)}</span>`).join("")}</div>
       </div>
       <div class="understand-card">
-        <h3>Технологии</h3>
-        <div class="chips">${proposal.recommendedStack.slice(0, 6).map((s) => `<span class="chip">${esc(s)}</span>`).join("")}</div>
+        <h3>Технологии и подход</h3>
+        <ul>${li(approach.principles)}</ul>
+        <div class="chips" style="margin-top:12px">${approach.stack.map((s) => `<span class="chip">${esc(s)}</span>`).join("")}</div>
       </div>
     </div>
   </div>
@@ -473,13 +541,14 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
     <div>
       <div class="price-card">
         <div class="cap">ВАША ЦЕНА</div>
+        ${showAnchor ? `<div class="was"><span class="wasnum">${usd(listUsd)}</span>без скидки</div>` : ""}
         <div class="big">${usd(total)}</div>
         <div class="uzs">${uzs(totalUzs)} сум</div>
         ${showAnchor ? `<div class="save">выгода ${savingPct} %</div>` : ""}
       </div>
       <div class="price-note">Цена собрана из реальных часов по ролям — видно, за что вы платите.${
         showAnchor
-          ? ` <s>${uzs(market.total)} сум</s> — столько же работ у команды из 6 человек по рыночным ставкам Ташкента.`
+          ? ` Сумма без скидки (${usd(listUsd)}) — столько же работ стоит у команды из 6 человек по рыночным ставкам Ташкента.`
           : ""
       }</div>
     </div>
@@ -494,7 +563,7 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
   <div style="display:flex; gap:44px">
     <table class="pay">
       <tr><th>Предоплата</th><th>После запуска</th></tr>
-      <tr><td>${usd(half)} · ${uzs(half * FX_RATE)}</td><td>${usd(half)} · ${uzs(half * FX_RATE)}</td></tr>
+      <tr><td>${usd(prepay)} · ${uzs(prepay * FX_RATE)}</td><td>${usd(postpay)} · ${uzs(postpay * FX_RATE)}</td></tr>
     </table>
     <table class="totals">
       <tr><td>Сумма проекта (USD):</td><td>${usd(total)}</td></tr>
@@ -504,7 +573,7 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
     </table>
   </div>
   <div class="footnote">Оплата в сумах по курсу на день платежа (в расчёте — ${uzs(FX_RATE)}). Второй платёж — после запуска и подписания акта.</div>
-  <div class="contact-strip"><b>Связаться:</b> Skyline Digital · Ташкент · sky-digital-agency.vercel.app <b style="margin-left:18px">Следующий шаг:</b> ${esc(proposal.nextSteps[0] ?? "подтвердить проект и бюджет")}</div>
+  <div class="contact-strip"><b>Связаться:</b> Skyline Digital · Ташкент · ${BRAND_DOMAIN} · ${esc(CONTACTS.phoneDisplay)} · <a href="${CONTACT_LINKS.telegram}" style="color:${C.link}">${esc(telegramHandle)}</a> · ${esc(CONTACTS.email)}<br/><b>Следующий шаг:</b> ${esc(proposal.nextSteps[0] ?? "подтвердить проект и бюджет")}</div>
   ${logo}${pageNo(8)}
 </section>
 

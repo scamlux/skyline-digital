@@ -20,3 +20,12 @@ export function generateToken(bytes = 32): string {
 export function formatUsd(amount: number): string {
   return `$${Math.round(amount).toLocaleString("en-US")}`;
 }
+
+/**
+ * Round a money figure to the nearest clean step (default $10) for tidy,
+ * client-facing display — so estimates read "$300", not "$296". Display-only:
+ * the pricing engine keeps exact figures for its transparent breakdown.
+ */
+export function roundMoney(amount: number, step = 10): number {
+  return Math.round(amount / step) * step;
+}

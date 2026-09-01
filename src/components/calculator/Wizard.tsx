@@ -13,7 +13,7 @@ import {
 import { ROLE_LABELS, roleHoursCost } from "@/lib/pricing/roles";
 import type { PricingResult, ProjectType, Urgency } from "@/lib/pricing/types";
 import type { Proposal } from "@/lib/ai/schema";
-import { cn, formatUsd } from "@/lib/utils";
+import { cn, formatUsd, roundMoney } from "@/lib/utils";
 import { getLeadContext } from "@/lib/leadContext";
 import { SunProgress } from "./SunProgress";
 import {
@@ -233,7 +233,7 @@ export function Wizard() {
                   >
                     <span className="text-sm text-day">{t(`features.${key}`)}</span>
                     <span className="shrink-0 font-mono text-xs text-mist">
-                      +{formatUsd(roleHoursCost(featureDefs[key] ?? {}))}
+                      +{formatUsd(roundMoney(roleHoursCost(featureDefs[key] ?? {})))}
                     </span>
                   </button>
                 ))}
@@ -273,7 +273,7 @@ export function Wizard() {
                 >
                   <span className="text-sm text-day">{t(`addons.${key}`)}</span>
                   <span className="shrink-0 font-mono text-xs text-mist">
-                    +{formatUsd(roleHoursCost(addonDefs[key] ?? {}))}
+                    +{formatUsd(roundMoney(roleHoursCost(addonDefs[key] ?? {})))}
                   </span>
                 </button>
               ))}
