@@ -1,16 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "@/i18n/navigation";
 
 /**
  * "Sunrise curtain" loading screen: the horizon draws, the sun rises over it,
  * the wordmark settles — then the whole curtain lifts. Shown once per browser
  * session; disabled entirely under prefers-reduced-motion (CSS).
+ *
+ * Skipped on the /audit tool page: the opaque curtain sits over the hero for
+ * ~1.3s and, under Lighthouse mobile CPU throttle, pushes that page's LCP past
+ * the ≥90 budget. Landing on /audit does not consume the once-per-session flag,
+ * so the sunrise intro still plays on the visitor's first non-audit page.
  */
 export function Loader() {
   const [show, setShow] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
+    if (pathname === "/audit") return;
     if (sessionStorage.getItem("skyline-loaded")) return;
     sessionStorage.setItem("skyline-loaded", "1");
     // Defer out of the effect body (microtasks flush before paint, so no flash)
@@ -21,7 +29,7 @@ export function Loader() {
     // mobile Speed Index.
     const t = setTimeout(() => setShow(false), 1300);
     return () => clearTimeout(t);
-  }, []);
+  }, [pathname]);
 
   if (!show) return null;
 
