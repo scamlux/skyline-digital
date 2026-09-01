@@ -400,5 +400,141 @@
     "title": "Sahifa topilmadi",
     "text": "Bunday sahifa yo'q. Bosh sahifaga qayting.",
     "cta": "Bosh sahifaga"
+  },
+  "audit": {
+    "eyebrow": "Bepul audit",
+    "title": "Saytingizni 20 soniyada tekshiring",
+    "subtitle": "URL manzilni kiriting — tezlik, mobil versiya, xavfsizlik va SEO bahosini aniq raqamlar bilan va nimani tuzatishni ko'rsatamiz.",
+    "urlPlaceholder": "example.uz",
+    "checkButton": "Tekshirish",
+    "tooManyRequests": "Juda ko'p tekshiruv. Bir soatdan keyin urinib ko'ring.",
+    "progress": {
+      "loadingPage": "Sahifa yuklanmoqda…",
+      "measuringSpeed": "Tezlik o'lchanmoqda…",
+      "checkingMobile": "Mobil versiya tekshirilmoqda…"
+    },
+    "categories": {
+      "speed": "Tezlik",
+      "mobile": "Mobillik",
+      "security": "Xavfsizlik",
+      "seo": "SEO"
+    },
+    "severity": {
+      "critical": "jiddiy",
+      "major": "muhim",
+      "minor": "kichik"
+    },
+    "result": {
+      "scoreLabel": "Umumiy baho",
+      "topProblems": "Nimani tuzatish kerak",
+      "mobileView": "Telefonda qanday ko'rinadi",
+      "unreachable": "Saytni tekshira olmadik"
+    },
+    "errors": {
+      "INVALID_URL": "Bu sayt manziliga o'xshamaydi. Kiritgan URL manzilni tekshiring.",
+      "BLOCKED_ADDRESS": "Bu manzilni tekshirib bo'lmaydi — u ichki tarmoqqa yo'naltiradi yoki himoyalangan.",
+      "DNS_FAILED": "Bunday sayt topilmadi. Manzilni tekshiring — domenda xato bo'lishi mumkin.",
+      "TIMEOUT": "Sayt juda sekin javob bermoqda — 20 soniyaga ulgurmadi.",
+      "TOO_LARGE": "Sahifa to'liq tekshirish uchun juda og'ir.",
+      "HTTP_ERROR": "Sayt xato qaytardi va ochilmadi.",
+      "BROWSER_FAILED": "Sahifani ocha olmadik. Qayta urinib ko'ring."
+    },
+    "report": {
+      "heading": "To'liq hisobotni olish",
+      "emailPlaceholder": "E-mail manzilingiz",
+      "namePlaceholder": "Ism (ixtiyoriy)",
+      "submit": "Hisobotni yuborish",
+      "success": "Tayyor! To'liq hisobot quyida ko'rsatildi.",
+      "sent": "Hisobot tayyor. O'z loyihangiz uchun ham shunday natija xohlaysizmi?",
+      "calculatorCta": "Sayt narxini hisoblash →",
+      "captchaRequired": "Robot emasligingizni tasdiqlang.",
+      "errorGeneric": "Nimadir xato ketdi. Qayta urinib ko'ring."
+    },
+    "findings": {
+      "lcp-slow": {
+        "title": "Asosiy kontent sekin yuklanadi",
+        "detail": "Asosiy kontent {lcp} ms da paydo bo'ladi. Maqsad — 2500 ms gacha: rasmlarni siqing, og'ir skriptlarni oling."
+      },
+      "ttfb-slow": {
+        "title": "Server sekin javob beradi",
+        "detail": "Server {ttfb} ms da javob beradi. Backendni tezlashtiring yoki kesh/CDN ulang."
+      },
+      "page-heavy": {
+        "title": "Og'ir sahifa",
+        "detail": "Sahifa {mb} MB. Rasm va skriptlarni optimallang — maqsad 1,5 MB gacha."
+      },
+      "too-many-requests": {
+        "title": "Juda ko'p so'rov",
+        "detail": "Sahifa {count} so'rov qiladi. Fayllarni birlashtiring va keraksizlarini oling."
+      },
+      "no-viewport": {
+        "title": "Mobil viewport yo'q",
+        "detail": "Viewport tegisiz sayt telefonga moslashmaydi. width=device-width bilan meta viewport qo'shing."
+      },
+      "horizontal-overflow": {
+        "title": "Gorizontal aylantirish",
+        "detail": "Kontent ekrandan keng — gorizontal skroll paydo bo'ladi. Qat'iy kengliklarni tekshiring."
+      },
+      "tap-targets-small": {
+        "title": "Kichik bosiladigan elementlar",
+        "detail": "{count} tugma/havola 40×40 px dan kichik — barmoq bilan bosish qiyin."
+      },
+      "font-too-small": {
+        "title": "Shrift juda kichik",
+        "detail": "Asosiy shrift {px} px. Telefon uchun 16 px va undan yuqori qulay."
+      },
+      "no-https": {
+        "title": "HTTPS'siz sayt",
+        "detail": "Ulanish himoyalanmagan. SSL sertifikat ulang — bu ishonch va SEO ga ta'sir qiladi."
+      },
+      "no-http-redirect": {
+        "title": "HTTP HTTPS ga yo'naltirmaydi",
+        "detail": "http:// versiyasi https:// ga yo'naltirilmaydi. Doimiy redirekt sozlang."
+      },
+      "missing-security-headers": {
+        "title": "Himoya sarlavhalari yo'q",
+        "detail": "{count} muhim xavfsizlik sarlavhasi yo'q (HSTS, CSP va h.k.)."
+      },
+      "mixed-content": {
+        "title": "Aralash kontent",
+        "detail": "https sahifada http resurslar yuklanadi — brauzer saytni xavfli deb belgilaydi."
+      },
+      "cert-expiring": {
+        "title": "SSL sertifikat tez orada tugaydi",
+        "detail": "Sertifikat yana {days} kun amal qiladi. Uni yangilang, aks holda sayt ochilmay qoladi."
+      },
+      "bad-title": {
+        "title": "Title bilan muammo",
+        "detail": "Sahifa sarlavhasi {length} belgi. Ideali 30–60 — aniq ma'no bilan."
+      },
+      "bad-meta-description": {
+        "title": "Tavsif bilan muammo",
+        "detail": "meta description {length} belgi. Ideali 50–160 — bu qidiruv natijasidagi matn."
+      },
+      "h1-count": {
+        "title": "H1 soni noto'g'ri",
+        "detail": "Sahifada {count} ta H1 sarlavha. Aynan bittasi bo'lishi kerak."
+      },
+      "images-without-alt": {
+        "title": "Alt'siz rasmlar",
+        "detail": "{count} rasmda alt matni yo'q — SEO va foydalanish uchun yomon."
+      },
+      "no-open-graph": {
+        "title": "Open Graph yo'q",
+        "detail": "og:title va og:image'siz havola ijtimoiy tarmoqlarda xira ko'rinadi."
+      },
+      "no-lang": {
+        "title": "Sahifa tili ko'rsatilmagan",
+        "detail": "<html> tegida lang atributi yo'q — foydalanish va qidiruv uchun muhim."
+      },
+      "no-robots": {
+        "title": "robots.txt yo'q",
+        "detail": "robots.txt topilmadi — qidiruv tizimlariga sayt tuzilishini tushunish qiyinroq."
+      },
+      "no-structured-data": {
+        "title": "Tuzilgan ma'lumot yo'q",
+        "detail": "JSON-LD belgilash yo'q — qidiruvdagi kengaytirilgan snippetlarni yo'qotasiz."
+      }
+    }
   }
 }

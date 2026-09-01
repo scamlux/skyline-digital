@@ -400,5 +400,141 @@
     "title": "Page not found",
     "text": "This page does not exist. Head back home.",
     "cta": "Go home"
+  },
+  "audit": {
+    "eyebrow": "Free audit",
+    "title": "Check your website in 20 seconds",
+    "subtitle": "Paste a URL — we'll score speed, mobile, security and SEO with concrete numbers and what to fix.",
+    "urlPlaceholder": "example.com",
+    "checkButton": "Check",
+    "tooManyRequests": "Too many checks. Try again in an hour.",
+    "progress": {
+      "loadingPage": "Loading the page…",
+      "measuringSpeed": "Measuring speed…",
+      "checkingMobile": "Checking the mobile version…"
+    },
+    "categories": {
+      "speed": "Speed",
+      "mobile": "Mobile",
+      "security": "Security",
+      "seo": "SEO"
+    },
+    "severity": {
+      "critical": "critical",
+      "major": "major",
+      "minor": "minor"
+    },
+    "result": {
+      "scoreLabel": "Overall score",
+      "topProblems": "What to fix",
+      "mobileView": "How it looks on a phone",
+      "unreachable": "We couldn't check this site"
+    },
+    "errors": {
+      "INVALID_URL": "That doesn't look like a website address. Check the URL you entered.",
+      "BLOCKED_ADDRESS": "This address can't be checked — it points to an internal network or is protected.",
+      "DNS_FAILED": "We couldn't find that site. Check the address — maybe a typo in the domain.",
+      "TIMEOUT": "The site takes too long to respond — it didn't finish within 20 seconds.",
+      "TOO_LARGE": "The page is too heavy to check in full.",
+      "HTTP_ERROR": "The site returned an error and didn't open.",
+      "BROWSER_FAILED": "We couldn't open the page. Please try again."
+    },
+    "report": {
+      "heading": "Get the full report",
+      "emailPlaceholder": "Your e-mail",
+      "namePlaceholder": "Name (optional)",
+      "submit": "Send the report",
+      "success": "Done! The full report is shown below.",
+      "sent": "Report ready. Want the same result for your own project?",
+      "calculatorCta": "Estimate a website →",
+      "captchaRequired": "Please confirm you're not a robot.",
+      "errorGeneric": "Something went wrong. Please try again."
+    },
+    "findings": {
+      "lcp-slow": {
+        "title": "Slow main content load",
+        "detail": "Main content appears in {lcp} ms. Aim for under 2500 ms: compress images, drop heavy scripts."
+      },
+      "ttfb-slow": {
+        "title": "Slow server response",
+        "detail": "The server responds in {ttfb} ms. Speed up the backend or add caching/CDN."
+      },
+      "page-heavy": {
+        "title": "Heavy page",
+        "detail": "The page weighs {mb} MB. Optimise images and scripts — aim for under 1.5 MB."
+      },
+      "too-many-requests": {
+        "title": "Too many requests",
+        "detail": "The page makes {count} requests. Bundle files and remove the unused ones."
+      },
+      "no-viewport": {
+        "title": "No mobile viewport",
+        "detail": "Without a viewport tag the site doesn't adapt to phones. Add a meta viewport with width=device-width."
+      },
+      "horizontal-overflow": {
+        "title": "Horizontal scrolling on mobile",
+        "detail": "Content is wider than the screen, causing horizontal scroll. Check fixed widths."
+      },
+      "tap-targets-small": {
+        "title": "Tiny tap targets",
+        "detail": "{count} buttons/links are smaller than 40×40 px — hard to hit with a finger."
+      },
+      "font-too-small": {
+        "title": "Font too small",
+        "detail": "Base font is {px} px. 16 px and up is comfortable on phones."
+      },
+      "no-https": {
+        "title": "Site without HTTPS",
+        "detail": "The connection isn't secure. Add an SSL certificate — it affects trust and SEO."
+      },
+      "no-http-redirect": {
+        "title": "HTTP doesn't redirect to HTTPS",
+        "detail": "The http:// version doesn't redirect to https://. Set up a permanent redirect."
+      },
+      "missing-security-headers": {
+        "title": "Missing security headers",
+        "detail": "{count} important security headers are missing (HSTS, CSP, etc.)."
+      },
+      "mixed-content": {
+        "title": "Mixed content",
+        "detail": "An https page loads http resources — the browser flags the site as insecure."
+      },
+      "cert-expiring": {
+        "title": "SSL certificate expiring soon",
+        "detail": "The certificate is valid for {days} more days. Renew it so the site keeps opening."
+      },
+      "bad-title": {
+        "title": "Title tag issue",
+        "detail": "The page title is {length} characters. 30–60 is ideal — with a clear message."
+      },
+      "bad-meta-description": {
+        "title": "Meta description issue",
+        "detail": "The meta description is {length} characters. 50–160 is ideal — it's the search-result text."
+      },
+      "h1-count": {
+        "title": "Wrong number of H1s",
+        "detail": "The page has {count} H1 headings. There should be exactly one."
+      },
+      "images-without-alt": {
+        "title": "Images without alt",
+        "detail": "{count} images have no alt text — bad for SEO and accessibility."
+      },
+      "no-open-graph": {
+        "title": "No Open Graph",
+        "detail": "Without og:title and og:image, the link looks dull when shared on social media."
+      },
+      "no-lang": {
+        "title": "Page language not set",
+        "detail": "The <html> tag has no lang attribute — important for accessibility and search."
+      },
+      "no-robots": {
+        "title": "No robots.txt",
+        "detail": "No robots.txt found — search engines struggle to understand the site's structure."
+      },
+      "no-structured-data": {
+        "title": "No structured data",
+        "detail": "No JSON-LD markup — you're missing rich snippets in search."
+      }
+    }
   }
 }

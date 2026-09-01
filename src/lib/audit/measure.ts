@@ -62,6 +62,22 @@ interface NetworkStats {
   exceededLimit: boolean;
 }
 
+/** Minimal shapes of the CDP events we consume (puppeteer types them loosely). */
+interface CdpResponseReceived {
+  requestId: string;
+  type: string;
+  response?: {
+    url?: string;
+    status?: number;
+    headers?: Record<string, unknown>;
+    securityDetails?: { validTo?: number };
+  };
+}
+interface CdpLoadingFinished {
+  requestId: string;
+  encodedDataLength?: number;
+}
+
 function unreachable(url: string, error: AuditErrorCode, status: number | null = null): Measurement {
   return {
     url,
@@ -220,7 +236,14 @@ async function runMeasurement(
     mobile: { ...dom.mobile, screenshotMobile },
     security,
     seo: { ...dom.seo, robotsTxtFound, sitemapFound },
-    business: { ...stripHtmlHints(dom.business), detectedCms: detectCms(dom.business, net.mainHeaders) },
+    business: {
+      hasContactForm: dom.business.hasContactForm,
+      hasPhoneLink: dom.business.hasPhoneLink,
+      hasMessengerLink: dom.business.hasMessengerLink,
+      hasAnalytics: dom.business.hasAnalytics,
+      copyrightYear: dom.business.copyrightYear,
+      detectedCms: detectCms(dom.business, net.mainHeaders),
+    },
   };
   return measurement;
 }
@@ -244,10 +267,11 @@ async function trackNetwork(page: Page): Promise<NetworkStats> {
   const cdp = await page.createCDPSession();
   await cdp.send("Network.enable");
 
-  cdp.on("Network.responseReceived", (e: any) => {
+  cdp.on("Network.responseReceived", (raw) => {
+    const e = raw as unknown as CdpResponseReceived;
     types.set(e.requestId, e.type);
     stats.requestCount += 1;
-    const url: string = e.response?.url ?? "";
+    const url = e.response?.url ?? "";
     if (url.startsWith("http://")) stats.mixedContent = true;
     if (e.type === "Document" && stats.mainStatus === null) {
       stats.mainStatus = e.response?.status ?? null;
@@ -257,8 +281,9 @@ async function trackNetwork(page: Page): Promise<NetworkStats> {
       if (typeof validTo === "number") stats.certValidToSec = validTo;
     }
   });
-  cdp.on("Network.loadingFinished", (e: any) => {
-    const bytes: number = e.encodedDataLength ?? 0;
+  cdp.on("Network.loadingFinished", (raw) => {
+    const e = raw as unknown as CdpLoadingFinished;
+    const bytes = e.encodedDataLength ?? 0;
     stats.pageWeightBytes += bytes;
     const t = types.get(e.requestId);
     if (t === "Image" || t === "Media") stats.imageBytes += bytes;
@@ -317,13 +342,6 @@ function detectCms(
   if (hay.includes("bitrix")) return "Bitrix";
   if (hay.includes("shopify")) return "Shopify";
   return "unknown";
-}
-
-function stripHtmlHints(
-  b: Omit<BusinessSignals, "detectedCms"> & { generator: string | null; htmlHints: string[] },
-): Omit<BusinessSignals, "detectedCms"> {
-  const { generator: _g, htmlHints: _h, ...rest } = b;
-  return rest;
 }
 
 // ————————————————————— hard timeout —————————————————————
