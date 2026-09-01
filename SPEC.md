@@ -1022,7 +1022,7 @@ RESEND_API_KEY                     почта
 NOTIFY_EMAIL                       адрес владельца
 TELEGRAM_BOT_TOKEN                 уведомления
 TELEGRAM_CHAT_ID
-TURNSTILE_SITE_KEY
+NEXT_PUBLIC_TURNSTILE_SITE_KEY
 TURNSTILE_SECRET_KEY               только сервер
 ADMIN_EMAIL                        для начального наполнения
 ADMIN_PASSWORD                     для начального наполнения

@@ -13,10 +13,10 @@
 - SEO: sitemap/robots/OG/hreflang/canonical; reduced-motion.
 
 ## Безопасность до запуска (дёшево, высокий риск) 🔴
-- [ ] Капча на последний шаг формы и контакт-форму (сейчас только honeypot) — §11.
+- [x] Капча на последний шаг визарда и контакт-форму (Cloudflare Turnstile) — §11. Работает после установки `NEXT_PUBLIC_TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` в Vercel.
 - [ ] Токен сметы 32+ символов (сейчас 16) — §11.
-- [ ] Приватный бакет `proposals` + signed URL (сейчас публичный, PDF по токену) — §11.
-- [ ] Распределённый rate-limit (Upstash/Vercel KV) вместо in-memory Map — §11.
+- [x] Приватный бакет `proposals` + signed URL — §11. Код готов; закрывает бакет миграция `0004`, применять её ТОЛЬКО после деплоя.
+- [x] Распределённый rate-limit на Upstash Redis (in-memory остался фолбэком) — §11. Работает после подключения Upstash в Vercel.
 - [ ] Глобальный `:focus-visible` — §12 a11y.
 - [ ] **Измерить гейты §12** (пока НЕ проверялись): Lighthouse ≥90 на главной/`/projects/[slug]`/`/calculator`, LCP ≤2.5с (4G), CLS ≤0.1, iOS Safari + Android Chrome на реальных устройствах.
 

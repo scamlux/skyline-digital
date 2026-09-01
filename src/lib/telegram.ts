@@ -63,11 +63,15 @@ export async function sendTelegramMessage(text: string): Promise<SendResult> {
 }
 
 /**
- * Send a document (by public URL) with an HTML caption. Telegram fetches the
- * file itself, so the URL must be publicly reachable (< 20MB). Never throws.
+ * Sends a document from raw bytes (multipart upload) instead of a URL.
+ *
+ * Needed since the `proposals` bucket went private: Telegram cannot fetch a
+ * signed, expiring URL reliably, so we hand it the PDF we already have in
+ * memory.
  */
-export async function sendTelegramDocument(
-  documentUrl: string,
+export async function sendTelegramDocumentBuffer(
+  bytes: Uint8Array,
+  filename: string,
   caption: string,
 ): Promise<SendResult> {
   if (!isTelegramConfigured()) {
@@ -75,16 +79,16 @@ export async function sendTelegramDocument(
     return { ok: false, error: "not_configured" };
   }
   try {
-    const res = await fetch(api("sendDocument"), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: CHAT_ID,
-        document: documentUrl,
-        caption,
-        parse_mode: "HTML",
-      }),
-    });
+    const form = new FormData();
+    form.set("chat_id", String(CHAT_ID));
+    form.set("caption", caption);
+    form.set("parse_mode", "HTML");
+    form.set(
+      "document",
+      new Blob([new Uint8Array(bytes)], { type: "application/pdf" }),
+      filename,
+    );
+    const res = await fetch(api("sendDocument"), { method: "POST", body: form });
     const data = await res.json();
     if (!data.ok) {
       console.error("[telegram] sendDocument failed:", data.error_code, data.description);

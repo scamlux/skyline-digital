@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { renderProposalHtml } from "@/templates/proposal/template";
 import { htmlToPdf } from "@/lib/pdf/render";
 import {
-  sendTelegramDocument,
+  sendTelegramDocumentBuffer,
   formatProposalMessage,
   type ProposalForTelegram,
 } from "@/lib/telegram";
@@ -16,6 +17,27 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const BUCKET = "proposals";
+/** Lifetime of a signed download link. Short: the client is redirected at once. */
+const SIGNED_URL_TTL_SECONDS = 60 * 60;
+
+/**
+ * Signs a download URL for a private-bucket object. Returns null on failure so
+ * the caller can fall back to streaming the PDF instead of 500-ing.
+ */
+async function signDownloadUrl(
+  supabase: SupabaseClient,
+  path: string,
+  filename: string,
+): Promise<string | null> {
+  const { data, error } = await supabase.storage
+    .from(BUCKET)
+    .createSignedUrl(path, SIGNED_URL_TTL_SECONDS, { download: filename });
+  if (error || !data?.signedUrl) {
+    console.error("[proposal] signing failed:", error?.message ?? "no url");
+    return null;
+  }
+  return data.signedUrl;
+}
 
 interface EstimateJoined {
   id: string;
@@ -56,18 +78,25 @@ export async function GET(
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 
-  // Idempotency: if a proposal PDF already exists for this estimate, serve it.
+  // Idempotency: if a proposal PDF already exists for this estimate, serve it
+  // through a freshly signed URL (the bucket is private — see migration 0003).
   try {
     const { data: existing } = await supabase
       .from("proposals")
       .select("*")
       .eq("estimate_id", est.id)
-      .not("file_url", "is", null)
+      .or("file_path.not.is.null,file_url.not.is.null")
       .order("version", { ascending: false })
       .limit(1)
       .maybeSingle();
-    if (existing?.file_url) {
-      return NextResponse.redirect(existing.file_url, 302);
+    if (existing) {
+      const row = existing as ProposalRow;
+      // Legacy rows (pre-0003) have no file_path; the object still lives at
+      // the deterministic `<token>.pdf` path.
+      const path = row.file_path ?? `${token}.pdf`;
+      const signed = await signDownloadUrl(supabase, path, `proposal-${token}.pdf`);
+      if (signed) return NextResponse.redirect(signed, 302);
+      console.warn("[proposal] could not sign existing PDF — regenerating");
     }
   } catch (err) {
     console.error("[proposal] lookup failed (continuing to generate):", err);
@@ -105,15 +134,15 @@ export async function GET(
   // 2. Upload to Supabase Storage. If this fails, still return the PDF so the
   //    user gets their КП; a later download will retry storage + Telegram.
   let fileUrl: string | null = null;
+  let filePath: string | null = null;
   try {
     const path = `${token}.pdf`;
     const { error: upErr } = await supabase.storage
       .from(BUCKET)
       .upload(path, Buffer.from(pdf), { contentType: "application/pdf", upsert: true });
     if (upErr) throw upErr;
-    fileUrl = supabase.storage.from(BUCKET).getPublicUrl(path, {
-      download: filename,
-    }).data.publicUrl;
+    filePath = path;
+    fileUrl = await signDownloadUrl(supabase, path, filename);
     console.info("[proposal] PDF stored", path);
   } catch (err) {
     console.error("[proposal] storage upload failed:", err);
@@ -147,6 +176,7 @@ export async function GET(
           total_price: price,
           currency: "USD",
           valid_until: validUntil.toISOString().slice(0, 10),
+          file_path: filePath,
           file_url: fileUrl,
           status: "CREATED",
         })
@@ -166,7 +196,7 @@ export async function GET(
   }
 
   // 4. Send the PDF to Telegram (best-effort — never deletes PDF/Proposal).
-  if (lead && proposalRow && fileUrl) {
+  if (lead && proposalRow) {
     const payload: ProposalForTelegram = {
       lead_number: lead.lead_number,
       client_name: lead.client_name,
@@ -180,7 +210,12 @@ export async function GET(
       version: proposalRow.version,
       created_at: proposalRow.created_at,
     };
-    const res = await sendTelegramDocument(fileUrl, formatProposalMessage(payload));
+    // The bucket is private, so upload the bytes rather than a signed URL.
+    const res = await sendTelegramDocumentBuffer(
+      pdf,
+      filename,
+      formatProposalMessage(payload),
+    );
     try {
       if (res.ok) {
         console.info("[telegram] proposal sent", lead.lead_number, res.messageId);
@@ -200,7 +235,7 @@ export async function GET(
     }
   }
 
-  // 5. Send the user to the stored file (or stream it if storage was skipped).
+  // 5. Send the user to the signed URL (or stream the PDF if signing failed).
   return fileUrl ? NextResponse.redirect(fileUrl, 302) : pdfResponse(pdf, filename);
 }
 

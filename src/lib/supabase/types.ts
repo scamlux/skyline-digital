@@ -67,6 +67,8 @@ export interface ProposalRow {
   currency: string | null;
   valid_until: string | null;
   file_url: string | null;
+  /** Path inside the private `proposals` bucket; sign it to serve the PDF. */
+  file_path: string | null;
   status: ProposalStatus;
   telegram_message_id: number | null;
   telegram_error: string | null;
