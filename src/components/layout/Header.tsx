@@ -10,6 +10,9 @@ import { ContactModal } from "@/components/contact/ContactModal";
 const NAV = [
   { href: "/services", key: "services" },
   { href: "/projects", key: "projects" },
+  // Free site-audit tool — a lead magnet; keep it in the primary nav so it's
+  // discoverable, not an orphaned route.
+  { href: "/audit", key: "audit" },
   { href: "/about", key: "about" },
   { href: "/contact", key: "contact" },
 ] as const;
