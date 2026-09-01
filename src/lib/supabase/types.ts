@@ -1,5 +1,6 @@
 import type { ProjectConfiguration, PricingResult } from "@/lib/pricing/types";
 import type { Proposal } from "@/lib/ai/schema";
+import type { AuditScore, Finding, Measurement } from "@/lib/audit/types";
 
 export type LeadStatus =
   | "NEW"
@@ -83,4 +84,44 @@ export interface EstimateRow {
   pricing_result: PricingResult;
   ai_result: Proposal;
   created_at: string;
+}
+
+/** A stored site audit (public /audit or radar). See migration 0005. */
+export interface AuditRow {
+  id: string;
+  url: string;
+  host: string;
+  final_url: string | null;
+  reachable: boolean;
+  error_code: string | null;
+  score_total: number | null;
+  score_grade: string | null;
+  categories: AuditScore["categories"] | null;
+  measurement: Measurement;
+  findings: Finding[] | null;
+  email: string | null;
+  lead_id: string | null;
+  source: "public" | "radar" | null;
+  created_at: string;
+}
+
+/** A company row for the radar (phase B). See migration 0005. */
+export interface RadarCompanyRow {
+  id: string;
+  domain: string | null;
+  name: string;
+  industry: string | null;
+  city: string | null;
+  phone: string | null;
+  instagram: string | null;
+  directory: string;
+  directory_url: string | null;
+  has_site: boolean;
+  class: "S" | "A" | "B" | "C" | null;
+  last_audit_id: string | null;
+  outreach_status: "NEW" | "QUEUED" | "SENT" | "REPLIED" | "WON" | "SKIP";
+  outreach_at: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
 }
