@@ -21,9 +21,15 @@ export const baseHours: Record<ProjectType, RoleHours> = {
   other: { pm: 2, dev: 8, design: 2, qa: 2 },
 };
 
-/** "From $X" starting price for a project type — its base hours, priced. */
+/**
+ * "From $X" starting price for a project type — its base hours, priced, then
+ * rounded to a clean $10 so the marketing "от $X" labels read tidily ("от
+ * $1,000", not "от $1,002"). Display-only; the engine always prices from exact
+ * hours.
+ */
 export function basePriceUsd(type: ProjectType): number {
-  return roleHoursCost(baseHours[type] ?? baseHours.other);
+  const exact = roleHoursCost(baseHours[type] ?? baseHours.other);
+  return Math.round(exact / 10) * 10;
 }
 
 /**
