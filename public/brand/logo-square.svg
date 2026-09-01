@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" role="img" aria-label="skyline.digital">
+  <defs>
+<radialGradient id="sun" cx="38%" cy="32%" r="78%">
+      <stop offset="0%" stop-color="#FFC978"/>
+      <stop offset="34%" stop-color="#FFAE5C"/>
+      <stop offset="100%" stop-color="#E8517C"/>
+    </radialGradient>
+    <radialGradient id="aurora" cx="50%" cy="50%" r="50%">
+      <stop offset="55%" stop-color="#E8517C" stop-opacity="0.42"/>
+      <stop offset="78%" stop-color="#E8517C" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#E8517C" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="horizon" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#E8517C" stop-opacity="0.15"/>
+      <stop offset="50%" stop-color="#FF5C8A"/>
+      <stop offset="100%" stop-color="#E8517C" stop-opacity="0.15"/>
+    </linearGradient>
+    <clipPath id="sky"><rect x="0" y="0" width="1024" height="600"/></clipPath>
+  </defs>
+  <rect width="1024" height="1024" fill="#1A2238"/>
+  <g clip-path="url(#sky)">
+    <circle cx="512" cy="600" r="470" fill="url(#aurora)"/>
+    <circle cx="512" cy="600" r="272" fill="url(#sun)"/>
+  </g>
+  <rect x="0" y="597" width="1024" height="6" fill="url(#horizon)"/>
+  <text x="512" y="800" text-anchor="middle" font-family="Unbounded, 'Golos Text', system-ui, sans-serif"
+        font-size="108" font-weight="600" letter-spacing="-2">
+    <tspan fill="#FFFFFF">skyline</tspan><tspan fill="#FFAE5C">.</tspan><tspan fill="#FFFFFF">digital</tspan>
+  </text>
+</svg>
