@@ -383,7 +383,18 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
   table.totals td { font-size: 14.5px; padding: 12px 16px; border: 1px solid ${C.line}; }
   table.totals tr:first-child td { background: ${C.tableRowA}; font-weight: bold; }
   table.totals td:last-child { text-align: right; font-weight: bold; }
-  .contact-strip { margin-top: 34px; background: #F4F6F9; border: 1px solid ${C.line}; border-radius: 10px; padding: 20px 24px; font-size: 15px; }
+  .contact-card { margin-top: 30px; display: flex; border: 1px solid ${C.line}; border-radius: 12px; overflow: hidden; }
+  .contact-main { flex: 1; padding: 20px 26px; background: #F7FAFD; }
+  .contact-brand-name { font-size: 19px; font-weight: bold; color: ${C.ink}; }
+  .contact-brand-sub { font-size: 12.5px; color: ${C.grey}; margin-top: 3px; }
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 30px; margin-top: 18px; }
+  .ci { display: flex; flex-direction: column; gap: 3px; }
+  .ci-l { font-size: 10.5px; letter-spacing: 1.3px; text-transform: uppercase; color: ${C.lightGrey}; }
+  .ci-v { font-size: 15px; color: ${C.ink}; font-weight: 600; text-decoration: none; }
+  a.ci-v { color: ${C.link}; }
+  .contact-next { width: 290px; flex-shrink: 0; background: ${C.cream}; color: ${C.creamText}; padding: 22px 24px; display: flex; flex-direction: column; justify-content: center; }
+  .contact-next-l { font-size: 11px; letter-spacing: 1.6px; text-transform: uppercase; font-weight: bold; margin-bottom: 8px; opacity: 0.85; }
+  .contact-next-v { font-size: 15.5px; line-height: 1.5; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -573,7 +584,22 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
     </table>
   </div>
   <div class="footnote">Оплата в сумах по курсу на день платежа (в расчёте — ${uzs(FX_RATE)}). Второй платёж — после запуска и подписания акта.</div>
-  <div class="contact-strip"><b>Связаться:</b> Skyline Digital · Ташкент · ${BRAND_DOMAIN} · ${esc(CONTACTS.phoneDisplay)} · <a href="${CONTACT_LINKS.telegram}" style="color:${C.link}">${esc(telegramHandle)}</a> · ${esc(CONTACTS.email)}<br/><b>Следующий шаг:</b> ${esc(proposal.nextSteps[0] ?? "подтвердить проект и бюджет")}</div>
+  <div class="contact-card">
+    <div class="contact-main">
+      <div class="contact-brand-name">Skyline Digital</div>
+      <div class="contact-brand-sub">Ташкент · веб-разработка, приложения и AI</div>
+      <div class="contact-grid">
+        <div class="ci"><span class="ci-l">Сайт</span><a class="ci-v" href="https://${BRAND_DOMAIN}">${BRAND_DOMAIN}</a></div>
+        <div class="ci"><span class="ci-l">Телефон</span><a class="ci-v" href="${CONTACT_LINKS.phone}">${esc(CONTACTS.phoneDisplay)}</a></div>
+        <div class="ci"><span class="ci-l">Telegram</span><a class="ci-v" href="${CONTACT_LINKS.telegram}">${esc(telegramHandle)}</a></div>
+        <div class="ci"><span class="ci-l">E-mail</span><a class="ci-v" href="${CONTACT_LINKS.email}">${esc(CONTACTS.email)}</a></div>
+      </div>
+    </div>
+    <div class="contact-next">
+      <div class="contact-next-l">Следующий шаг</div>
+      <div class="contact-next-v">→ ${esc(proposal.nextSteps[0] ?? "Подтвердите проект и выберите предпочтительный вариант бюджета.")}</div>
+    </div>
+  </div>
   ${logo}${pageNo(8)}
 </section>
 
