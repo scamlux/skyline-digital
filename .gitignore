@@ -60,3 +60,6 @@ kp_skyline.pdf
 # Рабочие артефакты сессии
 /skylineprodhardening.patch
 /skyline-prod-plan.md
+/docs/OPERATING-MODEL.md
+/docs/TZ-AUDIT-ENGINE.md
+/docs/prompts/
