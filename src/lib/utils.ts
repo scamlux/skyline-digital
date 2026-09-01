@@ -7,8 +7,12 @@ export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
 
-/** URL-safe token for addressable estimate pages. */
-export function generateToken(bytes = 12): string {
+/**
+ * URL-safe token for addressable estimate pages.
+ * 32 bytes -> 43 base64url chars. ТЗ §11 requires 32+ characters: the token IS
+ * the only credential guarding a proposal, so it must not be brute-forceable.
+ */
+export function generateToken(bytes = 32): string {
   return randomBytes(bytes).toString("base64url");
 }
 

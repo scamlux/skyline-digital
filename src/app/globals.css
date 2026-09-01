@@ -425,3 +425,28 @@ main {
     scroll-behavior: auto !important;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Focus visibility — ТЗ §12 (a11y).
+   Keyboard users must always see where they are. We scope the ring to
+   :focus-visible so mouse clicks stay clean, and use the apricot accent with a
+   contrasting outer ring so it reads on both the night and day skies.
+--------------------------------------------------------------------------- */
+
+:where(a, button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 2px solid var(--color-apricot);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* On the night sky the apricot ring can sit on a warm gradient — add a dark
+   halo so the ring never disappears into the sun. */
+.bg-night :where(a, button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible,
+.night :where(a, button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  box-shadow: 0 0 0 4px var(--color-night);
+}
+
+/* Never remove the ring without replacing it. */
+:focus:not(:focus-visible) {
+  outline: none;
+}
