@@ -3,6 +3,7 @@ import { contactRequestSchema } from "@/lib/validation/contact";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { createLead, notifyNewLead } from "@/lib/leads";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
+import { verifyTurnstile } from "@/lib/turnstile";
 
 export const runtime = "nodejs";
 
@@ -24,6 +25,12 @@ export async function POST(request: Request) {
       { error: "Validation failed", issues: parsed.error.flatten() },
       { status: 422 },
     );
+  }
+
+  // Captcha before any storage / notification work.
+  const captcha = await verifyTurnstile(parsed.data.turnstileToken, clientIp(request));
+  if (!captcha.ok) {
+    return NextResponse.json({ error: "Captcha failed" }, { status: 403 });
   }
 
   const d = parsed.data;

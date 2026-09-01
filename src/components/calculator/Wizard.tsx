@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { computePricing } from "@/lib/pricing/engine";
 import {
@@ -15,6 +15,11 @@ import type { Proposal } from "@/lib/ai/schema";
 import { cn, formatUsd } from "@/lib/utils";
 import { getLeadContext } from "@/lib/leadContext";
 import { SunProgress } from "./SunProgress";
+import {
+  TurnstileWidget,
+  resetTurnstile,
+  turnstileEnabled,
+} from "@/components/security/TurnstileWidget";
 
 const TYPES: ProjectType[] = [
   "website",
@@ -64,6 +69,8 @@ const inputCls =
 
 export function Wizard() {
   const t = useTranslations("calc");
+  const locale = useLocale();
+  const [captchaToken, setCaptchaToken] = useState("");
   const [step, setStep] = useState(0);
   const [projectType, setProjectType] = useState<ProjectType | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -125,6 +132,10 @@ export function Wizard() {
       setErrorMsg(t("errors.required"));
       return;
     }
+    if (turnstileEnabled && !captchaToken) {
+      setErrorMsg(t("errors.captcha"));
+      return;
+    }
     setErrorMsg(null);
     setStatus("sending");
     setStep(4);
@@ -141,6 +152,7 @@ export function Wizard() {
           },
           info: { ...info, hp: "" },
           context: getLeadContext(),
+          turnstileToken: captchaToken,
         }),
       });
       if (!res.ok) throw new Error(String(res.status));
@@ -151,6 +163,9 @@ export function Wizard() {
       setStatus("error");
       setStep(3);
       setErrorMsg(t("errors.generic"));
+      // A token is single-use — issue a fresh one for the retry.
+      setCaptchaToken("");
+      resetTurnstile();
     }
   }
 
@@ -371,6 +386,12 @@ export function Wizard() {
                 />
               </label>
             </div>
+
+            <TurnstileWidget
+              onToken={setCaptchaToken}
+              language={locale}
+              className="mt-1"
+            />
           </div>
         )}
 

@@ -54,6 +54,8 @@ export const estimateRequestSchema = z.object({
   configuration: projectConfigurationSchema,
   info: projectInfoSchema,
   context: z.object(leadContextSchema).partial().optional(),
+  // Cloudflare Turnstile token; verified server-side (skipped when unconfigured).
+  turnstileToken: z.string().max(4000).optional().default(""),
 });
 
 export type EstimateRequest = z.infer<typeof estimateRequestSchema>;

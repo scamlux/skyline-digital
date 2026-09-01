@@ -6,6 +6,7 @@ import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { generateToken } from "@/lib/utils";
 import { createLead, notifyNewLead, typeLabel } from "@/lib/leads";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
+import { verifyTurnstile } from "@/lib/turnstile";
 
 export const runtime = "nodejs";
 
@@ -31,6 +32,12 @@ export async function POST(request: Request) {
       { error: "Validation failed", issues: parsed.error.flatten() },
       { status: 422 },
     );
+  }
+
+  // Captcha before the (paid) AI call and any storage work.
+  const captcha = await verifyTurnstile(parsed.data.turnstileToken, clientIp(request));
+  if (!captcha.ok) {
+    return NextResponse.json({ error: "Captcha failed" }, { status: 403 });
   }
 
   const { configuration, info, context } = parsed.data;

@@ -23,6 +23,8 @@ export const contactRequestSchema = z.object({
   // Anti-spam honeypot: must stay empty.
   company: z.string().max(80).optional().default(""),
   hp: z.string().max(0).optional().default(""),
+  // Cloudflare Turnstile token; verified server-side (skipped when unconfigured).
+  turnstileToken: z.string().max(4000).optional().default(""),
   ...leadContextSchema,
 });
 

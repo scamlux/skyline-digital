@@ -221,7 +221,8 @@
       "error": "Yuborib bo'lmadi. Qayta urinib ko'ring yoki to'g'ridan-to'g'ri yozing.",
       "required": "Majburiy maydon",
       "invalidEmail": "Email noto'g'ri",
-      "phone": "Telefon"
+      "phone": "Telefon",
+      "captcha": "Iltimos, robot emasligingizni tasdiqlang"
     },
     "altTitle": "Formalarni yoqtirmaysizmi?",
     "altText": "Loyiha narxini o'zingiz hisoblang — kalkulyator to'g'ri savollarni beradi.",
@@ -350,7 +351,8 @@
     "errors": {
       "required": "Majburiy maydonlarni to'ldiring",
       "generic": "Xatolik yuz berdi. Qayta urinib ko'ring.",
-      "selectType": "Loyiha turini tanlang"
+      "selectType": "Loyiha turini tanlang",
+      "captcha": "Iltimos, robot emasligingizni tasdiqlang"
     },
     "result": {
       "eyebrow": "Sizning smetangiz",

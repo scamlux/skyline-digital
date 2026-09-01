@@ -1,9 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { getLeadContext } from "@/lib/leadContext";
+import {
+  TurnstileWidget,
+  resetTurnstile,
+  turnstileEnabled,
+} from "@/components/security/TurnstileWidget";
 
 const SERVICES = [
   "website",
@@ -22,24 +27,39 @@ const inputCls =
 export function ContactForm() {
   const t = useTranslations("contact.form");
   const ts = useTranslations("calc.types");
+  const locale = useLocale();
   const [status, setStatus] = useState<Status>("idle");
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaError, setCaptchaError] = useState(false);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
     const data = Object.fromEntries(new FormData(form).entries());
+    if (turnstileEnabled && !captchaToken) {
+      setCaptchaError(true);
+      return;
+    }
+    setCaptchaError(false);
     setStatus("sending");
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, ...getLeadContext() }),
+        body: JSON.stringify({
+          ...data,
+          ...getLeadContext(),
+          turnstileToken: captchaToken,
+        }),
       });
       if (!res.ok) throw new Error(String(res.status));
       setStatus("success");
       form.reset();
     } catch {
       setStatus("error");
+      // A token is single-use — issue a fresh one for the retry.
+      setCaptchaToken("");
+      resetTurnstile();
     }
   }
 
@@ -130,6 +150,21 @@ export function ContactForm() {
         className="absolute -left-[9999px] h-0 w-0 opacity-0"
         aria-hidden
       />
+
+      <TurnstileWidget
+        onToken={(tok) => {
+          setCaptchaToken(tok);
+          if (tok) setCaptchaError(false);
+        }}
+        language={locale}
+        className="mt-1"
+      />
+
+      {captchaError && (
+        <p className="text-sm text-afterglow" role="alert">
+          {t("captcha")}
+        </p>
+      )}
 
       {status === "error" && (
         <p className="text-sm text-afterglow" role="alert">

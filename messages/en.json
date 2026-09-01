@@ -221,7 +221,8 @@
       "error": "Could not send. Try again or contact us directly.",
       "required": "Required field",
       "invalidEmail": "Invalid email",
-      "phone": "Phone"
+      "phone": "Phone",
+      "captcha": "Please confirm you are not a robot"
     },
     "altTitle": "Not a fan of forms?",
     "altText": "Estimate your project yourself — the calculator asks the right questions.",
@@ -350,7 +351,8 @@
     "errors": {
       "required": "Please fill in the required fields",
       "generic": "Something went wrong. Please try again.",
-      "selectType": "Choose a project type"
+      "selectType": "Choose a project type",
+      "captcha": "Please confirm you are not a robot"
     },
     "result": {
       "eyebrow": "Your estimate",
