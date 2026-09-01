@@ -14,7 +14,7 @@ function midTotal(min: number, max: number): number {
 }
 
 export async function POST(request: Request) {
-  if (!rateLimit(`estimate:${clientIp(request)}`)) {
+  if (!(await rateLimit(`estimate:${clientIp(request)}`))) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 

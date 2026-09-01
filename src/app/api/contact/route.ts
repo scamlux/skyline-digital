@@ -7,7 +7,7 @@ import { rateLimit, clientIp } from "@/lib/rate-limit";
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
-  if (!rateLimit(`contact:${clientIp(request)}`)) {
+  if (!(await rateLimit(`contact:${clientIp(request)}`))) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 
