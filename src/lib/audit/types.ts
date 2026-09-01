@@ -144,3 +144,25 @@ export interface AuditScore {
   findings: Finding[]; // sorted by impact desc
   grade: Grade;
 }
+
+/**
+ * Shape returned by /api/audit and /api/audit/report and consumed by the page.
+ * On an unreachable target `reachable` is false and `error` is set (the UI
+ * shows a distinct state, not a zero score). On success `score` is present;
+ * the fast endpoint trims `score.findings` to the top 3, the report keeps all
+ * findings and adds the mobile `screenshot`.
+ */
+export interface AuditApiResult {
+  reachable: boolean;
+  host: string;
+  finalUrl: string;
+  error?: AuditErrorCode;
+  score?: {
+    total: number;
+    grade: Grade;
+    categories: Record<ScoreCategory, CategoryScore>;
+    findings: Finding[];
+  };
+  /** Data-URL PNG — report endpoint only. */
+  screenshot?: string | null;
+}
