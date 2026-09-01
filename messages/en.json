@@ -317,7 +317,11 @@
       "reporting": "Reporting",
       "wireframes": "Wireframes",
       "prototype": "Interactive prototype",
-      "designSystem": "Design system"
+      "designSystem": "Design system",
+      "paymeClickUzum": "Payme / Click / Uzum",
+      "integration1c": "1C integration",
+      "webgl3d": "3D / WebGL scene",
+      "booking": "Online booking"
     },
     "noFeatures": "This project type has no preset features — describe the task at the \"About the project\" step.",
     "addons": {
@@ -368,7 +372,22 @@
       "download": "Download commercial proposal",
       "permanent": "Permanent link to this estimate",
       "newCalc": "Calculate another project",
-      "disclaimer": "This is a preliminary estimate, not a binding offer. The final quote is fixed after a brief."
+      "disclaimer": "This is a preliminary estimate, not a binding offer. The final quote is fixed after a brief.",
+      "breakdown": "How the price adds up",
+      "colRole": "Role",
+      "colHours": "Hours",
+      "colRate": "Rate",
+      "colSum": "Sum",
+      "perHour": "h",
+      "subtotal": "Subtotal",
+      "urgencyLine": "Rush delivery (+35%)",
+      "total": "Total",
+      "customLine": "Your ‘Other’ item is priced individually — not included in the total above."
+    },
+    "custom": {
+      "label": "Other (custom item)",
+      "placeholder": "Describe anything not in the list",
+      "hint": "Priced individually — not included in the total"
     }
   },
   "estimate": {

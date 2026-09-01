@@ -317,7 +317,11 @@
       "reporting": "Hisobotlar",
       "wireframes": "Prototiplar",
       "prototype": "Interaktiv prototip",
-      "designSystem": "Dizayn-tizim"
+      "designSystem": "Dizayn-tizim",
+      "paymeClickUzum": "Payme / Click / Uzum",
+      "integration1c": "1C bilan integratsiya",
+      "webgl3d": "3D / WebGL sahna",
+      "booking": "Onlayn navbat / bron"
     },
     "noFeatures": "Bu loyiha turi uchun tayyor funksiyalar yo'q — vazifani \"Loyiha haqida\" qadamida tasvirlab bering.",
     "addons": {
@@ -368,7 +372,22 @@
       "download": "Tijorat taklifini yuklab olish",
       "permanent": "Smetaga doimiy havola",
       "newCalc": "Boshqa loyihani hisoblash",
-      "disclaimer": "Bu dastlabki baho bo'lib, oferta hisoblanmaydi. Aniq smeta brifdan keyin belgilanadi."
+      "disclaimer": "Bu dastlabki baho bo'lib, oferta hisoblanmaydi. Aniq smeta brifdan keyin belgilanadi.",
+      "breakdown": "Narx nimalardan tashkil topgan",
+      "colRole": "Rol",
+      "colHours": "Soatlar",
+      "colRate": "Stavka",
+      "colSum": "Summa",
+      "perHour": "soat",
+      "subtotal": "Oraliq summa",
+      "urgencyLine": "Shoshilinch ishga tushirish (+35%)",
+      "total": "Jami",
+      "customLine": "Sizning ‘Boshqa’ bandingiz alohida baholanadi — yuqoridagi summaga kirmaydi."
+    },
+    "custom": {
+      "label": "Boshqa (oʻz bandingiz)",
+      "placeholder": "Roʻyxatda yoʻq vazifani yozing",
+      "hint": "Alohida baholanadi — summaga kirmaydi"
     }
   },
   "estimate": {

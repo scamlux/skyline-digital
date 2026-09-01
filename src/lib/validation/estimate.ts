@@ -19,6 +19,8 @@ export const projectConfigurationSchema = z
     features: z.array(z.string()).max(30).default([]),
     addons: z.array(z.enum(addonKeys as [string, ...string[]])).max(10).default([]),
     urgency: z.enum(["normal", "urgent"]).default("normal"),
+    // Free-text "Другое" note — priced on request, never enters the sum.
+    customNote: z.string().trim().max(500).optional().default(""),
   })
   .superRefine((val, ctx) => {
     // Features must belong to the selected project type's catalog.

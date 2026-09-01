@@ -1,5 +1,6 @@
 import type { Proposal } from "@/lib/ai/schema";
 import type { PricingResult, ProjectConfiguration } from "@/lib/pricing/types";
+import { ROLE_LABELS } from "@/lib/pricing/roles";
 import ruMessages from "../../../messages/ru.json";
 
 /**
@@ -187,10 +188,21 @@ function marketTable(pricing: PricingResult) {
 
 export function renderProposalHtml(input: ProposalRenderInput): string {
   const { proposal, pricing, configuration, meta } = input;
-  const total = midTotal(pricing);
+  // Guard: estimates snapshotted before the open-unit-economics rollout have no
+  // roleBreakdown/subtotal/total — fall back to the mid-range figure so old
+  // proposals still render.
+  const breakdown = pricing.roleBreakdown ?? [];
+  const subtotal = pricing.subtotal ?? midTotal(pricing);
+  const urgencyAmount = pricing.urgencyAmount ?? 0;
+  const hasCustom = pricing.hasCustom ?? false;
+  const total = pricing.total ?? midTotal(pricing);
   const totalUzs = total * FX_RATE;
   const market = marketTable(pricing);
   const savingPct = Math.max(0, Math.round((1 - totalUzs / market.total) * 100));
+  // The market anchor is a sales device (CLAUDE.md §9) — only ever show it when
+  // it genuinely favours the client. Larger/urgent configs price above the
+  // reference team, so a 0% "выгода" would undercut the pitch; hide it then.
+  const showAnchor = savingPct > 0;
   const half = total / 2;
   const infra = infraRows(configuration, meta.projectName);
   const journey = journeySteps(configuration);
@@ -434,14 +446,28 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
   <div style="display:flex; gap:40px">
     <div>
       <table class="price">
-        <tr><th>Сотрудник</th><th>Количество</th><th>Месяц</th><th>Ставка</th><th>Сумма</th></tr>
-        ${market.rows
-          .map(
-            (r) => `
-        <tr><td>${esc(r.role)}</td><td>${r.load.toLocaleString("ru-RU")}</td><td>${r.months.toLocaleString("ru-RU")}</td><td>${uzs(r.rate)}</td><td>${uzs(r.sum)}</td></tr>`,
-          )
-          .join("")}
-        <tr class="market-total"><td colspan="4">Сумма по рыночным ставкам:</td><td class="strike">${uzs(market.total)}</td></tr>
+        <tr><th>Роль</th><th>Часы</th><th>Ставка, $/ч</th><th>Сумма</th></tr>
+        ${
+          breakdown.length > 0
+            ? breakdown
+                .map(
+                  (r) => `
+        <tr><td>${esc(ROLE_LABELS[r.role])}</td><td>${r.hours.toLocaleString("ru-RU")}</td><td>${usd(r.rate)}</td><td>${usd(r.sum)}</td></tr>`,
+                )
+                .join("")
+            : `<tr><td colspan="3">Стоимость проекта</td><td>${usd(subtotal)}</td></tr>`
+        }
+        <tr class="market-total"><td colspan="3">Подытог:</td><td>${usd(subtotal)}</td></tr>
+        ${
+          urgencyAmount > 0
+            ? `<tr><td colspan="3">Срочный запуск (+35%):</td><td>+${usd(urgencyAmount)}</td></tr>`
+            : ""
+        }
+        ${
+          hasCustom
+            ? `<tr><td colspan="3">Другое (по запросу):</td><td>обсуждается</td></tr>`
+            : ""
+        }
       </table>
     </div>
     <div>
@@ -449,12 +475,16 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
         <div class="cap">ВАША ЦЕНА</div>
         <div class="big">${usd(total)}</div>
         <div class="uzs">${uzs(totalUzs)} сум</div>
-        <div class="save">выгода ${savingPct} %</div>
+        ${showAnchor ? `<div class="save">выгода ${savingPct} %</div>` : ""}
       </div>
-      <div class="price-note">Один исполнитель полного цикла и готовые наработки — поэтому дешевле. Расширения — в смете.</div>
+      <div class="price-note">Цена собрана из реальных часов по ролям — видно, за что вы платите.${
+        showAnchor
+          ? ` <s>${uzs(market.total)} сум</s> — столько же работ у команды из 6 человек по рыночным ставкам Ташкента.`
+          : ""
+      }</div>
     </div>
   </div>
-  <div class="footnote">${uzs(market.total)} — справочная рыночная оценка (команда из 6 человек по ставкам Ташкента), а не прежняя цена. · Вилка сметы: ${usd(pricing.totalMin)}–${usd(pricing.totalMax)}; в КП указана средняя. · Хостинг, домен и SSL на первый год включены.</div>
+  <div class="footnote">Каждая строка — часы роли × почасовая ставка; суммы складываются в подытог. · Вилка сметы: ${usd(pricing.totalMin)}–${usd(pricing.totalMax)}; в КП указана итоговая. · Хостинг, домен и SSL на первый год включены.${hasCustom ? " · Пункт «Другое» оценивается индивидуально и в сумму выше не входит." : ""}</div>
   ${logo}${pageNo(7)}
 </section>
 

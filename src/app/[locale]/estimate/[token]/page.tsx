@@ -3,6 +3,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase/server";
 import type { PricingResult } from "@/lib/pricing/types";
+import { ROLE_LABELS } from "@/lib/pricing/roles";
 import type { Proposal } from "@/lib/ai/schema";
 import { formatUsd } from "@/lib/utils";
 
@@ -107,6 +108,7 @@ export default async function EstimatePage({
           <Block title={tr("summary")}>
             <p className="leading-relaxed">{proposal.summary}</p>
           </Block>
+          <Breakdown pricing={pricing} tr={tr} />
           <Block title={tr("scope")}>
             <List items={proposal.scope} />
           </Block>
@@ -150,6 +152,79 @@ export default async function EstimatePage({
         </div>
       </div>
     </main>
+  );
+}
+
+/** Open unit-economics breakdown. Guarded: older snapshots have no rows. */
+function Breakdown({
+  pricing,
+  tr,
+}: {
+  pricing: PricingResult;
+  tr: (key: string) => string;
+}) {
+  const rows = pricing.roleBreakdown ?? [];
+  if (rows.length === 0) return null;
+
+  return (
+    <section className="border-t border-line py-8">
+      <h2 className="font-mono text-xs uppercase tracking-[0.15em] text-muted">
+        {tr("breakdown")}
+      </h2>
+      <div className="mt-4 overflow-x-auto rounded-xl border border-line">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-line text-left font-mono text-xs uppercase tracking-wide text-muted">
+              <th className="px-4 py-3 font-normal">{tr("colRole")}</th>
+              <th className="px-4 py-3 text-right font-normal">{tr("colHours")}</th>
+              <th className="px-4 py-3 text-right font-normal">{tr("colRate")}</th>
+              <th className="px-4 py-3 text-right font-normal">{tr("colSum")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.role} className="border-b border-line/70">
+                <td className="px-4 py-2.5">{ROLE_LABELS[row.role]}</td>
+                <td className="px-4 py-2.5 text-right font-mono text-muted">{row.hours}</td>
+                <td className="px-4 py-2.5 text-right font-mono text-muted">
+                  {formatUsd(row.rate)}/{tr("perHour")}
+                </td>
+                <td className="px-4 py-2.5 text-right font-mono">{formatUsd(row.sum)}</td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr className="border-t border-line">
+              <td className="px-4 py-2.5 font-mono text-xs uppercase tracking-wide text-muted" colSpan={3}>
+                {tr("subtotal")}
+              </td>
+              <td className="px-4 py-2.5 text-right font-mono">{formatUsd(pricing.subtotal ?? 0)}</td>
+            </tr>
+            {(pricing.urgencyAmount ?? 0) > 0 && (
+              <tr>
+                <td className="px-4 py-2.5 font-mono text-xs uppercase tracking-wide text-muted" colSpan={3}>
+                  {tr("urgencyLine")}
+                </td>
+                <td className="px-4 py-2.5 text-right font-mono">
+                  +{formatUsd(pricing.urgencyAmount ?? 0)}
+                </td>
+              </tr>
+            )}
+            <tr className="border-t border-line">
+              <td className="px-4 py-3 font-mono text-xs uppercase tracking-wide text-afterglow" colSpan={3}>
+                {tr("total")}
+              </td>
+              <td className="px-4 py-3 text-right font-display text-lg">
+                {formatUsd(pricing.total ?? 0)}
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      {pricing.hasCustom && (
+        <p className="mt-3 text-sm text-muted">— {tr("customLine")}</p>
+      )}
+    </section>
   );
 }
 

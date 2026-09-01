@@ -3,7 +3,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Section } from "@/components/ui/Section";
 import { Reveal } from "@/components/ui/Reveal";
-import { basePrices } from "@/lib/pricing/rules";
+import { basePriceUsd } from "@/lib/pricing/rules";
 import { formatUsd } from "@/lib/utils";
 import { localeUrl, languageAlternates } from "@/lib/seo";
 
@@ -78,7 +78,7 @@ export default async function ServicesPage({
                       {t(`items.${key}.title`)}
                     </h2>
                     <p className="mt-2 font-mono text-sm text-muted">
-                      {t("from")} {formatUsd(basePrices[key].price)}
+                      {t("from")} {formatUsd(basePriceUsd(key))}
                     </p>
                   </div>
                   <div>

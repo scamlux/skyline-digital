@@ -8,7 +8,7 @@ import { PreviewCard } from "@/components/projects/PreviewCard";
 import { TechStack } from "@/components/home/TechStack";
 import { ProcessSteps } from "@/components/home/ProcessSteps";
 import { projects } from "@/data/projects";
-import { basePrices } from "@/lib/pricing/rules";
+import { basePriceUsd } from "@/lib/pricing/rules";
 import { formatUsd } from "@/lib/utils";
 
 const SERVICE_KEYS = [
@@ -162,7 +162,7 @@ export default async function HomePage({
                     {ts(`items.${key}.title`)}
                   </span>
                   <span className="shrink-0 font-mono text-sm text-muted">
-                    {t("from")} {formatUsd(basePrices[key].price)}
+                    {t("from")} {formatUsd(basePriceUsd(key))}
                     <span className="ml-3 inline-block transition-transform group-hover:translate-x-1">
                       →
                     </span>

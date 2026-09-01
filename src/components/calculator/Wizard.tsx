@@ -10,6 +10,7 @@ import {
   features as featureDefs,
   addons as addonDefs,
 } from "@/lib/pricing/rules";
+import { ROLE_LABELS, roleHoursCost } from "@/lib/pricing/roles";
 import type { PricingResult, ProjectType, Urgency } from "@/lib/pricing/types";
 import type { Proposal } from "@/lib/ai/schema";
 import { cn, formatUsd } from "@/lib/utils";
@@ -76,6 +77,7 @@ export function Wizard() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [addons, setAddons] = useState<Set<string>>(new Set());
   const [urgency, setUrgency] = useState<Urgency>("normal");
+  const [customNote, setCustomNote] = useState("");
   const [info, setInfo] = useState<InfoState>(EMPTY_INFO);
   const [status, setStatus] = useState<"idle" | "sending" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -91,8 +93,9 @@ export function Wizard() {
       features: [...selected],
       addons: [...addons],
       urgency,
+      customNote,
     });
-  }, [projectType, selected, addons, urgency]);
+  }, [projectType, selected, addons, urgency, customNote]);
 
   function toggle(set: Set<string>, key: string, apply: (s: Set<string>) => void) {
     const next = new Set(set);
@@ -149,6 +152,7 @@ export function Wizard() {
             features: [...selected],
             addons: [...addons],
             urgency,
+            customNote,
           },
           info: { ...info, hp: "" },
           context: getLeadContext(),
@@ -207,33 +211,48 @@ export function Wizard() {
           </div>
         )}
 
-        {/* ——— Step 2: features (depend on type) ——— */}
-        {step === 1 &&
-          (availableFeatures.length === 0 ? (
-            <p className="text-mist">{t("noFeatures")}</p>
-          ) : (
-            <div className="grid gap-3 sm:grid-cols-2">
-              {availableFeatures.map((key) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => toggle(selected, key, setSelected)}
-                  aria-pressed={selected.has(key)}
-                  className={cn(
-                    "flex items-baseline justify-between gap-3 rounded-xl border px-5 py-4 text-left transition-colors",
-                    selected.has(key)
-                      ? "border-apricot bg-night-deep"
-                      : "border-line-night hover:border-mist",
-                  )}
-                >
-                  <span className="text-sm text-day">{t(`features.${key}`)}</span>
-                  <span className="shrink-0 font-mono text-xs text-mist">
-                    +{formatUsd(featureDefs[key]?.price ?? 0)}
-                  </span>
-                </button>
-              ))}
-            </div>
-          ))}
+        {/* ——— Step 2: features (depend on type) + free-text "Другое" ——— */}
+        {step === 1 && (
+          <div>
+            {availableFeatures.length === 0 ? (
+              <p className="text-mist">{t("noFeatures")}</p>
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {availableFeatures.map((key) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => toggle(selected, key, setSelected)}
+                    aria-pressed={selected.has(key)}
+                    className={cn(
+                      "flex items-baseline justify-between gap-3 rounded-xl border px-5 py-4 text-left transition-colors",
+                      selected.has(key)
+                        ? "border-apricot bg-night-deep"
+                        : "border-line-night hover:border-mist",
+                    )}
+                  >
+                    <span className="text-sm text-day">{t(`features.${key}`)}</span>
+                    <span className="shrink-0 font-mono text-xs text-mist">
+                      +{formatUsd(roleHoursCost(featureDefs[key] ?? {}))}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+            <label className="mt-6 grid gap-1.5">
+              <span className="text-sm text-day">{t("custom.label")}</span>
+              <textarea
+                value={customNote}
+                onChange={(e) => setCustomNote(e.target.value)}
+                placeholder={t("custom.placeholder")}
+                rows={3}
+                maxLength={500}
+                className={cn(inputCls, "resize-y")}
+              />
+              <span className="font-mono text-xs text-mist/70">{t("custom.hint")}</span>
+            </label>
+          </div>
+        )}
 
         {/* ——— Step 3: addons + urgency ——— */}
         {step === 2 && (
@@ -254,7 +273,7 @@ export function Wizard() {
                 >
                   <span className="text-sm text-day">{t(`addons.${key}`)}</span>
                   <span className="shrink-0 font-mono text-xs text-mist">
-                    +{formatUsd(addonDefs[key]?.price ?? 0)}
+                    +{formatUsd(roleHoursCost(addonDefs[key] ?? {}))}
                   </span>
                 </button>
               ))}
@@ -496,6 +515,8 @@ function ResultView({ result }: { result: EstimateResponse }) {
         </div>
       </div>
 
+      <PricingBreakdown pricing={pricing} />
+
       <ResultSection title={t("summary")}>
         <p className="leading-relaxed text-mist">{proposal.summary}</p>
       </ResultSection>
@@ -546,6 +567,80 @@ function ResultView({ result }: { result: EstimateResponse }) {
 
       <p className="mt-8 text-xs leading-relaxed text-mist/70">{t("disclaimer")}</p>
     </div>
+  );
+}
+
+/** Open unit-economics table: role · hours · rate · sum → subtotal → total. */
+function PricingBreakdown({ pricing }: { pricing: PricingResult }) {
+  const t = useTranslations("calc.result");
+  const rows = pricing.roleBreakdown ?? [];
+  if (rows.length === 0) return null;
+
+  return (
+    <section className="mt-8">
+      <h3 className="font-mono text-xs uppercase tracking-wide text-mist">
+        {t("breakdown")}
+      </h3>
+      <div className="mt-3 overflow-x-auto rounded-xl border border-line-night bg-night-deep">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-line-night text-left font-mono text-xs uppercase tracking-wide text-mist">
+              <th className="px-4 py-3 font-normal">{t("colRole")}</th>
+              <th className="px-4 py-3 text-right font-normal">{t("colHours")}</th>
+              <th className="px-4 py-3 text-right font-normal">{t("colRate")}</th>
+              <th className="px-4 py-3 text-right font-normal">{t("colSum")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.role} className="border-b border-line-night/60">
+                <td className="px-4 py-2.5 text-day">{ROLE_LABELS[row.role]}</td>
+                <td className="px-4 py-2.5 text-right font-mono text-mist">{row.hours}</td>
+                <td className="px-4 py-2.5 text-right font-mono text-mist">
+                  {formatUsd(row.rate)}/{t("perHour")}
+                </td>
+                <td className="px-4 py-2.5 text-right font-mono text-day">
+                  {formatUsd(row.sum)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr className="border-t border-line-night">
+              <td className="px-4 py-2.5 font-mono text-xs uppercase tracking-wide text-mist" colSpan={3}>
+                {t("subtotal")}
+              </td>
+              <td className="px-4 py-2.5 text-right font-mono text-day">
+                {formatUsd(pricing.subtotal)}
+              </td>
+            </tr>
+            {pricing.urgencyAmount > 0 && (
+              <tr>
+                <td className="px-4 py-2.5 font-mono text-xs uppercase tracking-wide text-mist" colSpan={3}>
+                  {t("urgencyLine")}
+                </td>
+                <td className="px-4 py-2.5 text-right font-mono text-day">
+                  +{formatUsd(pricing.urgencyAmount)}
+                </td>
+              </tr>
+            )}
+            <tr className="border-t border-line-night">
+              <td className="px-4 py-3 font-mono text-xs uppercase tracking-wide text-apricot" colSpan={3}>
+                {t("total")}
+              </td>
+              <td className="px-4 py-3 text-right font-display text-lg text-day">
+                {formatUsd(pricing.total)}
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      {pricing.hasCustom && (
+        <p className="mt-3 text-sm text-mist">
+          <span className="text-apricot">—</span> {t("customLine")}
+        </p>
+      )}
+    </section>
   );
 }
 
