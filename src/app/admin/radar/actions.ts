@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { enrichCompany } from "@/lib/radar/signals";
-import { scoreCompany } from "@/lib/radar/score";
+import { contactInfo, scoreCompany } from "@/lib/radar/score";
 import type { Company } from "@/lib/radar/types";
 
 /** Soft-delete a company from the radar (never hard-deletes). */
@@ -41,7 +41,7 @@ export async function recheckWebsite(
     geo: null,
   };
   const { signals, webStatus } = await enrichCompany(company);
-  const grade = scoreCompany(signals);
+  const grade = scoreCompany(signals, contactInfo(company));
   await db
     .from("radar_companies")
     .update({

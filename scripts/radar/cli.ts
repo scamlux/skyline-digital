@@ -31,16 +31,18 @@ interface Args {
   region: Region;
   dryRun: boolean;
   stats: boolean;
+  rescore: boolean;
   help: boolean;
 }
 
 function parseArgs(argv: string[]): Args {
-  const a: Args = { all: false, region: "uz", dryRun: false, stats: false, help: false };
+  const a: Args = { all: false, region: "uz", dryRun: false, stats: false, rescore: false, help: false };
   for (let i = 0; i < argv.length; i++) {
     const v = argv[i];
     if (v === "--all") a.all = true;
     else if (v === "--dry-run") a.dryRun = true;
     else if (v === "--stats") a.stats = true;
+    else if (v === "--rescore") a.rescore = true;
     else if (v === "--help" || v === "-h") a.help = true;
     else if (v === "--industry") a.industry = argv[++i] as Industry;
     else if (v === "--collector") a.collector = argv[++i] as RadarSource;
@@ -76,6 +78,46 @@ async function main() {
     console.log(`\nRadar DB — ${s.total} companies`);
     console.log(`  Grades: A=${s.byGrade.A}  B=${s.byGrade.B}  C=${s.byGrade.C}`);
     for (const [ind, n] of Object.entries(s.byIndustry)) console.log(`  ${ind}: ${n}`);
+    return;
+  }
+
+  if (args.rescore) {
+    // Recompute grades from STORED signals (no network, no API quota) — used
+    // after grading-logic changes.
+    if (!db) {
+      console.error("No Supabase env — cannot rescore.");
+      process.exit(1);
+    }
+    const { contactInfo, scoreCompany } = await import("../../src/lib/radar/score");
+    const PAGE = 1000;
+    let updated = 0;
+    let scanned = 0;
+    for (let from = 0; ; from += PAGE) {
+      const { data } = await db
+        .from("radar_companies")
+        .select("id, phone, social_links, signals, grade")
+        .range(from, from + PAGE - 1);
+      const rows = (data ?? []) as {
+        id: string;
+        phone: string | null;
+        social_links: string[] | null;
+        signals: Parameters<typeof scoreCompany>[0] | null;
+        grade: string | null;
+      }[];
+      for (const r of rows) {
+        scanned++;
+        if (!r.signals) continue;
+        const grade = scoreCompany(r.signals, contactInfo({ phone: r.phone, socialLinks: r.social_links ?? [] }));
+        if (grade !== r.grade) {
+          await db.from("radar_companies").update({ grade, class: grade }).eq("id", r.id);
+          updated++;
+        }
+      }
+      if (rows.length < PAGE) break;
+    }
+    console.log(`Rescored: ${scanned} scanned, ${updated} grades changed.`);
+    const s = await getStats(db);
+    console.log(`Now: A=${s.byGrade.A}  B=${s.byGrade.B}  C=${s.byGrade.C} of ${s.total}`);
     return;
   }
 

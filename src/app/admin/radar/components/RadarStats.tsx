@@ -3,9 +3,9 @@ import type { RadarStats as Stats } from "@/lib/radar/store";
 export function RadarStats({ stats }: { stats: Stats }) {
   const cards = [
     { label: "Всего", value: stats.total, color: "#111827" },
-    { label: "A — горячие", value: stats.byGrade.A, color: "#10b981" },
-    { label: "B — тёплые", value: stats.byGrade.B, color: "#f59e0b" },
-    { label: "C — холодные", value: stats.byGrade.C, color: "#6b7480" },
+    { label: "A — без сайта (горячие)", value: stats.byGrade.A, color: "#10b981" },
+    { label: "B — слабый сайт", value: stats.byGrade.B, color: "#f59e0b" },
+    { label: "C — сильный сайт", value: stats.byGrade.C, color: "#6b7480" },
   ];
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

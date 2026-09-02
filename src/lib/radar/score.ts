@@ -1,19 +1,13 @@
 import type { Company, Grade, ScoreResult, Signals, WebStatus } from "./types";
 
 /**
- * Deterministic 100-point web-presence scoring (docs/radar/IMPLEMENTATION.md).
+ * Deterministic scoring (docs/radar/IMPLEMENTATION.md).
  *
- * A pure function of the collected {@link Signals} — no network, clock, or
- * randomness — so two runs over the same signals always agree.
- *
- *   website reachable  40
- *   email found        20
- *   social media       15
- *   CTA / analytics    10
- *   domain age ≥ 2y    10
- *   HTTPS               5
- *
- * Grades: A ≥ 70, B 40–69, C < 40.
+ * Two layers, both pure (no network/clock/randomness → runs always agree):
+ * 1. scoreValue — 100-point WEB-PRESENCE quality: website 40, email 20,
+ *    social 15, CTA/analytics 10, domain age ≥2y 10, HTTPS 5.
+ * 2. scoreCompany — SALES-PROSPECT grade built on top of it (see below):
+ *    hot = contactable but web-less, since we sell websites.
  */
 
 export const SCORE_WEIGHTS = {
@@ -52,17 +46,47 @@ export function scoreValue(s: Signals): number {
   return pts;
 }
 
-/** Points → grade. Never null. */
-export function gradeOf(points: number): Grade {
-  if (points >= 70) return "A";
-  if (points >= 40) return "B";
+/** Contactability facts about a company, derived from raw fields. */
+export interface ContactInfo {
+  /** Reachable by phone or Telegram. */
+  hasContact: boolean;
+  /** Runs a Telegram bot (t.me/...bot) — already digitally served. */
+  hasTgBot: boolean;
+}
+
+const TG_BOT_RE = /t\.me\/[A-Za-z0-9_]*bot(?:[/?]|$)/i;
+const TG_LINK_RE = /(?:t\.me|telegram\.me)\//i;
+
+/** Derive contact facts from phone + social links. */
+export function contactInfo(c: Pick<Company, "phone" | "socialLinks">): ContactInfo {
+  const socials = c.socialLinks ?? [];
+  return {
+    hasContact: Boolean(c.phone) || socials.some((s) => TG_LINK_RE.test(s)),
+    hasTgBot: socials.some((s) => TG_BOT_RE.test(s)),
+  };
+}
+
+/**
+ * Sales-prospect grade — WE SELL WEBSITES, so the hierarchy is inverted from
+ * plain web-presence quality:
+ *
+ * - A (горячие): contactable (phone/Telegram) but NO working website and no
+ *   Telegram bot — the perfect "you need a site" prospect.
+ * - B (тёплые): contactable, site exists but is weak (web-presence score < 70)
+ *   — an upgrade/redesign prospect.
+ * - C (холодные): strong web presence (already served), or not contactable.
+ */
+export function scoreCompany(signals: Signals, contact: ContactInfo): Grade {
+  if (!contact.hasContact) return "C";
+  if (!signals.websiteReachable && !contact.hasTgBot) return "A";
+  if (scoreValue(signals) < 70) return "B";
   return "C";
 }
 
-export function scoreCompany(signals: Signals): Grade {
-  return gradeOf(scoreValue(signals));
-}
-
-export function scoreResult(signals: Signals, webStatus: WebStatus): ScoreResult {
-  return { grade: scoreCompany(signals), signals, webStatus };
+export function scoreResult(
+  signals: Signals,
+  webStatus: WebStatus,
+  contact: ContactInfo,
+): ScoreResult {
+  return { grade: scoreCompany(signals, contact), signals, webStatus };
 }

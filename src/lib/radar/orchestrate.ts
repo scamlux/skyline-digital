@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Company, Grade, Industry, QueryDef, RadarSource, Region } from "./types";
 import { createCollector } from "./factory";
 import { dedupe } from "./dedupe";
-import { baseSignals, scoreCompany } from "./score";
+import { baseSignals, contactInfo, scoreCompany } from "./score";
 import { enrichCompany } from "./signals";
 import { upsertCompanies, startRun, finishRun, type ScoredCompany } from "./store";
 
@@ -87,7 +87,7 @@ export async function orchestrate(cfg: OrchestrateConfig): Promise<IndustrySumma
       const { signals, webStatus } = enrichOn
         ? await enrichCompany(c)
         : { signals: baseSignals(c), webStatus: "no_site" as const };
-      return { ...c, signals, webStatus, grade: scoreCompany(signals) };
+      return { ...c, signals, webStatus, grade: scoreCompany(signals, contactInfo(c)) };
     });
 
     const grades: Record<Grade, number> = { A: 0, B: 0, C: 0 };
