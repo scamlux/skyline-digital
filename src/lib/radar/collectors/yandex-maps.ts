@@ -9,7 +9,7 @@ import { normalizePhone, normalizeWebsite } from "../validate";
 
 const CITIES_UZ = ["Ташкент", "Самарканд", "Бухара", "Наманган", "Андижан", "Фергана"];
 
-const KEYWORDS: Record<Industry, string[]> = {
+const KEYWORDS: Record<string, string[]> = {
   dentistry: ["стоматология", "зубной врач"],
   auto: ["автосервис", "автомастерская"],
   beauty: ["салон красоты", "парикмахерская"],
@@ -48,7 +48,7 @@ export class YandexMapsCollector {
     const errors: string[] = [];
 
     for (const city of cities) {
-      for (const kw of KEYWORDS[industry]) {
+      for (const kw of (options.keywords ?? KEYWORDS[industry] ?? [industry])) {
         const url = new URL("https://search-maps.yandex.ru/v1/");
         url.searchParams.set("apikey", key);
         url.searchParams.set("text", `${kw} ${city}`);

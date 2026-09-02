@@ -16,8 +16,8 @@
 import { orchestrate } from "../../src/lib/radar/orchestrate";
 import { getRadarDb, isRadarDbConfigured } from "../../src/lib/radar/db";
 import { getStats } from "../../src/lib/radar/store";
+import { loadQueries } from "../../src/lib/radar/queries";
 import {
-  INDUSTRIES,
   RADAR_SOURCES,
   type Industry,
   type RadarSource,
@@ -79,8 +79,13 @@ async function main() {
     return;
   }
 
-  if (args.industry && !INDUSTRIES.includes(args.industry)) {
-    console.error(`Unknown industry: ${args.industry} (${INDUSTRIES.join(", ")})`);
+  // Industries are dynamic — defined in radar_queries (admin-editable).
+  const allQueries = await loadQueries(db);
+  const activeQueries = allQueries.filter((q) => q.active);
+  if (args.industry && !allQueries.some((q) => q.key === args.industry)) {
+    console.error(
+      `Unknown industry: ${args.industry} (known: ${allQueries.map((q) => q.key).join(", ")})`,
+    );
     process.exit(1);
   }
   if (args.collector && !RADAR_SOURCES.includes(args.collector)) {
@@ -88,7 +93,8 @@ async function main() {
     process.exit(1);
   }
 
-  const industries = args.industry ? [args.industry] : INDUSTRIES;
+  const industries = args.industry ? [args.industry] : activeQueries.map((q) => q.key);
+  const queries = new Map(allQueries.map((q) => [q.key, q]));
   const sources = args.collector ? [args.collector] : RADAR_SOURCES;
 
   if (!db && !args.dryRun) {
@@ -103,11 +109,16 @@ async function main() {
   const summaries = await orchestrate({
     sources,
     industries,
+    queries,
     region: args.region,
     dryRun: args.dryRun,
     db,
     log: (m) => console.log(m),
   });
+
+  for (const s of summaries) {
+    for (const e of s.errors) console.error(`  [${s.industry}] ERROR: ${e}`);
+  }
 
   let total = 0;
   const grand = { A: 0, B: 0, C: 0 };

@@ -11,7 +11,8 @@ import { sleep } from "./http";
 
 const CITIES_UZ = ["Ташкент", "Самарканд", "Бухара", "Наманган", "Андижан", "Фергана"];
 
-const KEYWORDS: Record<Industry, string[]> = {
+/** Fallback keywords when the caller passes none (industries are dynamic). */
+const KEYWORDS: Record<string, string[]> = {
   dentistry: ["dental clinic", "dentist"],
   auto: ["auto service", "car repair"],
   beauty: ["beauty salon", "hair salon"],
@@ -42,12 +43,13 @@ export class GoogleMapsCollector {
     }
     const doFetch = this.opts.fetchImpl ?? fetch;
     const cities = options.cities ?? CITIES_UZ;
+    const keywords = options.keywords ?? KEYWORDS[industry] ?? [industry];
     const maxPages = this.opts.maxPages ?? 3;
     const companies: Company[] = [];
     const errors: string[] = [];
 
     for (const city of cities) {
-      for (const kw of KEYWORDS[industry]) {
+      for (const kw of keywords) {
         let pageToken: string | undefined;
         let pages = 0;
         do {

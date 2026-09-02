@@ -59,7 +59,7 @@ async function scrapeUrls(
   return companies;
 }
 
-const KW: Record<Industry, string[]> = {
+const KW: Record<string, string[]> = {
   dentistry: ["стоматология", "стоматолог"],
   auto: ["автосервис", "СТО"],
   beauty: ["салон красоты", "парикмахерская"],
@@ -82,7 +82,11 @@ export class YellowpagesCollector extends PuppeteerCollector {
     beauty: ["/rubrika/salony-krasoty-parikmaherskie"],
   };
   protected scrape(page: Page, industry: Industry, opts: CollectorOptions) {
-    const urls = this.rubrics[industry].map((p) => this.origin + p);
+    // Dynamic industries have no rubric mapping — fall back to site search.
+    const paths =
+      this.rubrics[industry] ??
+      (opts.keywords ?? [industry]).map((q) => `/search?query=${encodeURIComponent(q)}`);
+    const urls = paths.map((p) => this.origin + p);
     return scrapeUrls(this, page, urls, industry, this.source, opts);
   }
 }
@@ -92,7 +96,7 @@ export class GigalCollector extends PuppeteerCollector {
   readonly origin = "https://gigal.uz";
   protected minDelayMs = 1500;
   protected scrape(page: Page, industry: Industry, opts: CollectorOptions) {
-    const urls = KW[industry].map((q) => `${this.origin}/search?query=${encodeURIComponent(q)}`);
+    const urls = (opts.keywords ?? KW[industry] ?? [industry]).map((q) => `${this.origin}/search?query=${encodeURIComponent(q)}`);
     return scrapeUrls(this, page, urls, industry, this.source, opts);
   }
 }
@@ -102,7 +106,7 @@ export class OlxCollector extends PuppeteerCollector {
   readonly origin = "https://www.olx.uz";
   protected minDelayMs = 2500;
   protected scrape(page: Page, industry: Industry, opts: CollectorOptions) {
-    const urls = KW[industry].map((q) => `${this.origin}/list/q-${encodeURIComponent(q)}/`);
+    const urls = (opts.keywords ?? KW[industry] ?? [industry]).map((q) => `${this.origin}/list/q-${encodeURIComponent(q)}/`);
     return scrapeUrls(this, page, urls, industry, this.source, opts);
   }
 }
@@ -114,7 +118,7 @@ export class TwoGisCollector extends PuppeteerCollector {
   protected scrape(page: Page, industry: Industry, opts: CollectorOptions) {
     const urls: string[] = [];
     for (const city of CITIES) {
-      for (const q of KW[industry]) urls.push(`${this.origin}/${city}/search/${encodeURIComponent(q)}`);
+      for (const q of (opts.keywords ?? KW[industry] ?? [industry])) urls.push(`${this.origin}/${city}/search/${encodeURIComponent(q)}`);
     }
     return scrapeUrls(this, page, urls, industry, this.source, opts);
   }

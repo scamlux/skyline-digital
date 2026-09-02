@@ -1,6 +1,11 @@
 /** Radar domain types — shared across collectors, scoring, store and admin. */
 
-export type Industry = "dentistry" | "auto" | "beauty";
+/**
+ * Industry key. Open string: industries live in the radar_queries table and
+ * are editable from the admin panel; "dentistry"/"auto"/"beauty" are the
+ * seeded defaults, not a closed set.
+ */
+export type Industry = string;
 export type Grade = "A" | "B" | "C";
 export type Region = "uz" | "kz" | "tj";
 export type RadarSource =
@@ -82,5 +87,16 @@ export interface CollectorOptions {
   log?: (msg: string) => void;
   /** Cities to sweep (source-dependent); defaults per collector. */
   cities?: string[];
+  /** Search phrases for the industry; overrides collector defaults. */
+  keywords?: string[];
   region?: Region;
+}
+
+/** A dynamic industry definition (radar_queries row). */
+export interface QueryDef {
+  key: Industry;
+  label: string;
+  keywords: string[];
+  cities: string[] | null;
+  active: boolean;
 }

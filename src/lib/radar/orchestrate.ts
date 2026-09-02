@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Company, Grade, Industry, RadarSource, Region } from "./types";
+import type { Company, Grade, Industry, QueryDef, RadarSource, Region } from "./types";
 import { createCollector } from "./factory";
 import { dedupe } from "./dedupe";
 import { baseSignals, scoreCompany } from "./score";
@@ -23,6 +23,8 @@ async function mapLimit<T, R>(items: T[], limit: number, fn: (t: T) => Promise<R
 export interface OrchestrateConfig {
   sources: RadarSource[];
   industries: Industry[];
+  /** Dynamic industry definitions (keywords/cities); keyed by industry key. */
+  queries?: Map<Industry, QueryDef>;
   region: Region;
   dryRun: boolean;
   db?: SupabaseClient | null;
@@ -66,7 +68,13 @@ export async function orchestrate(cfg: OrchestrateConfig): Promise<IndustrySumma
         log(`[orchestrate] no collector for ${source}`);
         continue;
       }
-      const res = await collector.run(industry, { log, region: cfg.region });
+      const q = cfg.queries?.get(industry);
+      const res = await collector.run(industry, {
+        log,
+        region: cfg.region,
+        keywords: q?.keywords?.length ? q.keywords : undefined,
+        cities: q?.cities ?? undefined,
+      });
       raw.push(...res.companies);
       perSource[source] = res.companies.length;
       errors.push(...res.errors);

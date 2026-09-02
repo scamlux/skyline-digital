@@ -12,7 +12,12 @@ const PAGE_SIZE = 50;
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="p-8">
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Радар — база лидов</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">Радар — база лидов</h1>
+        <a href="/admin/radar/queries" className="text-sm text-blue-600 hover:underline">
+          Параметры сбора →
+        </a>
+      </div>
       {children}
     </div>
   );
