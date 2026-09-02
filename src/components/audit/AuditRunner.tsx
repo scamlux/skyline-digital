@@ -5,6 +5,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { TurnstileWidget, turnstileEnabled, resetTurnstile } from "@/components/security/TurnstileWidget";
+import { buildAuditReportHtml } from "@/lib/audit/report-html";
+import { CONTACTS } from "@/lib/contact";
 import type { AuditApiResult, Finding, ScoreCategory } from "@/lib/audit/types";
 
 type Phase = "idle" | "measuring" | "done";
@@ -141,6 +143,45 @@ function ResultView({
   onReport: (r: AuditApiResult) => void;
 }) {
   const score = result.score!;
+
+  const downloadReport = () => {
+    const html = buildAuditReportHtml({
+      host: result.host,
+      url: result.finalUrl,
+      date: new Date().toLocaleDateString(
+        locale === "uz" ? "uz-UZ" : locale === "en" ? "en-US" : "ru-RU",
+      ),
+      total: score.total,
+      grade: score.grade,
+      scoreLabel: t("result.scoreLabel"),
+      categories: CATEGORIES.map((c) => ({
+        label: t(`categories.${c}`),
+        score: score.categories[c].score,
+      })),
+      problemsLabel: t("result.topProblems"),
+      noProblemsLabel: t("result.noProblems"),
+      findings: score.findings.map((f) => ({
+        title: finding(f, "title"),
+        severity: f.severity,
+        severityLabel: t(`severity.${f.severity}`),
+        detail: finding(f, "detail"),
+      })),
+      screenshot: result.screenshot ?? undefined,
+      mobileLabel: t("result.mobileView"),
+      tagline: t("report.downloadTagline"),
+      savePdfLabel: t("report.savePdf"),
+      contactLine: `Skyline Digital · skyline-digital.uz · ${CONTACTS.phoneDisplay} · ${CONTACTS.email}`,
+    });
+    const href = URL.createObjectURL(new Blob([html], { type: "text/html;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = href;
+    a.download = `skyline-audit-${result.host.replace(/[^a-z0-9.-]/gi, "_")}.html`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(href);
+  };
+
   return (
     <div className="rounded-2xl border border-line-night bg-night p-8 text-day">
       {/* Big score with the sun */}
@@ -198,12 +239,21 @@ function ResultView({
       {result.screenshot ? (
         <div className="mt-10 border-t border-line-night pt-8 text-center">
           <p className="text-mist">{t("report.sent")}</p>
-          <Link
-            href="/calculator"
-            className="horizon-gradient mt-5 inline-block rounded-full px-7 py-3.5 font-medium text-night transition-opacity hover:opacity-90"
-          >
-            {t("report.calculatorCta")}
-          </Link>
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={downloadReport}
+              className="rounded-full border border-line-night px-7 py-3.5 font-medium text-day transition-colors hover:border-apricot"
+            >
+              {t("report.download")}
+            </button>
+            <Link
+              href="/calculator"
+              className="horizon-gradient inline-block rounded-full px-7 py-3.5 font-medium text-night transition-opacity hover:opacity-90"
+            >
+              {t("report.calculatorCta")}
+            </Link>
+          </div>
         </div>
       ) : (
         <ReportForm url={result.finalUrl} t={t} locale={locale} onReport={onReport} />

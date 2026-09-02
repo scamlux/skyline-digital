@@ -429,7 +429,8 @@
       "scoreLabel": "Umumiy baho",
       "topProblems": "Nimani tuzatish kerak",
       "mobileView": "Telefonda qanday ko'rinadi",
-      "unreachable": "Saytni tekshira olmadik"
+      "unreachable": "Saytni tekshira olmadik",
+      "noProblems": "Muhim muammolar topilmadi — ajoyib natija."
     },
     "errors": {
       "INVALID_URL": "Bu sayt manziliga o'xshamaydi. Kiritgan URL manzilni tekshiring.",
@@ -444,12 +445,15 @@
       "heading": "To'liq hisobotni olish",
       "emailPlaceholder": "E-mail manzilingiz",
       "namePlaceholder": "Ism (ixtiyoriy)",
-      "submit": "Hisobotni yuborish",
+      "submit": "Hisobotni olish",
       "success": "Tayyor! To'liq hisobot quyida ko'rsatildi.",
       "sent": "Hisobot tayyor. O'z loyihangiz uchun ham shunday natija xohlaysizmi?",
       "calculatorCta": "Sayt narxini hisoblash →",
       "captchaRequired": "Robot emasligingizni tasdiqlang.",
-      "errorGeneric": "Nimadir xato ketdi. Qayta urinib ko'ring."
+      "errorGeneric": "Nimadir xato ketdi. Qayta urinib ko'ring.",
+      "download": "Hisobotni yuklab olish",
+      "savePdf": "PDF sifatida saqlash",
+      "downloadTagline": "Loyihangiz uchun ham shunday natija? Biz to‘liq quramiz."
     },
     "findings": {
       "lcp-slow": {

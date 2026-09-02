@@ -429,7 +429,8 @@
       "scoreLabel": "Overall score",
       "topProblems": "What to fix",
       "mobileView": "How it looks on a phone",
-      "unreachable": "We couldn't check this site"
+      "unreachable": "We couldn't check this site",
+      "noProblems": "No critical issues found — a great result."
     },
     "errors": {
       "INVALID_URL": "That doesn't look like a website address. Check the URL you entered.",
@@ -444,12 +445,15 @@
       "heading": "Get the full report",
       "emailPlaceholder": "Your e-mail",
       "namePlaceholder": "Name (optional)",
-      "submit": "Send the report",
+      "submit": "Get the report",
       "success": "Done! The full report is shown below.",
       "sent": "Report ready. Want the same result for your own project?",
       "calculatorCta": "Estimate a website →",
       "captchaRequired": "Please confirm you're not a robot.",
-      "errorGeneric": "Something went wrong. Please try again."
+      "errorGeneric": "Something went wrong. Please try again.",
+      "download": "Download report",
+      "savePdf": "Save as PDF",
+      "downloadTagline": "Want the same result for your project? We build it end-to-end."
     },
     "findings": {
       "lcp-slow": {
