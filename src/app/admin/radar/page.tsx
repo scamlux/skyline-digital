@@ -11,10 +11,10 @@ const PAGE_SIZE = 50;
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <main className="mx-auto max-w-6xl p-6">
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Radar — база лидов</h1>
+    <div className="p-8">
+      <h1 className="mb-6 text-2xl font-bold text-gray-900">Радар — база лидов</h1>
       {children}
-    </main>
+    </div>
   );
 }
 
