@@ -34,12 +34,7 @@ function hostOf(url: string | null): string | null {
   }
 }
 
-function toRow(
-  c: ScoredCompany,
-  source: string,
-  now: string,
-  region: Region,
-): Record<string, unknown> {
+function toRow(c: ScoredCompany, now: string, region: Region): Record<string, unknown> {
   return {
     name: c.name,
     name_normalized: normalizeCompanyName(c.name),
@@ -55,8 +50,8 @@ function toRow(
     web_status: c.webStatus,
     grade: c.grade,
     class: c.grade, // legacy 0005 column, kept in sync
-    source,
-    directory: source, // legacy 0005 column, kept in sync
+    source: c.source,
+    directory: c.source, // legacy 0005 column, kept in sync
     has_site: Boolean(c.website),
     geo: c.geo,
     verified_at: now,
@@ -67,7 +62,6 @@ function toRow(
 export async function upsertCompanies(
   db: SupabaseClient,
   companies: ScoredCompany[],
-  source: string,
   region: Region = "uz",
   now: string = new Date().toISOString(),
 ): Promise<UpsertResult> {
@@ -84,7 +78,7 @@ export async function upsertCompanies(
   if (selErr) errors.push(`select: ${selErr.message}`);
   const existingSet = new Set((existing ?? []).map((r: { phone: string }) => r.phone));
 
-  const rows = valid.map((c) => toRow(c, source, now, region));
+  const rows = valid.map((c) => toRow(c, now, region));
   const { error: upErr } = await db
     .from("radar_companies")
     .upsert(rows, { onConflict: "phone" });
@@ -121,6 +115,7 @@ export async function finishRun(
     companies_new?: number;
     companies_updated?: number;
     error_message?: string;
+    duration_seconds?: number;
   },
 ): Promise<void> {
   if (!id) return;
