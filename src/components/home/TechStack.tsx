@@ -36,7 +36,9 @@ export function TechStack() {
               setExpanded(false);
             }}
             className={cn(
-              "rounded-full border px-4 py-2 font-mono text-xs uppercase tracking-wide transition-all",
+              // min-h-[40px] + flex-center: ≥40px touch target on mobile with
+              // no real visual change (pills were ~32px).
+              "inline-flex min-h-[40px] items-center rounded-full border px-4 py-2 font-mono text-xs uppercase tracking-wide transition-all",
               filter === cat
                 ? "border-night bg-night text-day shadow-[0_6px_20px_rgba(19,26,44,0.25)]"
                 : "border-line text-muted hover:border-ink hover:text-ink",
