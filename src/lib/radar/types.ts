@@ -2,24 +2,46 @@
 
 export type Industry = "dentistry" | "auto" | "beauty";
 export type Grade = "A" | "B" | "C";
-export type RadarSource = "pc" | "olx" | "gigal" | "yellowpages" | "2gis";
+export type Region = "uz" | "kz" | "tj";
+export type RadarSource =
+  | "google"
+  | "yandex"
+  | "yellowpages"
+  | "gigal"
+  | "olx"
+  | "2gis";
 
 /** Outcome of the (timeout-safe) website check. Never blocks scoring. */
 export type WebStatus = "ok" | "timeout" | "unreachable" | "no_site" | "error";
 
 export const INDUSTRIES: Industry[] = ["dentistry", "auto", "beauty"];
-export const RADAR_SOURCES: RadarSource[] = ["pc", "olx", "gigal", "yellowpages", "2gis"];
+export const RADAR_SOURCES: RadarSource[] = [
+  "google",
+  "yandex",
+  "yellowpages",
+  "gigal",
+  "olx",
+  "2gis",
+];
 
-/** Web-presence signals — the inputs to the deterministic grade. */
+/**
+ * Web-presence signals — inputs to the deterministic 100-point score
+ * (docs/radar/IMPLEMENTATION.md): website 40, email 20, social 15,
+ * cta/analytics 10, domain-age≥2y 10, https 5.
+ */
 export interface Signals {
-  hasWebsite: boolean;
+  /** Site responded 2xx — the dominant signal (40 pts). */
+  websiteReachable: boolean;
   hasEmail: boolean;
   hasSocial: boolean;
+  /** A booking/call/order CTA on the page. */
   hasCta: boolean;
+  /** Analytics/pixel present (GA, Metrika, Meta Pixel…). */
+  hasAnalytics: boolean;
   /** Years since domain registration; null when unknown. */
   domainAgeYears: number | null;
-  /** Mobile viewport present / layout doesn't overflow. */
-  responsive: boolean;
+  /** Final URL is served over HTTPS. */
+  https: boolean;
 }
 
 /** A discovered company, before and after enrichment. */
@@ -60,4 +82,5 @@ export interface CollectorOptions {
   log?: (msg: string) => void;
   /** Cities to sweep (source-dependent); defaults per collector. */
   cities?: string[];
+  region?: Region;
 }

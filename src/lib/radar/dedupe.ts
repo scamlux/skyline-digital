@@ -1,8 +1,11 @@
 import type { Company, RadarSource } from "./types";
 
 /**
- * Deduplication by phone (strong key) with a fuzzy name+city fallback.
- * Deterministic and pure. See docs/adr/0002-radar-engine.md.
+ * Deduplication by phone (strong key) with a strict name+city fallback
+ * (docs/radar/IMPLEMENTATION.md): phone match on the last 10 digits, else same
+ * normalised first word AND Levenshtein ≤ 1 AND ≤ 3 char length difference AND
+ * (cities unknown or equal). Deliberately conservative — better a rare missed
+ * merge than collapsing two different clinics.
  */
 
 /** Legal-form tokens dropped from names (JS \b doesn't work on Cyrillic). */
@@ -10,11 +13,11 @@ const LEGAL_FORMS = new Set([
   "ооо", "оао", "зао", "чп", "ип", "llc", "ltd", "inc", "mchj", "xk", "yatt",
 ]);
 
-/** Lowercase, drop punctuation and legal-form noise, collapse whitespace. */
+/** Lowercase, split on punctuation/hyphens, drop legal-form noise, collapse. */
 export function normalizeCompanyName(name: string): string {
   return name
     .toLowerCase()
-    .replace(/[«»"'`’.,()[\]]/g, " ")
+    .replace(/[«»"'`’.,()[\]/\\-]/g, " ")
     .split(/\s+/)
     .filter((w) => w && !LEGAL_FORMS.has(w))
     .join(" ")
@@ -38,37 +41,44 @@ export function levenshtein(a: string, b: string): number {
   return prev[b.length];
 }
 
-/** Name similarity in [0,1] after normalisation. */
+/** Similarity in [0,1] after normalisation (exposed for diagnostics). */
 export function similarity(a: string, b: string): number {
   const A = normalizeCompanyName(a);
   const B = normalizeCompanyName(b);
-  if (!A && !B) return 1;
   const m = Math.max(A.length, B.length);
-  if (m === 0) return 1;
-  return 1 - levenshtein(A, B) / m;
+  return m === 0 ? 1 : 1 - levenshtein(A, B) / m;
 }
 
-function sameCity(a: string | null, b: string | null): boolean {
-  if (!a || !b) return true; // unknown city shouldn't block an otherwise-strong match
-  return normalizeCompanyName(a) === normalizeCompanyName(b);
+/** Last 10 significant digits of a phone, or null when too short. */
+export function last10(phone: string | null): string | null {
+  const d = (phone ?? "").replace(/\D/g, "");
+  return d.length >= 10 ? d.slice(-10) : null;
 }
 
-/**
- * Two records are the same business when their phones match, or (when a phone
- * is missing on either side) when the names are ≥85% similar in the same city.
- * Two *different* confirmed phones are treated as distinct contactable leads.
- */
-export function isDuplicate(c1: Company, c2: Company, threshold = 0.85): boolean {
-  if (c1.phone && c2.phone) return c1.phone === c2.phone;
-  return sameCity(c1.city, c2.city) && similarity(c1.name, c2.name) >= threshold;
+export function isDuplicate(c1: Company, c2: Company): boolean {
+  const p1 = last10(c1.phone);
+  const p2 = last10(c2.phone);
+  if (p1 && p2) return p1 === p2;
+
+  const n1 = normalizeCompanyName(c1.name);
+  const n2 = normalizeCompanyName(c2.name);
+  if (!n1 || !n2) return false;
+  if (n1.split(" ")[0] !== n2.split(" ")[0]) return false; // same first word
+  if (Math.abs(n1.length - n2.length) > 3) return false; // ≤3 char length diff
+  if (levenshtein(n1, n2) > 1) return false; // ≤1 edit
+  if (c1.city && c2.city && normalizeCompanyName(c1.city) !== normalizeCompanyName(c2.city)) {
+    return false; // both cities known and different
+  }
+  return true;
 }
 
 /** Higher rank = more trusted/complete source, wins field conflicts. */
 const SOURCE_RANK: Record<RadarSource, number> = {
-  yellowpages: 5,
-  "2gis": 4,
+  google: 6,
+  yandex: 5,
+  yellowpages: 4,
   gigal: 3,
-  pc: 2,
+  "2gis": 2,
   olx: 1,
 };
 

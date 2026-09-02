@@ -11,9 +11,11 @@
 
 -- ── radar_companies: new Phase B columns ───────────────────────────────────
 alter table public.radar_companies
-  add column if not exists grade          text,        -- 'A' | 'B' | 'C'
-  add column if not exists source         text,        -- 'pc'|'olx'|'gigal'|'yellowpages'|'2gis'
-  add column if not exists website        text,        -- full resolved URL (domain is just the host)
+  add column if not exists grade           text,       -- 'A' | 'B' | 'C'
+  add column if not exists source          text,       -- 'google'|'yandex'|'yellowpages'|'gigal'|'olx'|'2gis'
+  add column if not exists region          text not null default 'uz',  -- 'uz'|'kz'|'tj'
+  add column if not exists name_normalized text,       -- normalized name for dedup
+  add column if not exists website         text,       -- full resolved URL (domain is just the host)
   add column if not exists email          text,
   add column if not exists social_links   jsonb not null default '[]'::jsonb,
   add column if not exists signals        jsonb,       -- {hasWebsite,hasEmail,hasSocial,hasCta,domainAgeYears,responsive}
@@ -31,14 +33,17 @@ alter table public.radar_companies alter column directory drop not null;
 create unique index if not exists radar_companies_phone_key
   on public.radar_companies (phone) where phone is not null;
 
-create index if not exists radar_companies_grade_industry_idx
-  on public.radar_companies (grade, industry) where discarded = false;
+create index if not exists radar_companies_industry_grade_idx
+  on public.radar_companies (industry, grade) where discarded = false;
+create index if not exists radar_companies_city_idx on public.radar_companies (city);
+create index if not exists radar_companies_verified_idx on public.radar_companies (verified_at desc);
 create index if not exists radar_companies_source_idx
   on public.radar_companies (source, created_at desc);
 
 -- ── radar_runs: one row per collector×industry execution ───────────────────
 create table if not exists public.radar_runs (
   id                 uuid primary key default gen_random_uuid(),
+  region             text not null default 'uz',
   industry           text,
   source             text,
   status             text not null default 'running',  -- running | success | failed
@@ -46,6 +51,7 @@ create table if not exists public.radar_runs (
   companies_new      int  not null default 0,
   companies_updated  int  not null default 0,
   error_message      text,
+  duration_seconds   int,
   started_at         timestamptz not null default now(),
   ended_at           timestamptz
 );

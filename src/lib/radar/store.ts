@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Company, Grade, Industry, Signals, WebStatus } from "./types";
+import type { Company, Grade, Industry, Region, Signals, WebStatus } from "./types";
+import { normalizeCompanyName } from "./dedupe";
 
 /**
  * Idempotent persistence for radar leads (docs/adr/0002-radar-engine.md).
@@ -33,9 +34,16 @@ function hostOf(url: string | null): string | null {
   }
 }
 
-function toRow(c: ScoredCompany, source: string, now: string): Record<string, unknown> {
+function toRow(
+  c: ScoredCompany,
+  source: string,
+  now: string,
+  region: Region,
+): Record<string, unknown> {
   return {
     name: c.name,
+    name_normalized: normalizeCompanyName(c.name),
+    region,
     phone: c.phone,
     industry: c.industry,
     city: c.city,
@@ -60,6 +68,7 @@ export async function upsertCompanies(
   db: SupabaseClient,
   companies: ScoredCompany[],
   source: string,
+  region: Region = "uz",
   now: string = new Date().toISOString(),
 ): Promise<UpsertResult> {
   const errors: string[] = [];
@@ -75,7 +84,7 @@ export async function upsertCompanies(
   if (selErr) errors.push(`select: ${selErr.message}`);
   const existingSet = new Set((existing ?? []).map((r: { phone: string }) => r.phone));
 
-  const rows = valid.map((c) => toRow(c, source, now));
+  const rows = valid.map((c) => toRow(c, source, now, region));
   const { error: upErr } = await db
     .from("radar_companies")
     .upsert(rows, { onConflict: "phone" });

@@ -21,12 +21,17 @@ const CTA_WORDS = [
   "yozilish", "buyurtma", "aloqa",
 ];
 
+// Analytics / pixel fingerprints.
+const ANALYTICS_MARKERS = [
+  "googletagmanager.com", "google-analytics.com", "gtag(", "ga(",
+  "mc.yandex.ru", "metrika", "ym(", "fbevents.js", "fbq(", "connect.facebook.net",
+];
+
 export function extractEmails(html: string): string[] {
   const found = new Set<string>();
   for (const m of html.matchAll(EMAIL_RE)) {
     const e = normalizeEmail(m[0]);
-    // skip asset filenames that look like emails only rarely; keep it simple
-    if (e && !e.endsWith(".png") && !e.endsWith(".jpg")) found.add(e);
+    if (e && !e.endsWith(".png") && !e.endsWith(".jpg") && !e.endsWith(".webp")) found.add(e);
   }
   return [...found];
 }
@@ -42,8 +47,9 @@ export function hasCtaText(html: string): boolean {
   return CTA_WORDS.some((w) => lower.includes(w));
 }
 
-export function isResponsive(html: string): boolean {
-  return /<meta[^>]+name=["']viewport["']/i.test(html);
+export function hasAnalytics(html: string): boolean {
+  const lower = html.toLowerCase();
+  return ANALYTICS_MARKERS.some((m) => lower.includes(m));
 }
 
 export interface EnrichOptions {
@@ -54,7 +60,8 @@ export interface EnrichOptions {
 
 /**
  * Fetch the company site (if any) and derive signals. Timeout-safe: on any
- * failure returns the base signals with a diagnostic webStatus.
+ * failure returns the base signals with a diagnostic webStatus. Domain age
+ * (WHOIS/SOA) is intentionally not fetched — left null (0 pts) per ADR 0002.
  */
 export async function enrichCompany(
   company: Company,
@@ -74,22 +81,26 @@ export async function enrichCompany(
       redirect: "follow",
       headers: { "user-agent": opts.userAgent ?? "SkylineRadar/1.0 (+https://skyline-digital.uz)" },
     });
-    if (!res.ok) return { signals: { ...base, hasWebsite: true }, webStatus: "unreachable" };
+    const finalUrl = (res as Response).url || website;
+    if (!res.ok) {
+      return { signals: { ...base, websiteReachable: false, https: finalUrl.startsWith("https:") }, webStatus: "unreachable" };
+    }
     const html = (await res.text()).slice(0, 500_000);
     const emails = extractEmails(html);
     const socials = extractSocials(html);
     const signals: Signals = {
-      hasWebsite: true,
+      websiteReachable: true,
       hasEmail: base.hasEmail || emails.length > 0,
       hasSocial: base.hasSocial || socials.length > 0,
       hasCta: hasCtaText(html),
-      domainAgeYears: null, // WHOIS/SOA intentionally skipped — not scored (ADR 0002)
-      responsive: isResponsive(html),
+      hasAnalytics: hasAnalytics(html),
+      domainAgeYears: null,
+      https: finalUrl.startsWith("https:"),
     };
     return { signals, webStatus: "ok" };
   } catch (err) {
     const aborted = err instanceof Error && err.name === "AbortError";
-    return { signals: { ...base, hasWebsite: true }, webStatus: aborted ? "timeout" : "error" };
+    return { signals: base, webStatus: aborted ? "timeout" : "error" };
   } finally {
     clearTimeout(timer);
   }

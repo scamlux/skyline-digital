@@ -1,52 +1,61 @@
 import { describe, it, expect } from "vitest";
-import { baseSignals, scoreCompany, signalCount } from "./score";
+import { baseSignals, scoreCompany, scoreValue, gradeOf } from "./score";
 import type { Signals } from "./types";
 
 const S = (over: Partial<Signals> = {}): Signals => ({
-  hasWebsite: false,
+  websiteReachable: false,
   hasEmail: false,
   hasSocial: false,
   hasCta: false,
+  hasAnalytics: false,
   domainAgeYears: null,
-  responsive: false,
+  https: false,
   ...over,
 });
 
-describe("scoreCompany", () => {
-  it("A = 3+ signals AND responsive", () => {
-    expect(scoreCompany(S({ hasWebsite: true, hasEmail: true, hasSocial: true, responsive: true }))).toBe("A");
-    expect(scoreCompany(S({ hasWebsite: true, hasEmail: true, hasSocial: true, hasCta: true, responsive: true }))).toBe("A");
-  });
-
-  it("3+ signals but NOT responsive → B (not A)", () => {
-    expect(scoreCompany(S({ hasWebsite: true, hasEmail: true, hasSocial: true, responsive: false }))).toBe("B");
-  });
-
-  it("B = 1–2 signals", () => {
-    expect(scoreCompany(S({ hasWebsite: true }))).toBe("B");
-    expect(scoreCompany(S({ hasWebsite: true, hasSocial: true }))).toBe("B");
-    expect(scoreCompany(S({ hasSocial: true, responsive: true }))).toBe("B");
-  });
-
-  it("C = no signals", () => {
-    expect(scoreCompany(S())).toBe("C");
-    expect(scoreCompany(S({ responsive: true }))).toBe("C"); // responsive alone isn't a signal
-  });
-
-  it("is deterministic — 10 runs identical", () => {
-    const sig = S({ hasWebsite: true, hasEmail: true, hasSocial: true, responsive: true });
-    const out = Array.from({ length: 10 }, () => scoreCompany(sig));
-    expect(new Set(out).size).toBe(1);
-    expect(out[0]).toBe("A");
+describe("scoreValue (100-point)", () => {
+  it("sums weights: website 40, email 20, social 15, cta/analytics 10, age 10, https 5", () => {
+    expect(scoreValue(S({ websiteReachable: true }))).toBe(40);
+    expect(scoreValue(S({ websiteReachable: true, hasEmail: true }))).toBe(60);
+    expect(scoreValue(S({ websiteReachable: true, hasEmail: true, hasSocial: true }))).toBe(75);
+    expect(scoreValue(S({ websiteReachable: true, hasEmail: true, hasSocial: true, https: true }))).toBe(80);
+    expect(scoreValue(S({ hasCta: true, hasAnalytics: true }))).toBe(10); // OR, counted once
+    expect(scoreValue(S({ domainAgeYears: 3 }))).toBe(10);
+    expect(scoreValue(S({ domainAgeYears: 1 }))).toBe(0); // <2y
+    expect(
+      scoreValue(S({ websiteReachable: true, hasEmail: true, hasSocial: true, hasCta: true, domainAgeYears: 5, https: true })),
+    ).toBe(100);
   });
 });
 
-describe("baseSignals / signalCount", () => {
-  it("derives presence from raw fields", () => {
+describe("gradeOf", () => {
+  it("A ≥ 70, B 40–69, C < 40", () => {
+    expect(gradeOf(100)).toBe("A");
+    expect(gradeOf(70)).toBe("A");
+    expect(gradeOf(69)).toBe("B");
+    expect(gradeOf(40)).toBe("B");
+    expect(gradeOf(39)).toBe("C");
+    expect(gradeOf(0)).toBe("C");
+  });
+});
+
+describe("scoreCompany", () => {
+  it("website only → B; nothing → C; site+email+social → A", () => {
+    expect(scoreCompany(S({ websiteReachable: true }))).toBe("B");
+    expect(scoreCompany(S())).toBe("C");
+    expect(scoreCompany(S({ websiteReachable: true, hasEmail: true, hasSocial: true }))).toBe("A");
+  });
+  it("is deterministic — 10 runs identical", () => {
+    const sig = S({ websiteReachable: true, hasEmail: true, hasSocial: true });
+    expect(new Set(Array.from({ length: 10 }, () => scoreCompany(sig))).size).toBe(1);
+  });
+});
+
+describe("baseSignals", () => {
+  it("derives email/social from raw; website unreachable until enriched", () => {
     const s = baseSignals({ website: "https://x.uz", email: null, socialLinks: ["https://t.me/x"] });
-    expect(s.hasWebsite).toBe(true);
-    expect(s.hasEmail).toBe(false);
+    expect(s.websiteReachable).toBe(false);
     expect(s.hasSocial).toBe(true);
-    expect(signalCount(s)).toBe(2);
+    expect(s.hasEmail).toBe(false);
   });
 });
