@@ -29,3 +29,8 @@ insert into public.radar_queries (key, label, keywords) values
   ('auto',      'Автосервис',   '["auto service","car repair","автосервис"]'::jsonb),
   ('beauty',    'Салоны красоты','["beauty salon","hair salon","салон красоты"]'::jsonb)
 on conflict (key) do nothing;
+
+-- (3) 0005 made `domain` UNIQUE, but branches of one business legitimately
+-- share a domain — upserts died on radar_companies_domain_key. Phone is the
+-- real dedup key; drop the domain constraint.
+alter table public.radar_companies drop constraint if exists radar_companies_domain_key;
