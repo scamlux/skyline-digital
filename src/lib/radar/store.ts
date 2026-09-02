@@ -134,16 +134,25 @@ export interface RadarStats {
 }
 
 export async function getStats(db: SupabaseClient): Promise<RadarStats> {
-  const { data } = await db
-    .from("radar_companies")
-    .select("grade, industry")
-    .eq("discarded", false);
-  const rows = (data ?? []) as { grade: Grade | null; industry: string | null }[];
+  // PostgREST caps a single select at 1000 rows — page through explicitly so
+  // stats stay correct as the base grows past that.
+  const PAGE = 1000;
   const byGrade: Record<Grade, number> = { A: 0, B: 0, C: 0 };
   const byIndustry: Record<string, number> = {};
-  for (const r of rows) {
-    if (r.grade && r.grade in byGrade) byGrade[r.grade]++;
-    if (r.industry) byIndustry[r.industry] = (byIndustry[r.industry] ?? 0) + 1;
+  let total = 0;
+  for (let from = 0; ; from += PAGE) {
+    const { data } = await db
+      .from("radar_companies")
+      .select("grade, industry")
+      .eq("discarded", false)
+      .range(from, from + PAGE - 1);
+    const rows = (data ?? []) as { grade: Grade | null; industry: string | null }[];
+    for (const r of rows) {
+      total++;
+      if (r.grade && r.grade in byGrade) byGrade[r.grade]++;
+      if (r.industry) byIndustry[r.industry] = (byIndustry[r.industry] ?? 0) + 1;
+    }
+    if (rows.length < PAGE) break;
   }
-  return { total: rows.length, byGrade, byIndustry };
+  return { total, byGrade, byIndustry };
 }
