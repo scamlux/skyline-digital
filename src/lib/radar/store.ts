@@ -66,8 +66,20 @@ export async function upsertCompanies(
   now: string = new Date().toISOString(),
 ): Promise<UpsertResult> {
   const errors: string[] = [];
-  const valid = companies.filter((c) => Boolean(c.phone));
-  const skipped = companies.length - valid.length;
+  // Collapse same-phone rows inside the batch: greedy dedupe can leave two
+  // clusters converging on one phone (a null-phone cluster acquires the number
+  // during merge), and Postgres rejects a batch that hits the same unique key
+  // twice ("ON CONFLICT DO UPDATE cannot affect row a second time").
+  const byPhone = new Map<string, ScoredCompany>();
+  let skipped = 0;
+  for (const c of companies) {
+    if (!c.phone) {
+      skipped++;
+      continue;
+    }
+    if (!byPhone.has(c.phone)) byPhone.set(c.phone, c);
+  }
+  const valid = [...byPhone.values()];
   if (valid.length === 0) return { new: 0, updated: 0, skipped, errors };
 
   const phones = valid.map((c) => c.phone as string);

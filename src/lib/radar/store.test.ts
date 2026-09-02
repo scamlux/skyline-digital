@@ -49,6 +49,18 @@ describe("upsertCompanies", () => {
     expect(upserts[0][0].region).toBe("uz");
   });
 
+  it("collapses same-phone rows within a batch (unique-key safety)", async () => {
+    const { db, upserts } = fakeDb();
+    const r = await upsertCompanies(
+      db,
+      [SC("+998900000001", { name: "Юрист А" }), SC("+998900000001", { name: "Юрист Б" })],
+      "uz",
+      "2026-01-01T00:00:00Z",
+    );
+    expect(upserts[0]).toHaveLength(1); // one row per phone reaches Postgres
+    expect(r.new).toBe(1);
+  });
+
   it("skips companies without a phone", async () => {
     const { db } = fakeDb();
     const r = await upsertCompanies(db, [SC(null), SC("+998900000009")], "uz", "2026-01-01T00:00:00Z");
