@@ -32,7 +32,9 @@ async function scrapeUrls(
     try {
       await page.goto(url, { waitUntil: "networkidle2", timeout: 30000 });
       await new Promise((r) => setTimeout(r, 2500)); // let the SPA hydrate
-      const cards = (await page.evaluate(EXTRACT_CARDS)) as RawCard[];
+      // page.evaluate(string) evaluates an expression — wrap the arrow as an
+      // IIFE so it's actually called and returns the array.
+      const cards = (await page.evaluate(`(${EXTRACT_CARDS})()`)) as RawCard[];
       for (const c of cards) {
         const name = c.name?.trim();
         if (!name) continue;
