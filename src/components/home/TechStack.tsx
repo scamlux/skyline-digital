@@ -55,7 +55,7 @@ export function TechStack() {
           >
             <Image
               src={item.icon}
-              alt=""
+              alt={item.name}
               width={36}
               height={36}
               className="h-9 w-9 transition-transform duration-300 group-hover:scale-110"

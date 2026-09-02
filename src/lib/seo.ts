@@ -12,9 +12,9 @@ export const seoByLocale: Record<
   { title: string; description: string; keywords: string[]; ogLocale: string }
 > = {
   ru: {
-    title: "Skyline Digital (Скайлайн) — веб-разработка, приложения и AI в Ташкенте",
+    title: "Skyline Digital — сайты, приложения и AI в Ташкенте",
     description:
-      "Скайлайн Диджитал (Skyline Digital) — цифровое агентство: разработка сайтов, веб- и мобильных приложений, AI-решения и автоматизация. Рассчитайте стоимость проекта онлайн за 2 минуты и получите коммерческое предложение.",
+      "Цифровое агентство в Ташкенте: сайты, веб- и мобильные приложения, AI и автоматизация. Рассчитайте стоимость проекта и получите КП за 2 минуты.",
     keywords: [
       "скайлайн",
       "скайлайн диджитал",
@@ -34,9 +34,9 @@ export const seoByLocale: Record<
     ogLocale: "ru_RU",
   },
   en: {
-    title: "Skyline Digital — Web, Mobile & AI Development Agency in Tashkent",
+    title: "Skyline Digital — Web, Mobile & AI Agency in Tashkent",
     description:
-      "Skyline Digital is a full-cycle digital agency: websites, web & mobile apps, AI solutions and automation. Estimate your project cost online in 2 minutes and get a commercial proposal.",
+      "Digital agency in Tashkent: websites, web & mobile apps, AI and automation. Estimate your project cost and get a proposal in 2 minutes.",
     keywords: [
       "web development Tashkent",
       "software development Uzbekistan",
@@ -51,9 +51,9 @@ export const seoByLocale: Record<
     ogLocale: "en_US",
   },
   uz: {
-    title: "Skyline Digital — Toshkentda veb, mobil va AI ishlab chiqish agentligi",
+    title: "Skyline Digital — veb, mobil va AI agentligi, Toshkent",
     description:
-      "Skyline Digital — to'liq tsiklli raqamli agentlik: saytlar, veb va mobil ilovalar, AI yechimlar va avtomatlashtirish. Loyiha narxini onlayn 2 daqiqada hisoblang va tijorat taklifini oling.",
+      "Toshkentdagi raqamli agentlik: saytlar, veb va mobil ilovalar, AI va avtomatlashtirish. Loyiha narxini hisoblang va 2 daqiqada taklif oling.",
     keywords: [
       "veb ishlab chiqish Toshkent",
       "sayt yaratish O'zbekiston",
