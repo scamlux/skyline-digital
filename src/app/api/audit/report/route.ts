@@ -49,6 +49,7 @@ export async function POST(request: Request) {
       const lead = await createLead(supabase, {
         client_name: d.name || undefined,
         email: d.email,
+        phone: d.phone,
         description: `Аудит ${measurement.host}: ${score.grade} (${score.total}/100)`,
         ai_summary: top ? `Топ-проблема: ${top}` : undefined,
         source: d.source || "audit",

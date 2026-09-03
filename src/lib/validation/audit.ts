@@ -10,6 +10,8 @@ export const auditRequestSchema = z.object({
 export const auditReportRequestSchema = z.object({
   url: z.string().trim().min(1).max(2000),
   email: z.string().trim().email().max(200),
+  // Masked UZ phone from the client; strict server-side check anyway.
+  phone: z.string().regex(/^\+998\d{9}$/),
   name: z.string().trim().max(120).optional().default(""),
   // Anti-spam honeypot: must stay empty, like the contact/estimate forms.
   hp: z.string().max(0).optional().default(""),

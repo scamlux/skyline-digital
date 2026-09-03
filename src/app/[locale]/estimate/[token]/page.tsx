@@ -6,6 +6,7 @@ import type { PricingResult } from "@/lib/pricing/types";
 import { ROLE_LABELS } from "@/lib/pricing/roles";
 import type { Proposal } from "@/lib/ai/schema";
 import { formatUsd } from "@/lib/utils";
+import { ProposalDownloadGate } from "@/components/estimate/ProposalDownloadGate";
 
 export const dynamic = "force-dynamic";
 
@@ -135,12 +136,7 @@ export default async function EstimatePage({
           </Block>
 
           <div className="mt-12 flex flex-wrap items-center gap-4">
-            <a
-              href={`/api/proposal/${token}`}
-              className="rounded-full bg-night px-7 py-3.5 text-sm font-medium text-day transition-opacity hover:opacity-90"
-            >
-              {tr("download")}
-            </a>
+            <ProposalDownloadGate token={token} />
             <Link
               href="/calculator"
               className="font-mono text-sm text-muted transition-colors hover:text-ink"

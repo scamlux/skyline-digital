@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { TurnstileWidget, turnstileEnabled, resetTurnstile } from "@/components/security/TurnstileWidget";
 import { buildAuditReportHtml } from "@/lib/audit/report-html";
 import { CONTACTS } from "@/lib/contact";
+import { PhoneInputUz } from "@/components/ui/PhoneInputUz";
 import type { AuditApiResult, Finding, ScoreCategory } from "@/lib/audit/types";
 
 type Phase = "idle" | "measuring" | "done";
@@ -275,6 +276,7 @@ function ReportForm({
   onReport: (r: AuditApiResult) => void;
 }) {
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
   const [hp, setHp] = useState("");
   const [captchaToken, setCaptchaToken] = useState("");
@@ -284,6 +286,10 @@ function ReportForm({
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (phase === "sending") return;
+    if (!phone) {
+      setError(t("report.phoneRequired"));
+      return;
+    }
     if (turnstileEnabled && !captchaToken) {
       setError(t("report.captchaRequired"));
       return;
@@ -294,7 +300,7 @@ function ReportForm({
       const res = await fetch("/api/audit/report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url, email, name, hp, turnstileToken: captchaToken, landing_page: url }),
+        body: JSON.stringify({ url, email, phone, name, hp, turnstileToken: captchaToken, landing_page: url }),
       });
       if (res.status === 429) {
         setError(t("tooManyRequests"));
@@ -331,13 +337,18 @@ function ReportForm({
           placeholder={t("report.emailPlaceholder")}
           className="rounded-full border border-line-night bg-night-deep px-5 py-3 text-day outline-none transition-colors focus-visible:border-apricot"
         />
+        <PhoneInputUz
+          value={phone}
+          onChange={setPhone}
+          className="rounded-full border border-line-night bg-night-deep px-5 py-3 font-mono text-day outline-none transition-colors focus-visible:border-apricot"
+        />
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder={t("report.namePlaceholder")}
           maxLength={120}
-          className="rounded-full border border-line-night bg-night-deep px-5 py-3 text-day outline-none transition-colors focus-visible:border-apricot"
+          className="rounded-full border border-line-night bg-night-deep px-5 py-3 text-day outline-none transition-colors focus-visible:border-apricot sm:col-span-2"
         />
       </div>
       {/* Honeypot — must stay empty. */}

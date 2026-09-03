@@ -16,6 +16,7 @@ import type { Proposal } from "@/lib/ai/schema";
 import { cn, formatUsd, roundMoney } from "@/lib/utils";
 import { getLeadContext } from "@/lib/leadContext";
 import { SunProgress } from "./SunProgress";
+import { ProposalDownloadGate } from "@/components/estimate/ProposalDownloadGate";
 import {
   TurnstileWidget,
   resetTurnstile,
@@ -551,12 +552,7 @@ function ResultView({ result }: { result: EstimateResponse }) {
       </ResultSection>
 
       <div className="mt-10 flex flex-wrap items-center gap-4">
-        <a
-          href={`/api/proposal/${token}`}
-          className="horizon-gradient rounded-full px-7 py-3.5 text-sm font-medium text-night transition-opacity hover:opacity-90"
-        >
-          {t("download")}
-        </a>
+        <ProposalDownloadGate token={token} />
         <Link
           href={`/estimate/${token}`}
           className="font-mono text-sm text-mist underline-offset-4 transition-colors hover:text-day hover:underline"

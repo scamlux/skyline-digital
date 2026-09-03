@@ -55,11 +55,18 @@ function midTotal(min: number, max: number): number {
 }
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ token: string }> },
 ) {
   const { token } = await params;
   const supabase = getSupabaseAdmin();
+
+  // Phone gate: the КП download requires a valid UZ phone (collected by the
+  // masked input on the estimate page / wizard). Stored on the lead below.
+  const phone = new URL(request.url).searchParams.get("phone") ?? "";
+  if (!/^\+998\d{9}$/.test(phone)) {
+    return NextResponse.json({ error: "phone_required" }, { status: 400 });
+  }
 
   // Load the estimate + its lead.
   let est: EstimateJoined;
@@ -77,6 +84,14 @@ export async function GET(
     est = data as unknown as EstimateJoined;
   } catch {
     return NextResponse.json({ error: "Server error" }, { status: 500 });
+  }
+
+  // Persist the gate phone on the lead (fills empty or updates stale).
+  if (est.lead_id) {
+    await supabase
+      .from("leads")
+      .update({ phone, updated_at: new Date().toISOString() })
+      .eq("id", est.lead_id);
   }
 
   // Idempotency: if a proposal PDF already exists for this estimate, serve it

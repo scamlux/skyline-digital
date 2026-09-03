@@ -395,7 +395,12 @@
     "eyebrow": "Tijorat taklifi",
     "notFoundTitle": "Smeta topilmadi",
     "notFoundText": "Havola eskirgan yoki noto'g'ri. Loyihani qaytadan hisoblang.",
-    "notFoundCta": "Kalkulyatorni ochish"
+    "notFoundCta": "Kalkulyatorni ochish",
+    "phoneGate": {
+      "download": "Taklifni yuklab olish (PDF)",
+      "hint": "Yuklab olish uchun telefon kiriting",
+      "error": "Xatolik — raqamni tekshiring."
+    }
   },
   "notFound": {
     "title": "Sahifa topilmadi",
@@ -453,7 +458,8 @@
       "errorGeneric": "Nimadir xato ketdi. Qayta urinib ko'ring.",
       "download": "Hisobotni yuklab olish",
       "savePdf": "PDF sifatida saqlash",
-      "downloadTagline": "Loyihangiz uchun ham shunday natija? Biz to‘liq quramiz."
+      "downloadTagline": "Loyihangiz uchun ham shunday natija? Biz to‘liq quramiz.",
+      "phoneRequired": "Telefonni +998 formatida kiriting."
     },
     "findings": {
       "lcp-slow": {

@@ -395,7 +395,12 @@
     "eyebrow": "Commercial proposal",
     "notFoundTitle": "Estimate not found",
     "notFoundText": "The link is outdated or invalid. Calculate your project again.",
-    "notFoundCta": "Open the calculator"
+    "notFoundCta": "Open the calculator",
+    "phoneGate": {
+      "download": "Download proposal (PDF)",
+      "hint": "Enter your phone to download",
+      "error": "Failed — check the number."
+    }
   },
   "notFound": {
     "title": "Page not found",
@@ -453,7 +458,8 @@
       "errorGeneric": "Something went wrong. Please try again.",
       "download": "Download report",
       "savePdf": "Save as PDF",
-      "downloadTagline": "Want the same result for your project? We build it end-to-end."
+      "downloadTagline": "Want the same result for your project? We build it end-to-end.",
+      "phoneRequired": "Enter your phone in +998 format."
     },
     "findings": {
       "lcp-slow": {
