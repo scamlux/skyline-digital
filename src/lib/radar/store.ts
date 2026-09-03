@@ -85,11 +85,14 @@ export async function upsertCompanies(
   const phones = valid.map((c) => c.phone as string);
   const { data: existing, error: selErr } = await db
     .from("radar_companies")
-    .select("phone, source")
+    .select("phone, source, industry")
     .in("phone", phones);
   if (selErr) errors.push(`select: ${selErr.message}`);
   const existingBy = new Map(
-    (existing ?? []).map((r: { phone: string; source: string | null }) => [r.phone, r.source]),
+    (existing ?? []).map((r: { phone: string; source: string | null; industry: string | null }) => [
+      r.phone,
+      r,
+    ]),
   );
 
   // Cross-source duplicate guard: a lower-ranked source (geoapify/scrapers)
@@ -98,12 +101,20 @@ export async function upsertCompanies(
     SOURCE_RANK[(s ?? "") as RadarSource] ?? 0;
   const writable = valid.filter((c) => {
     const prev = existingBy.get(c.phone as string);
-    return prev === undefined || rank(c.source) >= rank(prev);
+    return prev === undefined || rank(c.source) >= rank(prev.source);
   });
   const protectedCount = valid.length - writable.length;
   if (writable.length === 0) return { new: 0, updated: 0, skipped: skipped + protectedCount, errors };
 
-  const rows = writable.map((c) => toRow(c, now, region));
+  const rows = writable.map((c) => {
+    const row = toRow(c, now, region);
+    // Industry labels must not flap between runs: a company keeps the industry
+    // it was first discovered under (later same-phone claims from other
+    // industry queries update signals/contacts but not the label).
+    const prev = existingBy.get(c.phone as string);
+    if (prev?.industry) row.industry = prev.industry;
+    return row;
+  });
   const { error: upErr } = await db
     .from("radar_companies")
     .upsert(rows, { onConflict: "phone" });
