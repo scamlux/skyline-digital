@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Company, Grade, Industry, Region, Signals, WebStatus } from "./types";
-import { normalizeCompanyName } from "./dedupe";
+import type { Company, Grade, Industry, RadarSource, Region, Signals, WebStatus } from "./types";
+import { normalizeCompanyName, SOURCE_RANK } from "./dedupe";
 
 /**
  * Idempotent persistence for radar leads (docs/adr/0002-radar-engine.md).
@@ -85,12 +85,25 @@ export async function upsertCompanies(
   const phones = valid.map((c) => c.phone as string);
   const { data: existing, error: selErr } = await db
     .from("radar_companies")
-    .select("phone")
+    .select("phone, source")
     .in("phone", phones);
   if (selErr) errors.push(`select: ${selErr.message}`);
-  const existingSet = new Set((existing ?? []).map((r: { phone: string }) => r.phone));
+  const existingBy = new Map(
+    (existing ?? []).map((r: { phone: string; source: string | null }) => [r.phone, r.source]),
+  );
 
-  const rows = valid.map((c) => toRow(c, now, region));
+  // Cross-source duplicate guard: a lower-ranked source (geoapify/scrapers)
+  // must never overwrite a row already filled by a higher-ranked one (google).
+  const rank = (s: string | null | undefined): number =>
+    SOURCE_RANK[(s ?? "") as RadarSource] ?? 0;
+  const writable = valid.filter((c) => {
+    const prev = existingBy.get(c.phone as string);
+    return prev === undefined || rank(c.source) >= rank(prev);
+  });
+  const protectedCount = valid.length - writable.length;
+  if (writable.length === 0) return { new: 0, updated: 0, skipped: skipped + protectedCount, errors };
+
+  const rows = writable.map((c) => toRow(c, now, region));
   const { error: upErr } = await db
     .from("radar_companies")
     .upsert(rows, { onConflict: "phone" });
@@ -98,8 +111,13 @@ export async function upsertCompanies(
     errors.push(`upsert: ${upErr.message}`);
     return { new: 0, updated: 0, skipped, errors };
   }
-  const isNew = valid.filter((c) => !existingSet.has(c.phone as string)).length;
-  return { new: isNew, updated: valid.length - isNew, skipped, errors };
+  const isNew = writable.filter((c) => !existingBy.has(c.phone as string)).length;
+  return {
+    new: isNew,
+    updated: writable.length - isNew,
+    skipped: skipped + protectedCount,
+    errors,
+  };
 }
 
 // ── radar_runs bookkeeping ─────────────────────────────────────────────────

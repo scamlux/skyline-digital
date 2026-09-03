@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { GoogleMapsCollector } from "./google-maps";
 import { YandexMapsCollector } from "./yandex-maps";
+import { GeoapifyCollector } from "./geoapify";
 
 const jsonResponse = (body: unknown): Response =>
   ({ ok: true, status: 200, json: async () => body }) as unknown as Response;
@@ -69,6 +70,37 @@ describe("YandexMapsCollector", () => {
       website: "https://roza.uz",
       source: "yandex",
       geo: { lat: 41.31, lng: 69.24 },
+    });
+  });
+});
+
+describe("GeoapifyCollector", () => {
+  it("skips without key; skips unmapped industry; parses features", async () => {
+    expect((await new GeoapifyCollector({ apiKey: "" }).run("dentistry")).blocked).toBe(true);
+    expect((await new GeoapifyCollector({ apiKey: "k" }).run("no-such-industry")).blocked).toBe(true);
+
+    const fetchImpl = (async () =>
+      jsonResponse({
+        features: [
+          {
+            properties: {
+              name: "Стоматология OSM",
+              contact: { phone: "+998 71 200 11 22" },
+              website: "https://osm-dent.uz",
+              lat: 41.3, lon: 69.24,
+            },
+          },
+          { properties: { name: "" } }, // unnamed → dropped
+        ],
+      })) as unknown as typeof fetch;
+    const r = await new GeoapifyCollector({ apiKey: "k", fetchImpl }).run("dentistry", { cities: ["Ташкент"] });
+    expect(r.companies).toHaveLength(1);
+    expect(r.companies[0]).toMatchObject({
+      name: "Стоматология OSM",
+      phone: "+998712001122",
+      website: "https://osm-dent.uz",
+      source: "geoapify",
+      geo: { lat: 41.3, lng: 69.24 },
     });
   });
 });

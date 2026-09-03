@@ -73,9 +73,10 @@ export function isDuplicate(c1: Company, c2: Company): boolean {
 }
 
 /** Higher rank = more trusted/complete source, wins field conflicts. */
-const SOURCE_RANK: Record<RadarSource, number> = {
-  google: 6,
-  yandex: 5,
+export const SOURCE_RANK: Record<RadarSource, number> = {
+  google: 7,
+  yandex: 6,
+  geoapify: 5,
   yellowpages: 4,
   gigal: 3,
   "2gis": 2,

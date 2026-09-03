@@ -43,5 +43,11 @@
     "typescript": "^5",
     "vitest": "^4.1.11"
   },
-  "description": "Skyline Digital — agency site with AI cost calculator"
+  "description": "Skyline Digital — agency site with AI cost calculator",
+  "allowScripts": {
+    "@parcel/watcher": true,
+    "@swc/core": true,
+    "esbuild": true,
+    "unrs-resolver": true
+  }
 }

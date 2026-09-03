@@ -1,6 +1,7 @@
 import type { CollectorOptions, CollectorResult, Industry, RadarSource } from "./types";
 import { GoogleMapsCollector } from "./collectors/google-maps";
 import { YandexMapsCollector } from "./collectors/yandex-maps";
+import { GeoapifyCollector } from "./collectors/geoapify";
 import {
   YellowpagesCollector,
   GigalCollector,
@@ -15,7 +16,7 @@ export interface RadarCollector {
 }
 
 /** API collectors are cheap/reliable; scrapers are heavier (Puppeteer). */
-export const API_SOURCES: RadarSource[] = ["google", "yandex"];
+export const API_SOURCES: RadarSource[] = ["google", "yandex", "geoapify"];
 export const SCRAPER_SOURCES: RadarSource[] = ["yellowpages", "gigal", "olx", "2gis"];
 
 export function createCollector(source: RadarSource): RadarCollector | null {
@@ -24,6 +25,8 @@ export function createCollector(source: RadarSource): RadarCollector | null {
       return new GoogleMapsCollector();
     case "yandex":
       return new YandexMapsCollector();
+    case "geoapify":
+      return new GeoapifyCollector();
     case "yellowpages":
       return new YellowpagesCollector();
     case "gigal":

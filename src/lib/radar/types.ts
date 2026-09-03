@@ -11,6 +11,7 @@ export type Region = "uz" | "kz" | "tj";
 export type RadarSource =
   | "google"
   | "yandex"
+  | "geoapify"
   | "yellowpages"
   | "gigal"
   | "olx"
@@ -23,6 +24,7 @@ export const INDUSTRIES: Industry[] = ["dentistry", "auto", "beauty"];
 export const RADAR_SOURCES: RadarSource[] = [
   "google",
   "yandex",
+  "geoapify",
   "yellowpages",
   "gigal",
   "olx",

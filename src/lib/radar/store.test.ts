@@ -2,8 +2,14 @@ import { describe, it, expect } from "vitest";
 import { upsertCompanies, type ScoredCompany } from "./store";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-/** Minimal in-memory fake of the Supabase query builder used by the store. */
-function fakeDb(existingPhones: string[] = []) {
+/**
+ * Minimal in-memory fake of the Supabase query builder used by the store.
+ * `existing` maps phone → source of the pre-existing row.
+ */
+function fakeDb(existing: string[] | Record<string, string | null> = []) {
+  const map: Record<string, string | null> = Array.isArray(existing)
+    ? Object.fromEntries(existing.map((p) => [p, "google"]))
+    : existing;
   const upserts: Record<string, unknown>[][] = [];
   const db = {
     from() {
@@ -12,7 +18,9 @@ function fakeDb(existingPhones: string[] = []) {
           return {
             in(_col: string, phones: string[]) {
               return Promise.resolve({
-                data: phones.filter((p) => existingPhones.includes(p)).map((phone) => ({ phone })),
+                data: phones
+                  .filter((p) => p in map)
+                  .map((phone) => ({ phone, source: map[phone] })),
                 error: null,
               });
             },
@@ -47,6 +55,31 @@ describe("upsertCompanies", () => {
     expect(upserts[0]).toHaveLength(3);
     expect(upserts[0][0].name_normalized).toBe("клиника");
     expect(upserts[0][0].region).toBe("uz");
+  });
+
+  it("geoapify never overwrites an existing google row (source rank guard)", async () => {
+    const { db, upserts } = fakeDb({ "+998900000001": "google" });
+    const r = await upsertCompanies(
+      db,
+      [SC("+998900000001", { source: "geoapify", name: "OSM-вариант" })],
+      "uz",
+      "2026-01-01T00:00:00Z",
+    );
+    expect(upserts).toHaveLength(0); // nothing written
+    expect(r.updated).toBe(0);
+    expect(r.skipped).toBe(1);
+  });
+
+  it("google DOES overwrite an existing geoapify row", async () => {
+    const { db, upserts } = fakeDb({ "+998900000001": "geoapify" });
+    const r = await upsertCompanies(
+      db,
+      [SC("+998900000001", { source: "google" })],
+      "uz",
+      "2026-01-01T00:00:00Z",
+    );
+    expect(upserts[0]).toHaveLength(1);
+    expect(r.updated).toBe(1);
   });
 
   it("collapses same-phone rows within a batch (unique-key safety)", async () => {
