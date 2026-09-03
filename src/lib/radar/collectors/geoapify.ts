@@ -99,9 +99,19 @@ export class GeoapifyCollector {
           const p = f.properties ?? {};
           const name = p.name?.trim();
           if (!name) continue; // unnamed OSM nodes are useless as leads
+          // OSM contact fields are loosely typed (string | string[] | number).
+          const rawPhone = p.contact?.phone ?? p.phone;
+          const phoneStr =
+            typeof rawPhone === "string"
+              ? rawPhone
+              : Array.isArray(rawPhone)
+                ? String(rawPhone[0] ?? "")
+                : rawPhone != null
+                  ? String(rawPhone)
+                  : null;
           companies.push({
             name,
-            phone: normalizePhone(p.contact?.phone ?? p.phone),
+            phone: normalizePhone(phoneStr),
             industry,
             city,
             website: normalizeWebsite(p.website),
