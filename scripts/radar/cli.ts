@@ -98,6 +98,7 @@ async function main() {
       const { data } = await db
         .from("radar_companies")
         .select("id, phone, social_links, signals, grade")
+        .order("id", { ascending: true })
         .range(from, from + PAGE - 1);
       const rows = (data ?? []) as {
         id: string;

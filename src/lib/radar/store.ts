@@ -187,6 +187,7 @@ export async function getStats(db: SupabaseClient): Promise<RadarStats> {
       .from("radar_companies")
       .select("grade, industry")
       .eq("discarded", false)
+      .order("id", { ascending: true })
       .range(from, from + PAGE - 1);
     const rows = (data ?? []) as { grade: Grade | null; industry: string | null }[];
     for (const r of rows) {
