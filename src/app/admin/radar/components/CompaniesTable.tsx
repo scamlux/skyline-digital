@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CellGrade } from "./CellGrade";
-import { markDiscarded, recheckWebsite } from "../actions";
+import { markDiscarded, recheckWebsite, updateCompany } from "../actions";
 
 export interface RadarRow {
   id: string;
@@ -103,6 +103,11 @@ function Field({ label, value }: { label: string; value: string | null }) {
 function Drawer({ row, onClose }: { row: RadarRow; onClose: () => void }) {
   const [pending, start] = useTransition();
   const [reason, setReason] = useState("");
+  const [name, setName] = useState(row.name);
+  const [phone, setPhone] = useState(row.phone ?? "");
+  const [city, setCity] = useState(row.city ?? "");
+  const [website, setWebsite] = useState(row.website ?? "");
+  const INPUT = "mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm";
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/30" onClick={onClose}>
       <div className="h-full w-full max-w-md overflow-y-auto bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
@@ -111,11 +116,44 @@ function Drawer({ row, onClose }: { row: RadarRow; onClose: () => void }) {
           <button onClick={onClose} className="text-2xl leading-none text-gray-400 hover:text-gray-700">×</button>
         </div>
         <div className="mt-2"><CellGrade grade={row.grade} /></div>
+
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <div className="col-span-2">
+            <label className="text-xs uppercase tracking-wide text-gray-500">Название</label>
+            <input value={name} onChange={(e) => setName(e.target.value)} className={INPUT} />
+          </div>
+          <div>
+            <label className="text-xs uppercase tracking-wide text-gray-500">Телефон</label>
+            <input value={phone} onChange={(e) => setPhone(e.target.value)} className={INPUT} />
+          </div>
+          <div>
+            <label className="text-xs uppercase tracking-wide text-gray-500">Город</label>
+            <input value={city} onChange={(e) => setCity(e.target.value)} className={INPUT} />
+          </div>
+          <div className="col-span-2">
+            <label className="text-xs uppercase tracking-wide text-gray-500">Сайт</label>
+            <input value={website} onChange={(e) => setWebsite(e.target.value)} className={INPUT} />
+          </div>
+        </div>
+        <button
+          disabled={pending}
+          onClick={() =>
+            start(async () => {
+              await updateCompany(row.id, {
+                name,
+                phone: phone || null,
+                city: city || null,
+                website: website || null,
+              });
+            })
+          }
+          className="mt-2 w-full rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+        >
+          {pending ? "…" : "Сохранить"}
+        </button>
+
         <dl className="mt-4 space-y-1 text-sm">
-          <Field label="Телефон" value={row.phone} />
-          <Field label="Сайт" value={row.website} />
           <Field label="Email" value={row.email} />
-          <Field label="Город" value={row.city} />
           <Field label="Отрасль" value={row.industry} />
           <Field label="Источник" value={row.source} />
           <Field label="Web-статус" value={row.web_status} />

@@ -1,4 +1,6 @@
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase/server";
+import { deleteAudit } from "../estimates/actions";
+import { DeleteButton } from "../components/DeleteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +33,7 @@ export default async function AuditsPage() {
               <th className="p-3">Источник</th>
               <th className="p-3">Email (лид)</th>
               <th className="p-3">Дата</th>
+              <th className="p-3" />
             </tr>
           </thead>
           <tbody>
@@ -54,10 +57,11 @@ export default async function AuditsPage() {
                 <td className="p-3 text-gray-600">{a.source ?? "—"}</td>
                 <td className="p-3 text-gray-600">{a.email ?? "—"}</td>
                 <td className="p-3 text-gray-500">{(a.created_at ?? "").slice(0, 10)}</td>
+                <td className="p-3"><DeleteButton onDelete={deleteAudit.bind(null, a.id)} confirmText="Удалить аудит?" /></td>
               </tr>
             ))}
             {rows.length === 0 && (
-              <tr><td colSpan={6} className="p-10 text-center text-gray-400">Аудитов пока нет</td></tr>
+              <tr><td colSpan={7} className="p-10 text-center text-gray-400">Аудитов пока нет</td></tr>
             )}
           </tbody>
         </table>

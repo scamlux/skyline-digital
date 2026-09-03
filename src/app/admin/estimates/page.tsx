@@ -1,4 +1,6 @@
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase/server";
+import { deleteEstimate } from "./actions";
+import { DeleteButton } from "../components/DeleteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +27,7 @@ export default async function EstimatesPage() {
               <th className="p-3">Итог</th>
               <th className="p-3">Дата</th>
               <th className="p-3">Смета</th>
+              <th className="p-3" />
             </tr>
           </thead>
           <tbody>
@@ -39,11 +42,12 @@ export default async function EstimatesPage() {
                   <td className="p-3">
                     <a href={`/estimate/${e.token}`} target="_blank" rel="noopener noreferrer" className="text-blue-600">Открыть ↗</a>
                   </td>
+                  <td className="p-3"><DeleteButton onDelete={deleteEstimate.bind(null, e.id)} confirmText="Удалить смету безвозвратно?" /></td>
                 </tr>
               );
             })}
             {rows.length === 0 && (
-              <tr><td colSpan={4} className="p-10 text-center text-gray-400">Смет пока нет</td></tr>
+              <tr><td colSpan={5} className="p-10 text-center text-gray-400">Смет пока нет</td></tr>
             )}
           </tbody>
         </table>

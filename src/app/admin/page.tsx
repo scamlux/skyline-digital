@@ -1,6 +1,27 @@
 import Link from "next/link";
 import { Inbox, Calculator, FileText, Gauge, Radar } from "lucide-react";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase/server";
+import { getStats } from "@/lib/radar/store";
+
+function BarChart({ title, items, color }: { title: string; items: [string, number][]; color: string }) {
+  const max = Math.max(1, ...items.map(([, n]) => n));
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white p-5">
+      <h3 className="mb-3 text-sm font-semibold text-gray-700">{title}</h3>
+      <div className="space-y-2">
+        {items.map(([label, n]) => (
+          <div key={label} className="flex items-center gap-2 text-xs">
+            <span className="w-28 shrink-0 truncate text-gray-500">{label}</span>
+            <div className="h-4 flex-1 overflow-hidden rounded bg-gray-100">
+              <div className="h-full rounded" style={{ width: `${(n / max) * 100}%`, background: color }} />
+            </div>
+            <span className="w-10 shrink-0 text-right font-medium text-gray-700">{n}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +72,17 @@ export default async function AdminDashboard() {
     .order("created_at", { ascending: false })
     .limit(8);
 
+  // Charts: leads by status + radar top industries.
+  const { data: allLeadStatuses } = await db.from("leads").select("status");
+  const byStatus: Record<string, number> = {};
+  for (const r of (allLeadStatuses ?? []) as { status: string }[]) {
+    byStatus[r.status] = (byStatus[r.status] ?? 0) + 1;
+  }
+  const radarStats = await getStats(db);
+  const topIndustries = Object.entries(radarStats.byIndustry)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8) as [string, number][];
+
   const cards = [
     { label: "Заявки", value: leads.count ?? 0, icon: Inbox, href: "/admin/leads", color: "#2563eb" },
     { label: "Сметы", value: estimates.count ?? 0, icon: Calculator, href: "/admin/estimates", color: "#7c3aed" },
@@ -75,6 +107,15 @@ export default async function AdminDashboard() {
             <div className="text-sm text-gray-500">{label}</div>
           </Link>
         ))}
+      </div>
+
+      <div className="mt-6 grid gap-4 md:grid-cols-2">
+        <BarChart
+          title="Заявки по статусам"
+          items={Object.entries(byStatus).sort((a, b) => b[1] - a[1])}
+          color="#2563eb"
+        />
+        <BarChart title="Радар: топ отраслей" items={topIndustries} color="#ea580c" />
       </div>
 
       <div className="mt-8">

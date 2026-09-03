@@ -3,6 +3,7 @@ import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase/server";
 import { getStats } from "@/lib/radar/store";
 import { RadarStats } from "./components/RadarStats";
 import { FilterBar } from "./components/FilterBar";
+import { RunPanel } from "./components/RunPanel";
 import { CompaniesTable, type RadarRow } from "./components/CompaniesTable";
 
 export const dynamic = "force-dynamic";
@@ -64,10 +65,18 @@ export default async function RadarAdminPage({
     .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
 
   const stats = await getStats(db);
+  const { data: queryRows } = await db
+    .from("radar_queries")
+    .select("key,label")
+    .eq("active", true)
+    .order("created_at", { ascending: true });
 
   return (
     <Shell>
       <RadarStats stats={stats} />
+      <div className="mt-4">
+        <RunPanel industries={(queryRows ?? []) as { key: string; label: string }[]} />
+      </div>
       <div className="mt-6">
         <FilterBar />
       </div>

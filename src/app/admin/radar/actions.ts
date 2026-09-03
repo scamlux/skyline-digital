@@ -6,6 +6,20 @@ import { enrichCompany } from "@/lib/radar/signals";
 import { contactInfo, scoreCompany } from "@/lib/radar/score";
 import type { Company } from "@/lib/radar/types";
 
+/** Edit basic company fields from the drawer. */
+export async function updateCompany(
+  id: string,
+  fields: { name?: string; phone?: string | null; city?: string | null; industry?: string; website?: string | null },
+): Promise<{ success: boolean }> {
+  const db = getSupabaseAdmin();
+  const { error } = await db
+    .from("radar_companies")
+    .update({ ...fields, updated_at: new Date().toISOString() })
+    .eq("id", id);
+  revalidatePath("/admin/radar");
+  return { success: !error };
+}
+
 /** Soft-delete a company from the radar (never hard-deletes). */
 export async function markDiscarded(
   id: string,
