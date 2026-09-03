@@ -44,7 +44,10 @@ export default async function LeadsPage({
   const pages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE));
   const mkHref = (patch: Record<string, string>) => {
     const p = new URLSearchParams(sp as Record<string, string>);
-    for (const [k, v] of Object.entries(patch)) v ? p.set(k, v) : p.delete(k);
+    for (const [k, v] of Object.entries(patch)) {
+      if (v) p.set(k, v);
+      else p.delete(k);
+    }
     return `/admin/leads?${p.toString()}`;
   };
 

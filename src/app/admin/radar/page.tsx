@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase/server";
 import { getStats } from "@/lib/radar/store";
 import { RadarStats } from "./components/RadarStats";
@@ -14,9 +15,9 @@ function Shell({ children }: { children: React.ReactNode }) {
     <div className="p-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Радар — база лидов</h1>
-        <a href="/admin/radar/queries" className="text-sm text-blue-600 hover:underline">
+        <Link href="/admin/radar/queries" className="text-sm text-blue-600 hover:underline">
           Параметры сбора →
-        </a>
+        </Link>
       </div>
       {children}
     </div>

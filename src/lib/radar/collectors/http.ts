@@ -33,7 +33,6 @@ export async function fetchHtml(url: string, opts: FetchOptions = {}): Promise<F
   const timeoutMs = opts.timeoutMs ?? 15000;
   const retries = opts.retries ?? 1;
   let attempt = 0;
-  let lastErr: unknown;
   while (attempt <= retries) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -51,15 +50,13 @@ export async function fetchHtml(url: string, opts: FetchOptions = {}): Promise<F
       clearTimeout(timer);
       if (res.status === 429 || res.status >= 500) {
         // rate-limited / server error → backoff and retry
-        lastErr = new Error(`HTTP ${res.status}`);
         if (attempt < retries) await sleep(1000 * 2 ** attempt);
         attempt++;
         continue;
       }
       return { ok: res.ok, status: res.status, html, finalUrl: res.url || url };
-    } catch (err) {
+    } catch {
       clearTimeout(timer);
-      lastErr = err;
       if (attempt < retries) await sleep(1000 * 2 ** attempt);
       attempt++;
     }
