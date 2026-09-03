@@ -16,6 +16,8 @@ const BRAND_DOMAIN = "skyline-digital.uz";
  */
 
 export interface ProposalRenderInput {
+  /** сум за $1; из settings.fx_rate, дефолт 12 000 */
+  fxRate?: number;
   proposal: Proposal;
   pricing: PricingResult;
   configuration: ProjectConfiguration;
@@ -237,6 +239,7 @@ function marketTable(pricing: PricingResult) {
 }
 
 export function renderProposalHtml(input: ProposalRenderInput): string {
+  const FX = input.fxRate && input.fxRate > 0 ? input.fxRate : FX_RATE;
   const { proposal, pricing, configuration, meta } = input;
   // Guard: estimates snapshotted before the open-unit-economics rollout have no
   // roleBreakdown/subtotal/total — fall back to the mid-range figure so old
@@ -253,7 +256,7 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
   // keep the exact figure (nothing to absorb into).
   const total = rawUrgency > 0 ? Math.round(rawTotal / 10) * 10 : rawTotal;
   const urgencyAmount = rawUrgency > 0 ? total - subtotal : 0;
-  const totalUzs = total * FX_RATE;
+  const totalUzs = total * FX;
   const market = marketTable(pricing);
   const savingPct = Math.max(0, Math.round((1 - totalUzs / market.total) * 100));
   // The market anchor is a sales device (CLAUDE.md §9) — only ever show it when
@@ -262,7 +265,7 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
   const showAnchor = savingPct > 0;
   // "Без скидки" comparison in USD, so it reads next to ВАША ЦЕНА in the same
   // unit. Ceil to a clean $50 for a tidy strike-through figure.
-  const listUsd = Math.ceil(market.total / FX_RATE / 50) * 50;
+  const listUsd = Math.ceil(market.total / FX / 50) * 50;
   // Payment split: round the prepayment to a clean $10 and let the balance be
   // the exact remainder, so the two rows still sum to ВАША ЦЕНА (point 4).
   const prepay = Math.round(total / 2 / 10) * 10;
@@ -574,7 +577,7 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
   <div style="display:flex; gap:44px">
     <table class="pay">
       <tr><th>Предоплата</th><th>После запуска</th></tr>
-      <tr><td>${usd(prepay)} · ${uzs(prepay * FX_RATE)}</td><td>${usd(postpay)} · ${uzs(postpay * FX_RATE)}</td></tr>
+      <tr><td>${usd(prepay)} · ${uzs(prepay * FX)}</td><td>${usd(postpay)} · ${uzs(postpay * FX)}</td></tr>
     </table>
     <table class="totals">
       <tr><td>Сумма проекта (USD):</td><td>${usd(total)}</td></tr>
@@ -583,7 +586,7 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
       <tr><td class="muted">Правки после запуска:</td><td>от $15</td></tr>
     </table>
   </div>
-  <div class="footnote">Оплата в сумах по курсу на день платежа (в расчёте — ${uzs(FX_RATE)}). Второй платёж — после запуска и подписания акта.</div>
+  <div class="footnote">Оплата в сумах по курсу на день платежа (в расчёте — ${uzs(FX)}). Второй платёж — после запуска и подписания акта.</div>
   <div class="contact-card">
     <div class="contact-main">
       <div class="contact-brand-name">Skyline Digital</div>

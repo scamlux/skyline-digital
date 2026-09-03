@@ -19,12 +19,9 @@ const NAV = [
   { href: "/admin/estimates", label: "Сметы и КП", icon: Calculator },
   { href: "/admin/audits", label: "Аудиты сайтов", icon: Gauge },
   { href: "/admin/radar", label: "Радар (лиды)", icon: Radar },
-];
-
-const SOON = [
-  { label: "Проекты", icon: FolderKanban },
-  { label: "Прайс", icon: DollarSign },
-  { label: "Настройки", icon: Settings },
+  { href: "/admin/projects", label: "Проекты", icon: FolderKanban },
+  { href: "/admin/pricing", label: "Прайс", icon: DollarSign },
+  { href: "/admin/settings", label: "Настройки", icon: Settings },
 ];
 
 export function AdminSidebar() {
@@ -54,19 +51,6 @@ export function AdminSidebar() {
             <Icon size={18} />
             {label}
           </Link>
-        ))}
-        <div className="px-3 pb-1 pt-5 text-[10px] uppercase tracking-wider text-white/30">
-          Скоро
-        </div>
-        {SOON.map(({ label, icon: Icon }) => (
-          <div
-            key={label}
-            className="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/25"
-            title="В следующей волне"
-          >
-            <Icon size={18} />
-            {label}
-          </div>
         ))}
       </nav>
       <div className="border-t border-white/10 px-5 py-4 text-xs text-white/40">

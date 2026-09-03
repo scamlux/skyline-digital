@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { projects, projectCategories, type ProjectCategory } from "@/data/projects";
+import { projectCategories, type Project, type ProjectCategory } from "@/data/projects";
 import { PreviewCard } from "./PreviewCard";
 import { cn } from "@/lib/utils";
 
-export function ProjectsGrid() {
+export function ProjectsGrid({ projects }: { projects: Project[] }) {
   const t = useTranslations("projects");
   const [filter, setFilter] = useState<"all" | ProjectCategory>("all");
 

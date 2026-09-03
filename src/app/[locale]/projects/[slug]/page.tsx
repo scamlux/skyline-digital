@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
-import { projects, getProjectBySlug } from "@/data/projects";
+import { projects } from "@/data/projects";
+import { getProject } from "@/lib/portfolio";
 import { localeUrl, languageAlternates, SITE_URL, SITE_NAME } from "@/lib/seo";
 
 export function generateStaticParams() {
@@ -19,7 +20,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
   const { locale, slug } = await params;
-  const project = getProjectBySlug(slug);
+  const project = await getProject(slug);
   if (!project) return {};
   const path = `/projects/${slug}`;
   return {
@@ -48,7 +49,7 @@ export default async function ProjectPage({
   const { locale, slug } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("project");
-  const project = getProjectBySlug(slug);
+  const project = await getProject(slug);
   if (!project) notFound();
 
   const jsonLd = {

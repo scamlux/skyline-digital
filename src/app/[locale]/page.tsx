@@ -7,7 +7,7 @@ import { Spotlight } from "@/components/ui/Spotlight";
 import { PreviewCard } from "@/components/projects/PreviewCard";
 import { TechStack } from "@/components/home/TechStack";
 import { ProcessSteps } from "@/components/home/ProcessSteps";
-import { projects } from "@/data/projects";
+import { getProjects } from "@/lib/portfolio";
 import { basePriceUsd } from "@/lib/pricing/rules";
 import { formatUsd } from "@/lib/utils";
 
@@ -54,7 +54,7 @@ export default async function HomePage({
   setRequestLocale(locale);
   const t = await getTranslations("home");
   const ts = await getTranslations("services");
-  const featured = projects.slice(0, 4);
+  const featured = (await getProjects()).slice(0, 4);
   const words = heroWords(t("hero.title"));
 
   const marqueeItems = [

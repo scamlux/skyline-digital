@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { ProjectsGrid } from "@/components/projects/ProjectsGrid";
+import { getProjects } from "@/lib/portfolio";
 import { localeUrl, languageAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
@@ -28,6 +29,7 @@ export default async function ProjectsPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("projects");
+  const items = await getProjects();
 
   return (
     <main>
@@ -49,7 +51,7 @@ export default async function ProjectsPage({
 
       <div className="bg-day">
         <div className="mx-auto max-w-6xl px-5 py-12 md:px-8 md:py-16">
-          <ProjectsGrid />
+          <ProjectsGrid projects={items} />
         </div>
       </div>
     </main>

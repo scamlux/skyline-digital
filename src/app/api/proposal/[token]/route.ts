@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { renderProposalHtml } from "@/templates/proposal/template";
+import { getSetting } from "@/lib/portfolio";
 import { htmlToPdf } from "@/lib/pdf/render";
 import {
   sendTelegramDocumentBuffer,
@@ -113,7 +114,9 @@ export async function GET(
       month: "long",
       year: "numeric",
     });
+    const fxRate = await getSetting<number>("fx_rate", 12000);
     const html = renderProposalHtml({
+      fxRate,
       proposal: est.ai_result,
       pricing: est.pricing_result,
       configuration: est.configuration,
