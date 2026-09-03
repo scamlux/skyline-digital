@@ -32,17 +32,19 @@ interface Args {
   dryRun: boolean;
   stats: boolean;
   rescore: boolean;
+  relabel: boolean;
   help: boolean;
 }
 
 function parseArgs(argv: string[]): Args {
-  const a: Args = { all: false, region: "uz", dryRun: false, stats: false, rescore: false, help: false };
+  const a: Args = { all: false, region: "uz", dryRun: false, stats: false, rescore: false, relabel: false, help: false };
   for (let i = 0; i < argv.length; i++) {
     const v = argv[i];
     if (v === "--all") a.all = true;
     else if (v === "--dry-run") a.dryRun = true;
     else if (v === "--stats") a.stats = true;
     else if (v === "--rescore") a.rescore = true;
+    else if (v === "--relabel") a.relabel = true;
     else if (v === "--help" || v === "-h") a.help = true;
     else if (v === "--industry") a.industry = argv[++i] as Industry;
     else if (v === "--collector") a.collector = argv[++i] as RadarSource;
@@ -153,6 +155,7 @@ async function main() {
     industries,
     queries,
     region: args.region,
+    relabel: args.relabel,
     dryRun: args.dryRun,
     db,
     log: (m) => console.log(m),

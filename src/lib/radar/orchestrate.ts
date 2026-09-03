@@ -32,6 +32,8 @@ export interface OrchestrateConfig {
   /** Fetch each company's site to score signals (default true). */
   enrich?: boolean;
   concurrency?: number;
+  /** Allow industry relabeling on existing rows (one-off corrective runs). */
+  relabel?: boolean;
   /** Wall-clock now, injected for deterministic tests. */
   now?: () => number;
 }
@@ -96,7 +98,7 @@ export async function orchestrate(cfg: OrchestrateConfig): Promise<IndustrySumma
     let created = 0;
     let updated = 0;
     if (!cfg.dryRun && cfg.db) {
-      const r = await upsertCompanies(cfg.db, scored, cfg.region);
+      const r = await upsertCompanies(cfg.db, scored, cfg.region, undefined, { relabel: cfg.relabel });
       created = r.new;
       updated = r.updated;
       errors.push(...r.errors);

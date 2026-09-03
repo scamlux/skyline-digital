@@ -64,6 +64,7 @@ export async function upsertCompanies(
   companies: ScoredCompany[],
   region: Region = "uz",
   now: string = new Date().toISOString(),
+  opts: { relabel?: boolean } = {},
 ): Promise<UpsertResult> {
   const errors: string[] = [];
   // Collapse same-phone rows inside the batch: greedy dedupe can leave two
@@ -112,7 +113,7 @@ export async function upsertCompanies(
     // it was first discovered under (later same-phone claims from other
     // industry queries update signals/contacts but not the label).
     const prev = existingBy.get(c.phone as string);
-    if (prev?.industry) row.industry = prev.industry;
+    if (prev?.industry && !opts.relabel) row.industry = prev.industry;
     return row;
   });
   const { error: upErr } = await db
