@@ -1,7 +1,17 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { saveProject, deleteProject, type ProjectInput } from "./actions";
+import { saveProject, deleteProject, prefillProject, type ProjectInput } from "./actions";
+
+/** Бейдж «ИИ» у полей, заполненных моделью, — до первой ручной правки (§5). */
+function AiBadge({ on }: { on: boolean }) {
+  if (!on) return null;
+  return (
+    <span className="ml-2 rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-700">
+      ИИ
+    </span>
+  );
+}
 
 export interface ProjectRow extends ProjectInput {
   id: string;
@@ -102,7 +112,48 @@ function Editor({
   const [metrics, setMetrics] = useState(
     (initial?.metrics ?? []).map((m) => `${m.value} | ${m.label}`).join("\n"),
   );
-  const set = (k: keyof ProjectInput, v: unknown) => setF((s) => ({ ...s, [k]: v }));
+  const [aiFields, setAiFields] = useState<Set<string>>(new Set());
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiErr, setAiErr] = useState<string | null>(null);
+  const clearAi = (k: string) => setAiFields((s) => { if (!s.has(k)) return s; const n = new Set(s); n.delete(k); return n; });
+  const set = (k: keyof ProjectInput, v: unknown) => { clearAi(k); setF((s) => ({ ...s, [k]: v })); };
+
+  async function runPrefill() {
+    setAiBusy(true);
+    setAiErr(null);
+    try {
+      const res = await prefillProject({
+        title: f.title,
+        url: f.url ?? undefined,
+        category: f.category,
+        stack: tech.split(",").map((s) => s.trim()).filter(Boolean),
+        year: f.year,
+        facts: f.description || undefined,
+      });
+      if (!res.ok || !res.draft) {
+        setAiErr("ИИ недоступен — заполните вручную.");
+        return;
+      }
+      const d = res.draft;
+      const filled = new Set<string>();
+      setF((s) => ({
+        ...s,
+        description: d.description || s.description,
+        brief: d.brief || s.brief,
+        solution: d.solution || s.solution,
+        result: d.result || s.result,
+      }));
+      ["description", "brief", "solution", "result"].forEach((k) => filled.add(k));
+      if (d.technologies.length) { setTech(d.technologies.join(", ")); filled.add("technologies"); }
+      if (d.metrics.length) {
+        setMetrics(d.metrics.map((m) => `${m.value} | ${m.label}`).join("\n"));
+        filled.add("metrics");
+      }
+      setAiFields(filled);
+    } finally {
+      setAiBusy(false);
+    }
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/30" onClick={onClose}>
@@ -110,6 +161,21 @@ function Editor({
         <div className="flex items-start justify-between">
           <h2 className="text-xl font-bold text-gray-900">{initial ? "Редактировать проект" : "Новый проект"}</h2>
           <button onClick={onClose} className="text-2xl leading-none text-gray-400 hover:text-gray-700">×</button>
+        </div>
+
+        {/* Touchpoint C (§5): предзаполнение полей моделью. Ничего не публикует. */}
+        <div className="mt-4 flex items-center gap-3">
+          <button
+            type="button"
+            onClick={runPrefill}
+            disabled={aiBusy || !f.title.trim()}
+            className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+          >
+            {aiBusy ? "Заполняю…" : "✦ Заполнить с ИИ"}
+          </button>
+          <span className="text-xs text-gray-400">
+            {aiErr ?? "Заполнит описание, задачу/решение/результат, стек и метрики — можно править."}
+          </span>
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-3">
@@ -123,12 +189,12 @@ function Editor({
             </select></div>
           <div><label className="text-xs uppercase text-gray-500">Год</label>
             <input type="number" value={f.year ?? ""} onChange={(e) => set("year", Number(e.target.value) || null)} className={INPUT} /></div>
-          <div className="col-span-2"><label className="text-xs uppercase text-gray-500">Описание</label>
+          <div className="col-span-2"><label className="text-xs uppercase text-gray-500">Описание<AiBadge on={aiFields.has("description")} /></label>
             <textarea value={f.description} onChange={(e) => set("description", e.target.value)} rows={3} className={INPUT} /></div>
           <div className="col-span-2"><label className="text-xs uppercase text-gray-500">Картинка (путь/URL)</label>
             <input value={f.image} onChange={(e) => set("image", e.target.value)} placeholder="/projects/name.jpg" className={INPUT} /></div>
-          <div className="col-span-2"><label className="text-xs uppercase text-gray-500">Технологии (через запятую)</label>
-            <input value={tech} onChange={(e) => setTech(e.target.value)} className={INPUT} /></div>
+          <div className="col-span-2"><label className="text-xs uppercase text-gray-500">Технологии (через запятую)<AiBadge on={aiFields.has("technologies")} /></label>
+            <input value={tech} onChange={(e) => { clearAi("technologies"); setTech(e.target.value); }} className={INPUT} /></div>
           <div><label className="text-xs uppercase text-gray-500">Ссылка на живой сайт</label>
             <input value={f.url ?? ""} onChange={(e) => set("url", e.target.value || null)} className={INPUT} /></div>
           <div><label className="text-xs uppercase text-gray-500">Порядок</label>
@@ -147,14 +213,14 @@ function Editor({
               <input value={f.client ?? ""} onChange={(e) => set("client", e.target.value || null)} className={INPUT} /></div>
             <div><label className="text-xs uppercase text-gray-500">Роль</label>
               <input value={f.role ?? ""} onChange={(e) => set("role", e.target.value || null)} className={INPUT} /></div>
-            <div className="col-span-2"><label className="text-xs uppercase text-gray-500">Задача</label>
+            <div className="col-span-2"><label className="text-xs uppercase text-gray-500">Задача<AiBadge on={aiFields.has("brief")} /></label>
               <textarea value={f.brief ?? ""} onChange={(e) => set("brief", e.target.value || null)} rows={2} className={INPUT} /></div>
-            <div className="col-span-2"><label className="text-xs uppercase text-gray-500">Решение</label>
+            <div className="col-span-2"><label className="text-xs uppercase text-gray-500">Решение<AiBadge on={aiFields.has("solution")} /></label>
               <textarea value={f.solution ?? ""} onChange={(e) => set("solution", e.target.value || null)} rows={2} className={INPUT} /></div>
-            <div className="col-span-2"><label className="text-xs uppercase text-gray-500">Результат</label>
+            <div className="col-span-2"><label className="text-xs uppercase text-gray-500">Результат<AiBadge on={aiFields.has("result")} /></label>
               <textarea value={f.result ?? ""} onChange={(e) => set("result", e.target.value || null)} rows={2} className={INPUT} /></div>
-            <div className="col-span-2"><label className="text-xs uppercase text-gray-500">Метрики (по строке: значение | подпись)</label>
-              <textarea value={metrics} onChange={(e) => setMetrics(e.target.value)} rows={3} placeholder="+38% | конверсия" className={INPUT} /></div>
+            <div className="col-span-2"><label className="text-xs uppercase text-gray-500">Метрики (по строке: значение | подпись)<AiBadge on={aiFields.has("metrics")} /></label>
+              <textarea value={metrics} onChange={(e) => { clearAi("metrics"); setMetrics(e.target.value); }} rows={3} placeholder="+38% | конверсия" className={INPUT} /></div>
             <div className="col-span-2"><label className="text-xs uppercase text-gray-500">Галерея (по одному пути/URL на строку)</label>
               <textarea value={gallery} onChange={(e) => setGallery(e.target.value)} rows={3} placeholder="/projects/name-2.jpg" className={INPUT} /></div>
           </div>

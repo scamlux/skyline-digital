@@ -50,6 +50,30 @@ export async function saveProject(id: string | null, p: ProjectInput): Promise<{
   return { ok: !error, error: error?.message };
 }
 
+/**
+ * Touchpoint C (§5): предзаполнение карточки с ИИ. Возвращает ЧЕРНОВИК —
+ * ничего не сохраняет. Server Action, а не /api-роут: наследует Basic-Auth
+ * админки и не открывает публичный AI-эндпоинт (§11). Фолбэк при сбое —
+ * пустой черновик, форма остаётся редактируемой.
+ */
+export async function prefillProject(input: {
+  title: string;
+  url?: string;
+  category?: string;
+  stack?: string[];
+  year?: number | null;
+  facts?: string;
+}): Promise<{ ok: boolean; draft?: import("@/lib/ai/project-prefill").ProjectPrefill; error?: string }> {
+  if (!input.title?.trim()) return { ok: false, error: "no_title" };
+  try {
+    const { parseProjectPrefill } = await import("@/lib/ai/project-prefill");
+    const draft = await parseProjectPrefill(input);
+    return { ok: true, draft };
+  } catch (err) {
+    return { ok: false, error: String(err) };
+  }
+}
+
 export async function deleteProject(id: string): Promise<{ ok: boolean }> {
   const db = getSupabaseAdmin();
   const { error } = await db.from("projects").delete().eq("id", id);
