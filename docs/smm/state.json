@@ -1,0 +1,136 @@
+{
+  "_comment": "Состояние SMM-машины, редакция 3 — карусели вместо видео, Instagram главный, LinkedIn с личного профиля владельца. Спецификация — docs/SMM-PLAN.md и docs/SMM-ANALYSIS-2026-09.md. Обновляет пятничная сверка, правила — docs/smm/QA.md.",
+  "updated": "2026-09-04",
+  "phase": 0,
+  "phase_name": "упаковка",
+  "goal": {
+    "metric": "followers_ig_plus_tg",
+    "target": 1000,
+    "current": 0
+  },
+  "followers": {
+    "instagram": 0,
+    "telegram": 0,
+    "threads": 0,
+    "linkedin": 0
+  },
+  "week": {
+    "number": 0,
+    "posted": 0,
+    "views": 0,
+    "new_followers": 0,
+    "bio_clicks": 0,
+    "retention_3s": null,
+    "audit_starts": 0,
+    "shares_per_reach": null,
+    "saves": null,
+    "comments": null
+  },
+  "median_views": null,
+  "formats": {
+    "carousel_audit": {
+      "posts": 0,
+      "median_views": null,
+      "status": "testing",
+      "note": "столп A — разбор по замеру, обезличенно; этого не делает ни один конкурент"
+    },
+    "carousel_prices": {
+      "posts": 0,
+      "median_views": null,
+      "status": "testing",
+      "note": "столп B — цены открыто; в ленте это делает 1 студия из 20"
+    },
+    "carousel_howto": {
+      "posts": 0,
+      "median_views": null,
+      "status": "testing",
+      "note": "столп C — ликбез для заказчика, работает на сохранения"
+    },
+    "carousel_case": {
+      "posts": 0,
+      "median_views": null,
+      "status": "testing",
+      "note": "столп D — кейс из портфолио"
+    },
+    "linkedin_pdf_en": {
+      "posts": 0,
+      "median_views": null,
+      "status": "testing",
+      "note": "столп E — PDF-документ, 7,00% ER при медиане рынка 2 поста в месяц"
+    },
+    "linkedin_text_en": {
+      "posts": 0,
+      "median_views": null,
+      "status": "testing",
+      "note": "столп E — текстовый пост EN"
+    },
+    "telegram_short": {
+      "posts": 0,
+      "median_views": null,
+      "status": "testing",
+      "note": "столп F — короткое наблюдение, канал как медиа"
+    },
+    "stories": {
+      "posts": 0,
+      "median_views": null,
+      "status": "testing",
+      "note": "ответы на сторис растут на 88% за год, кормят сигнал двустороннего разговора"
+    }
+  },
+  "kill_list": [],
+  "leads_from_social": 0,
+  "tokens": {
+    "meta_expires": null,
+    "google_status": "not_created",
+    "last_refresh": null
+  },
+  "_status_values": [
+    "testing",
+    "winner",
+    "archived"
+  ],
+  "_kill_list_item": {
+    "format": "<ключ>",
+    "date": "YYYY-MM-DD",
+    "reason": "<3 публикации ниже медианы>"
+  },
+  "edition": 3,
+  "mode": "static",
+  "platforms": [
+    "instagram",
+    "telegram",
+    "linkedin_personal",
+    "facebook",
+    "threads"
+  ],
+  "platform_roles": {
+    "instagram": "главный канал охвата — 14,1 млн аудитории в Узбекистане, 3 карусели в неделю",
+    "telegram": "собственная аудитория, канал как медиа; у конкурентов поле пустое (максимум 113 подписчиков)",
+    "linkedin_personal": "EN, субподряд и международные клиенты; посты людей дают +63% вовлечённости против страницы, страница получает раздачу лишь на 2-5% подписчиков",
+    "facebook": "инфраструктура и кросспост, 60-85 просмотров на пост — отдельной работы ноль",
+    "threads": "кросспост из Instagram, ноль усилий"
+  },
+  "accounts": {
+    "instagram": "@skylinedigital.uz",
+    "facebook": "Skyline Digital",
+    "linkedin": "личный профиль владельца",
+    "telegram": "канал студии"
+  },
+  "benchmarks": {
+    "_comment": "Ориентиры для пятничной сверки, чтобы не считать норму провалом. Источники — docs/SMM-ANALYSIS-2026-09.md §4.",
+    "instagram_carousel_views_1k_5k": 993,
+    "instagram_reels_views_1k_5k": 580,
+    "instagram_photo_views_1k_5k": 417,
+    "facebook_views_per_post_1k_5k": "60-85",
+    "linkedin_impressions_1k_5k": 490,
+    "telegram_err_percent": "6-16",
+    "share_of_sub10k_accounts_that_grew_yoy_percent": 21
+  },
+  "publishing": {
+    "instagram": "Meta Business Suite, бесплатно; глубину очереди проверить в кабинете — 30 или 75 дней, источники расходятся",
+    "facebook": "Meta Business Suite, тот же пост",
+    "threads": "кросспост из Instagram",
+    "telegram": "Bot API, бот админом канала",
+    "linkedin": "руками с личного профиля, API нет"
+  }
+}

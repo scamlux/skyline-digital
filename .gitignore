@@ -61,5 +61,13 @@ kp_skyline.pdf
 /skylineprodhardening.patch
 /skyline-prod-plan.md
 /docs/OPERATING-MODEL.md
+/docs/SMM-PLAN.md
+# docs/smm/ НЕ игнорируем: brain.md и state.json нужны GitHub Actions (SMM-PLAN §6)
 /docs/TZ-AUDIT-ENGINE.md
+/docs/TZ-CONTENT-STUDIO.md
+/docs/HOWTO-DESIGN-IMPORT.md
 /docs/prompts/
+
+# Фабрика постов: шрифты и рендер не коммитятся, они пересобираются
+/scripts/content/fonts/*.woff2
+/scripts/content/out/

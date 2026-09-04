@@ -1,0 +1,36 @@
+{
+  "slug": "vibe-no-lighthouse",
+  "title": "Почему мы не используем Lighthouse",
+  "format": "post",
+  "style": "vibe",
+  "platforms": ["LinkedIn", "Threads", "Telegram"],
+  "slides": [
+    { "type": "cover", "eyebrow": "под капотом", "title": "Мы меряем сайты без Lighthouse", "subtitle": "Все инструменты аудита строятся вокруг него. Мы сознательно отказались. Объясняю почему.", "swipe": "листай →" },
+    { "type": "points", "eyebrow": "три причины", "title": "Почему не он",
+      "items": [
+        { "n": "01", "title": "Он медленный", "text": "Полный прогон — десятки секунд на сайт. Когда надо замерить триста сайтов подряд, это часы вместо минут." },
+        { "n": "02", "title": "Он даёт больше, чем нужно", "text": "Сто с лишним проверок, из которых владельцу бизнеса важны пять. Остальное — шум в отчёте." },
+        { "n": "03", "title": "Он тяжёлый в проде", "text": "Тащить его в serverless-функцию — отдельный проект. Мы хотели, чтобы аудит работал прямо на сайте." }
+      ] },
+    { "type": "terminal", "eyebrow": "что вместо", "title": "Chrome DevTools Protocol напрямую", "window": "measure.ts",
+      "lines": [
+        { "kind": "comment", "text": "// открываем страницу в мобильной эмуляции" },
+        { "kind": "cmd", "text": "await page.emulate(iPhone)" },
+        { "kind": "comment", "text": "// берём только то, что показываем клиенту" },
+        { "kind": "out", "text": "ttfb   · время до первого байта" },
+        { "kind": "out", "text": "lcp    · когда виден главный элемент" },
+        { "kind": "out", "text": "viewport, https, заголовки, базовое SEO" },
+        { "kind": "ok", "text": "оценка A–F по четырём направлениям" }
+      ],
+      "text": "Тот же браузер, те же метрики — но мы сами решаем, что считать и что показывать." },
+    { "type": "take", "eyebrow": "вывод", "text": "Готовый инструмент даёт *чужие* ответы на чужие вопросы", "note": "Когда собираешь сам, ты понимаешь каждую цифру в отчёте и можешь объяснить её клиенту словами, а не ссылкой на документацию." },
+    { "type": "cta", "eyebrow": "попробовать", "title": "Замерим ваш сайт бесплатно", "text": "Тот самый движок, о котором пост. Адрес сайта — и отчёт с оценкой и списком того, что чинить первым.", "action": "skyline-digital.uz/audit" }
+  ],
+  "caption": {
+    "default": "Все инструменты аудита сайтов строятся вокруг Lighthouse. Мы отказались — и вот почему.\n\nОн медленный: полный прогон занимает десятки секунд, а нам надо мерить сотни сайтов подряд. Он даёт сто проверок, из которых владельцу важны пять. И он тяжёлый — тащить его в serverless отдельный проект.\n\nВместо него — Chrome DevTools Protocol напрямую. Тот же браузер, те же метрики, но мы сами решаем, что считать.\n\nГлавное: когда собираешь сам, ты понимаешь каждую цифру в отчёте и можешь объяснить её клиенту словами.\n\nЗамерить свой сайт: skyline-digital.uz/audit",
+    "telegram": "**Почему мы меряем сайты без Lighthouse**\n\n**Медленный.** Полный прогон — десятки секунд. Для трёхсот сайтов это часы.\n**Избыточный.** Сто проверок, из которых владельцу важны пять.\n**Тяжёлый.** В serverless его тащить — отдельный проект.\n\nВместо него — Chrome DevTools Protocol напрямую: TTFB, LCP, viewport, https, заголовки, базовое SEO. Оценка A–F по четырём направлениям.\n\nКогда собираешь сам, ты понимаешь каждую цифру и объясняешь её клиенту словами, а не ссылкой на доки.\n\nПроверить свой сайт: skyline-digital.uz/audit",
+    "short": "Все инструменты аудита строятся вокруг Lighthouse. Мы отказались: медленный, избыточный, тяжёлый в проде. Взяли Chrome DevTools Protocol напрямую и считаем только то, что показываем клиенту.",
+    "linkedin": "Every website audit tool is built around Lighthouse. We deliberately skipped it.\n\nThree reasons. It is slow — a full run takes tens of seconds, and we measure hundreds of sites in a batch. It is excessive — over a hundred checks, of which a business owner cares about five. And it is heavy to ship: getting it into a serverless function is a project of its own.\n\nInstead we drive the Chrome DevTools Protocol directly. Same browser, same metrics, but we decide what to collect: TTFB, LCP under mobile emulation, viewport, HTTPS, security headers, basic SEO. Four category scores, A to F.\n\nThe real gain is not speed. It is that we understand every number in the report and can explain it to a client in words, instead of linking to documentation."
+  },
+  "hashtags": ["#вебразработка", "#производительность", "#вайбкодинг", "#ташкент", "#buildinpublic"]
+}

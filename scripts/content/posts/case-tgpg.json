@@ -1,0 +1,60 @@
+{
+  "slug": "case-tgpg",
+  "title": "Кейс: TGPG.UZ — сайт инжиниринговой компании",
+  "format": "post",
+  "platforms": ["Instagram", "Telegram", "LinkedIn"],
+  "slides": [
+    {
+      "type": "cover",
+      "tone": "dark",
+      "eyebrow": "Кейс · 2026",
+      "title": "TGPG.UZ",
+      "subtitle": "Корпоративный сайт инжиниринговой компании: газовая инфраструктура, каталог труб и техники, три языка и CMS.",
+      "swipe": "листай →"
+    },
+    {
+      "type": "case",
+      "tone": "light",
+      "eyebrow": "Как выглядит",
+      "image": "/public/projects/tgpg.jpg",
+      "text": "Тринадцать реализованных объектов, каталог оборудования и понятная структура для тех, кто выбирает подрядчика по инфраструктуре.",
+      "tags": ["Next.js", "TypeScript", "Tailwind CSS", "CMS"]
+    },
+    {
+      "type": "points",
+      "tone": "light",
+      "eyebrow": "Задача",
+      "title": "Что нужно было решить",
+      "items": [
+        { "title": "Показать масштаб работ", "text": "Инжиниринг покупают по доказательствам. Объекты должны быть видны сразу, а не в PDF по запросу." },
+        { "title": "Каталог, который не устареет", "text": "Трубы и техника меняются. Нужна CMS, чтобы правки шли без разработчика." },
+        { "title": "Три языка", "text": "Русский, узбекский, английский — с корректной вёрсткой на каждом, а не машинным переводом поверх." }
+      ]
+    },
+    {
+      "type": "points",
+      "tone": "dark",
+      "eyebrow": "Решение",
+      "title": "Что сделали",
+      "items": [
+        { "title": "Каталог на CMS", "text": "Позиции и объекты редактируются из админки. Разработчик для этого больше не нужен." },
+        { "title": "Реестр объектов", "text": "Тринадцать проектов вынесены на первый экран как основное доказательство компетенции." },
+        { "title": "Трёхъязычность на уровне архитектуры", "text": "Не плагин-переводчик, а отдельные версии страниц с корректными адресами для поиска." }
+      ]
+    },
+    {
+      "type": "cta",
+      "tone": "dark",
+      "eyebrow": "Похожая задача",
+      "title": "Посчитайте свой проект за минуту",
+      "text": "Калькулятор на сайте покажет вилку цены и срок сразу. А если сайт уже есть — замерим его бесплатно и покажем, что чинить в первую очередь.",
+      "action": "skyline-digital.uz/calculator"
+    }
+  ],
+  "caption": {
+    "default": "TGPG.UZ — корпоративный сайт инжиниринговой компании: газовая инфраструктура, каталог труб и техники, 13 реализованных объектов.\n\nЗадача была не «сделать красиво», а показать масштаб работ так, чтобы это читалось за первые секунды, и дать каталог, который компания правит сама, без разработчика.\n\nСтек: Next.js, TypeScript, Tailwind, CMS. Три языка на уровне архитектуры, а не плагином-переводчиком.\n\nПосчитать похожий проект: skyline-digital.uz/calculator",
+    "telegram": "**Кейс: TGPG.UZ**\n\nКорпоративный сайт инжиниринговой компании — газовая инфраструктура, каталог труб и техники, 13 реализованных объектов.\n\n**Задача.** Показать масштаб работ сразу, а не в PDF по запросу. Дать каталог, который правится без разработчика. Три языка.\n\n**Решение.** Каталог и объекты на CMS, реестр проектов на первом экране, трёхъязычность на уровне архитектуры с корректными адресами для поиска.\n\nNext.js · TypeScript · Tailwind · CMS\n\nПосмотреть работы: skyline-digital.uz/projects",
+    "linkedin": "Case: TGPG.UZ — corporate site for an engineering company in gas infrastructure.\n\nThe brief was not visual. Engineering services are bought on evidence, so the thirteen delivered sites had to be the first thing a visitor sees, not a PDF sent on request. The equipment catalogue had to be editable by the company, not by us.\n\nBuilt on Next.js and TypeScript with a CMS behind the catalogue, and trilingual at the routing level rather than through a translation plugin — separate pages with proper URLs, which is the part that actually matters for search."
+  },
+  "hashtags": ["#кейс", "#ташкент", "#сайтташкент", "#вебстудияташкент", "#nextjs", "#бизнесузбекистан"]
+}
