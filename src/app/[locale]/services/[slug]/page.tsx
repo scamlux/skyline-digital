@@ -141,7 +141,10 @@ export default async function ServiceDetailPage({
             </div>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {cases.map((p) => (
-                <PreviewCard key={p.slug} image={p.image} title={p.title} url={`/projects/${p.slug}`} sizes="(min-width:1024px) 33vw, 50vw" />
+                <Link key={p.slug} href={`/projects/${p.slug}`} className="group block">
+                  <PreviewCard image={p.image} title={p.title} url={p.url} sizes="(min-width:1024px) 33vw, 50vw" />
+                  <p className="mt-3 font-medium">{p.title}</p>
+                </Link>
               ))}
             </div>
           </section>
