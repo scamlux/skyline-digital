@@ -5,10 +5,10 @@ import type { ProjectInfo } from "@/lib/validation/estimate";
 import { proposalSchema, type Proposal } from "./schema";
 import { SYSTEM_PROMPT, buildUserPrompt } from "./prompt";
 
-const MODEL = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
+export const MODEL = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
 
 let cached: OpenAI | null = null;
-function getClient(): OpenAI {
+export function getClient(): OpenAI {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     throw new Error("OPENAI_API_KEY is not configured");
@@ -27,32 +27,62 @@ export async function generateProposal(input: {
   info: ProjectInfo;
   pricing: PricingResult;
 }): Promise<Proposal> {
+  const { withAiGuards, logAiCall, enforceEngineNumbers } = await import("./observability");
   const client = getClient();
+  const started = Date.now();
 
-  const completion = await client.chat.completions.parse({
-    model: MODEL,
-    messages: [
-      { role: "system", content: SYSTEM_PROMPT },
-      { role: "user", content: buildUserPrompt(input) },
-    ],
-    response_format: zodResponseFormat(proposalSchema, "proposal"),
-    temperature: 0.4,
-  });
+  try {
+    const completion = await withAiGuards(() =>
+      client.chat.completions.parse({
+        model: MODEL,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: buildUserPrompt(input) },
+        ],
+        response_format: zodResponseFormat(proposalSchema, "proposal"),
+        temperature: 0.4,
+      }),
+    );
+    void logAiCall({
+      touchpoint: "proposal",
+      model: MODEL,
+      usage: completion.usage,
+      latencyMs: Date.now() - started,
+      ok: true,
+    });
 
-  const parsed = completion.choices[0]?.message.parsed;
-  if (!parsed) {
-    throw new Error("Model returned no structured proposal");
+    const parsed = completion.choices[0]?.message.parsed;
+    if (!parsed) {
+      throw new Error("Model returned no structured proposal");
+    }
+
+    // Валидатор чисел (§8): чужие $-суммы в прозе → официальная вилка движка.
+    const range = `$${input.pricing.totalMin}–$${input.pricing.totalMax}`;
+    const cleaned = enforceEngineNumbers(
+      parsed,
+      [input.pricing.totalMin, input.pricing.totalMax, input.pricing.total, input.pricing.subtotal],
+      range,
+    );
+
+    // Enforce deterministic values — the AI never decides money or duration.
+    return {
+      ...cleaned,
+      price: { min: input.pricing.totalMin, max: input.pricing.totalMax },
+      timeline: {
+        ...cleaned.timeline,
+        weeks: input.pricing.estimatedWeeks,
+      },
+    };
+  } catch (err) {
+    void logAiCall({
+      touchpoint: "proposal",
+      model: MODEL,
+      latencyMs: Date.now() - started,
+      ok: false,
+      error: String(err),
+    });
+    throw err;
   }
-
-  // Enforce deterministic values — the AI never decides money or duration.
-  return {
-    ...parsed,
-    price: { min: input.pricing.totalMin, max: input.pricing.totalMax },
-    timeline: {
-      ...parsed.timeline,
-      weeks: input.pricing.estimatedWeeks,
-    },
-  };
 }
 
 /**

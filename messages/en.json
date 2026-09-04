@@ -157,7 +157,24 @@
         "benefits": "Prototyping·Design system·Responsive layouts·Dev handoff",
         "examples": "Product redesign·MVP design·Design system"
       }
-    }
+    },
+    "includedLabel": "What's included",
+    "casesLabel": "Case studies",
+    "faqTitle": "FAQ",
+    "ctaTitle": "Estimate your project",
+    "ctaText": "The calculator builds an estimate and a PDF proposal in 2 minutes — free.",
+    "ctaButton": "Calculate cost",
+    "faq": {
+      "q1": "How long does a project take?",
+      "a1": "Depends on scope: the calculator gives exact terms, and we fix the range in the proposal before start.",
+      "q2": "What do you need from me to start?",
+      "a2": "Domain access, company materials (logo, texts or bullet points) and a decision-maker on your side.",
+      "q3": "What about support after launch?",
+      "a3": "One month of support is included. After that — monthly support or one-off fixes per price list.",
+      "q4": "Who owns the code and design?",
+      "a4": "You do. The code lives in your repository from day one; all sources are handed over on delivery."
+    },
+    "allProjects": "All projects →"
   },
   "projects": {
     "title": "Projects",
@@ -389,6 +406,11 @@
       "label": "Other (custom item)",
       "placeholder": "Describe anything not in the list",
       "hint": "Priced individually — not included in the total"
+    },
+    "brief": {
+      "button": "✦ Analyze description with AI",
+      "loading": "Analyzing…",
+      "suggested": "Recommended to add"
     }
   },
   "estimate": {

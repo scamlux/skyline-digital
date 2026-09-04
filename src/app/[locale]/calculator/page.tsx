@@ -22,10 +22,13 @@ export async function generateMetadata({
 
 export default async function CalculatorPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ type?: string }>;
 }) {
   const { locale } = await params;
+  const { type } = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("calc");
 
@@ -48,7 +51,7 @@ export default async function CalculatorPage({
           className="animate-fade-up mt-12"
           style={{ "--d": "300ms" } as React.CSSProperties}
         >
-          <Wizard />
+          <Wizard initialType={type} />
         </div>
       </div>
     </main>

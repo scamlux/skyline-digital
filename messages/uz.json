@@ -157,7 +157,24 @@
         "benefits": "Prototiplash·Dizayn-tizim·Adaptiv maketlar·Dasturchilarga topshirish",
         "examples": "Mahsulot redizayni·MVP dizayni·Dizayn-tizim"
       }
-    }
+    },
+    "includedLabel": "Nimalar kiradi",
+    "casesLabel": "Keyslar",
+    "faqTitle": "Ko'p so'raladigan savollar",
+    "ctaTitle": "Loyihangizni hisoblang",
+    "ctaText": "Kalkulyator 2 daqiqada smeta va PDF taklifni tayyorlaydi — bepul.",
+    "ctaButton": "Narxni hisoblash",
+    "faq": {
+      "q1": "Loyiha qancha vaqt oladi?",
+      "a1": "Hajmga bog'liq: aniq muddatlarni kalkulyator hisoblaydi, oraliqni taklifda boshlashdan oldin belgilaymiz.",
+      "q2": "Boshlash uchun mendan nima kerak?",
+      "a2": "Domenga kirish, kompaniya materiallari (logotip, matnlar) va sizning tomondan mas'ul shaxs.",
+      "q3": "Ishga tushirgandan keyin qo'llab-quvvatlash?",
+      "a3": "Bir oy qo'llab-quvvatlash kiritilgan. Keyin — oylik yoki bir martalik tuzatishlar narxnoma bo'yicha.",
+      "q4": "Kod va dizayn kimniki?",
+      "a4": "Sizniki. Kod birinchi kundan sizning repozitoriyingizda, barcha manbalar topshiriladi."
+    },
+    "allProjects": "Barcha loyihalar →"
   },
   "projects": {
     "title": "Loyihalar",
@@ -389,6 +406,11 @@
       "label": "Boshqa (oʻz bandingiz)",
       "placeholder": "Roʻyxatda yoʻq vazifani yozing",
       "hint": "Alohida baholanadi — summaga kirmaydi"
+    },
+    "brief": {
+      "button": "✦ Tavsifni AI bilan tahlil qilish",
+      "loading": "Tahlil…",
+      "suggested": "Qo'shishni tavsiya qilamiz"
     }
   },
   "estimate": {

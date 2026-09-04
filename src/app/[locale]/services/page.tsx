@@ -75,7 +75,9 @@ export default async function ServicesPage({
                 >
                   <div>
                     <h2 className="font-display text-xl font-medium md:text-2xl">
-                      {t(`items.${key}.title`)}
+                      <Link href={`/services/${key}`} className="transition-colors hover:text-afterglow">
+                        {t(`items.${key}.title`)} →
+                      </Link>
                     </h2>
                     <p className="mt-2 font-mono text-sm text-muted">
                       {t("from")} {formatUsd(basePriceUsd(key))}

@@ -69,12 +69,14 @@ interface EstimateResponse {
 const inputCls =
   "w-full rounded-lg border border-line-night bg-night-deep px-4 py-3 text-sm text-day outline-none transition-colors placeholder:text-mist/60 focus:border-apricot";
 
-export function Wizard() {
+export function Wizard({ initialType }: { initialType?: string } = {}) {
   const t = useTranslations("calc");
   const locale = useLocale();
   const [captchaToken, setCaptchaToken] = useState("");
   const [step, setStep] = useState(0);
-  const [projectType, setProjectType] = useState<ProjectType | null>(null);
+  const [projectType, setProjectType] = useState<ProjectType | null>(
+    TYPES.includes(initialType as ProjectType) ? (initialType as ProjectType) : null,
+  );
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [addons, setAddons] = useState<Set<string>>(new Set());
   const [urgency, setUrgency] = useState<Urgency>("normal");
@@ -341,6 +343,17 @@ export function Wizard() {
                 className={cn(inputCls, "resize-y")}
               />
             </label>
+            {projectType && info.description.trim().length >= 20 && (
+              <BriefAssist
+                projectType={projectType}
+                description={info.description}
+                selected={selected}
+                addons={addons}
+                onAddFeature={(k) => toggle(selected, k, setSelected)}
+                onAddAddon={(k) => toggle(addons, k, setAddons)}
+                t={t}
+              />
+            )}
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="grid gap-1.5">
                 <span className="text-sm text-day">{t("info.budget")}</span>
@@ -665,5 +678,96 @@ function ResultList({ items }: { items: string[] }) {
         </li>
       ))}
     </ul>
+  );
+}
+
+/** Touchpoint A (§8): ИИ-разбор описания — подсказки, вопросы, рекомендации. */
+function BriefAssist({
+  projectType, description, selected, addons, onAddFeature, onAddAddon, t,
+}: {
+  projectType: ProjectType;
+  description: string;
+  selected: Set<string>;
+  addons: Set<string>;
+  onAddFeature: (k: string) => void;
+  onAddAddon: (k: string) => void;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [brief, setBrief] = useState<{
+    understood_scope: string;
+    suggested_option_keys: string[];
+    clarifying_questions: string[];
+  } | null>(null);
+
+  const run = async () => {
+    setBusy(true);
+    try {
+      const res = await fetch("/api/estimate/brief", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          projectType,
+          description,
+          features: [...selected],
+          addons: [...addons],
+        }),
+      });
+      if (res.ok) setBrief((await res.json()) as typeof brief);
+    } catch {
+      /* без ИИ калькулятор работает как раньше */
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const featureSet = new Set(featuresByType[projectType] ?? []);
+  return (
+    <div className="mt-4 rounded-xl border border-line-night bg-night-deep p-4">
+      {!brief ? (
+        <button
+          type="button"
+          onClick={run}
+          disabled={busy}
+          className="font-mono text-xs uppercase tracking-wide text-apricot transition-opacity hover:opacity-80 disabled:opacity-50"
+        >
+          {busy ? t("brief.loading") : t("brief.button")}
+        </button>
+      ) : (
+        <div className="space-y-3 text-sm">
+          <p className="text-mist">{brief.understood_scope}</p>
+          {brief.suggested_option_keys.length > 0 && (
+            <div>
+              <p className="font-mono text-xs uppercase tracking-wide text-apricot">{t("brief.suggested")}</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {brief.suggested_option_keys.map((k) => {
+                  const isFeature = featureSet.has(k);
+                  const active = isFeature ? selected.has(k) : addons.has(k);
+                  return (
+                    <button
+                      key={k}
+                      type="button"
+                      onClick={() => (isFeature ? onAddFeature(k) : onAddAddon(k))}
+                      className={cn(
+                        "rounded-full border px-3 py-1.5 text-xs transition-colors",
+                        active ? "border-apricot text-apricot" : "border-line-night text-day hover:border-mist",
+                      )}
+                    >
+                      {active ? "✓ " : "+ "}
+                      {isFeature ? t(`features.${k}`) : t(`addons.${k}`)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          {brief.clarifying_questions.length > 0 && (
+            <ul className="list-disc pl-5 text-xs text-mist">
+              {brief.clarifying_questions.map((q) => <li key={q}>{q}</li>)}
+            </ul>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
