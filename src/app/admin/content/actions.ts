@@ -1,0 +1,92 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { getSupabaseAdmin } from "@/lib/supabase/server";
+import { savePost, renderPost, type ContentPostRow } from "@/lib/content/store";
+import { publishToTelegram } from "@/lib/content/publish-telegram";
+import { buildPost } from "@/lib/content/build";
+import type { GuardIssue } from "@/lib/content/types";
+
+const reval = () => {
+  revalidatePath("/admin/content");
+  revalidatePath("/admin/content/calendar");
+};
+
+export async function saveSpecAction(
+  id: string | null,
+  rawJson: string,
+  patch: { status?: string; scheduled_at?: string | null; notes?: string | null },
+): Promise<{ ok: boolean; id?: string; issues: GuardIssue[]; error?: string }> {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(rawJson);
+  } catch (e) {
+    return { ok: false, issues: [], error: `JSON: ${String(e)}` };
+  }
+  const res = await savePost(getSupabaseAdmin(), id, raw, patch);
+  reval();
+  return res;
+}
+
+export async function renderAction(id: string): Promise<{ ok: boolean; slides?: number; error?: string }> {
+  const res = await renderPost(getSupabaseAdmin(), id);
+  reval();
+  return res;
+}
+
+/** review → approved: только человек, только этой кнопкой (ТЗ §4.2). */
+export async function approveAction(id: string): Promise<{ ok: boolean }> {
+  const db = getSupabaseAdmin();
+  const { error } = await db
+    .from("content_posts")
+    .update({ status: "approved" })
+    .eq("id", id)
+    .eq("status", "review");
+  reval();
+  return { ok: !error };
+}
+
+export async function scheduleAction(id: string, when: string | null): Promise<{ ok: boolean }> {
+  const db = getSupabaseAdmin();
+  const { error } = await db
+    .from("content_posts")
+    .update(when ? { status: "scheduled", scheduled_at: when } : { scheduled_at: null })
+    .eq("id", id)
+    .in("status", ["approved", "scheduled"]);
+  reval();
+  return { ok: !error };
+}
+
+export async function publishTelegramAction(
+  id: string,
+): Promise<{ ok: boolean; permalink?: string; error?: string }> {
+  const db = getSupabaseAdmin();
+  const { data } = await db.from("content_posts").select("*").eq("id", id).single();
+  if (!data) return { ok: false, error: "not found" };
+  const post = data as ContentPostRow;
+  if (!["approved", "scheduled"].includes(post.status)) {
+    return { ok: false, error: `нельзя публиковать из статуса «${post.status}» — нужен approve` };
+  }
+  const res = await publishToTelegram(db, post);
+  reval();
+  return res;
+}
+
+export async function deletePostAction(id: string): Promise<{ ok: boolean }> {
+  const db = getSupabaseAdmin();
+  const { error } = await db.from("content_posts").delete().eq("id", id);
+  reval();
+  return { ok: !error };
+}
+
+/** HTML-превью слайдов для редактора (без браузера — iframe srcdoc). */
+export async function previewAction(
+  rawJson: string,
+): Promise<{ ok: boolean; slides?: string[]; error?: string }> {
+  try {
+    const built = buildPost(JSON.parse(rawJson));
+    return { ok: true, slides: built.slides };
+  } catch (e) {
+    return { ok: false, error: String(e) };
+  }
+}

@@ -11,6 +11,7 @@ import {
   FolderKanban,
   DollarSign,
   Settings,
+  Megaphone,
 } from "lucide-react";
 
 const NAV = [
@@ -19,6 +20,7 @@ const NAV = [
   { href: "/admin/estimates", label: "Сметы и КП", icon: Calculator },
   { href: "/admin/audits", label: "Аудиты сайтов", icon: Gauge },
   { href: "/admin/radar", label: "Радар (лиды)", icon: Radar },
+  { href: "/admin/content", label: "Контент", icon: Megaphone },
   { href: "/admin/projects", label: "Проекты", icon: FolderKanban },
   { href: "/admin/pricing", label: "Прайс", icon: DollarSign },
   { href: "/admin/settings", label: "Настройки", icon: Settings },
