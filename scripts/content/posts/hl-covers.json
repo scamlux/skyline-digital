@@ -1,0 +1,17 @@
+{
+  "slug": "hl-covers",
+  "title": "Обложки хайлайтов",
+  "format": "story",
+  "style": "studio",
+  "platforms": ["Instagram"],
+  "_note": "Пять обложек 1080×1920. Instagram обрезает их в круг по центру кадра — слово стоит строго в середине. Порядок: Работы первым, человек ищет доказательства.",
+  "slides": [
+    { "type": "hl", "tone": "dark", "frame": true, "word": "Работы",   "note": "восемь проектов" },
+    { "type": "hl", "tone": "dark", "frame": true, "word": "Цены",     "note": "вилки и что входит" },
+    { "type": "hl", "tone": "dark", "frame": true, "word": "Аудит",    "note": "что проверяем" },
+    { "type": "hl", "tone": "dark", "frame": true, "word": "О студии", "note": "кто и как работает" },
+    { "type": "hl", "tone": "dark", "frame": true, "word": "Отзывы",   "note": "заполняется настоящими" }
+  ],
+  "caption": { "default": "Обложки хайлайтов. «Отзывы» не заполнять выдуманным — пустой хайлайт лучше сочинённого отзыва." },
+  "hashtags": []
+}

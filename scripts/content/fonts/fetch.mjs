@@ -4,7 +4,7 @@
  * @fontsource/*, то есть те же файлы, что отдаёт Google Fonts, но через
  * реестр, который доступен и локально, и в CI.
  *
- *   node scripts/content/fonts/fetch.mjs
+ *   node src/lib/content/fonts/fetch.mjs
  *
  * Шрифты не коммитятся (см. .gitignore) — эта команда часть сборки.
  */
@@ -48,4 +48,4 @@ for (const [pkg, weights] of Object.entries(WANT)) {
     }
   }
 }
-console.log(`Готово: ${copied} файлов в scripts/content/fonts/`);
+console.log(`Готово: ${copied} файлов в src/lib/content/fonts/`);

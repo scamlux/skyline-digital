@@ -1,228 +1,571 @@
 {
-  "_comment": "Контент-план сентября 2026, редакция 3 от 2026-09-03. Переработан под выводы docs/SMM-ANALYSIS-2026-09.md: карусели вместо одиночных фото, ноль хэштегов, вопрос и призыв прокомментировать в каждом посте, последний слайд под пересылку, LinkedIn только с личного профиля владельца на английском. Ритм: пн и ср — короткий текст в TG, вт/чт/сб — карусель в IG (кросспост TG+FB+Threads), ср — PDF-документ в LinkedIn, пт — текстовый пост в LinkedIn. Семь уникальных единиц в неделю.",
+  "_comment": "Контент-план, редакция 5 от 2026-09-04. Собран по рубрикатору из разбора владельца (Skyline — разбор конкурентов и референсов IG.pdf, §14-15) и дизайн-системе DESIGN-SYSTEM-POSTS.md. Instagram — четыре поста в неделю пн/ср/пт/вс с чередованием тёмный/светлый. LinkedIn на английском с личного профиля владельца идёт отдельным слоем ср/пт. Facebook и Threads — кросспост из Instagram, отдельной работы ноль. Редакция 5: добавлен блок profile_setup — закреплённая тройка, хайлайты и сторис о студии. Тексты в PROFILE-CONTENT.md.",
   "month": "2026-09",
-  "edition": 3,
+  "edition": 7,
   "rhythm": {
-    "instagram_carousel": ["вт", "чт", "сб"],
-    "telegram_short": ["пн", "ср"],
-    "linkedin_en": ["ср (документ)", "пт (текст)"],
-    "stories": "3-5 в неделю, привязаны к карусели дня",
-    "auto_crosspost": ["facebook", "threads"]
+    "instagram": [
+      "пн Разбор",
+      "ср Радар",
+      "пт Цена вопроса / Кейс",
+      "вс Вайбкодинг"
+    ],
+    "telegram": "дубль Разбора и Радара расширенным текстом",
+    "linkedin_personal_en": [
+      "ср PDF-документ",
+      "пт текстовый пост"
+    ],
+    "auto_crosspost": [
+      "facebook",
+      "threads"
+    ],
+    "tone_alternation": "пн тёмный · ср светлый · пт тёмный · вс светлый"
   },
-  "rules_ref": "docs/smm/brain.md — раздел «Правила площадок». Нарушение любого пункта = пост не публикуется.",
-  "pillars": {
-    "A": "Замер и разбор — флагман, этого не делает ни один конкурент",
-    "B": "Цены и деньги открыто — в ленте это делает 1 студия из 20",
-    "C": "Ликбез для заказчика — работает на сохранения и пересылки",
-    "D": "Кейс из портфолио — доказательство компетенции",
-    "E": "EN техзаметка для LinkedIn — субподряд и международные клиенты",
-    "F": "Короткое наблюдение в Telegram — канал как медиа, не как витрина"
+  "rules_ref": "brain.md — правила площадок · QA.md — гейт · DESIGN-SYSTEM-POSTS.md — шаблоны",
+  "hashtags": "ноль во всех постах, см. DESIGN-SYSTEM-POSTS.md §6 — решение спорное, тест через 8 публикаций",
+  "rubrics": {
+    "razbor": "Разбор — публичный разбор чужого сайта, обезличенно. Аналога у конкурентов нет, это отличие",
+    "radar": "Радар — подборка готовых решений. Самый сохраняемый тип контента",
+    "cena": "Цена вопроса — прозрачность как контент. В ленте это делает 1 студия из 20",
+    "case": "Кейс — задача → решение → цифра → стек и срок",
+    "vibe": "Вайбкодинг — второй стиль, лёгкий, без корпоративности"
   },
   "slots": [
-    { "date": "2026-09-03", "day": "чт", "format": "carousel", "pillar": "B", "slug": "ceny-sajta", "status": "ready", "title": "Сколько стоит сайт в Ташкенте",
-      "goal": "позиционирование и отсев дешёвых лидов",
-      "question": "На какую цифру вы рассчитывали, когда решили делать сайт?",
-      "cta": "Напишите в комментариях свой бюджет — скажу, что в него реально влезает",
-      "share_hook": "Последний слайд: вилка цен по типам сайта — «перешлите тому, кто собирает бюджет»",
-      "platforms": ["instagram", "telegram", "facebook", "threads"] },
-
-    { "date": "2026-09-04", "day": "пт", "format": "linkedin_text", "pillar": "E", "slug": "vibe-no-lighthouse", "status": "ready", "title": "EN: Why we measure sites without Lighthouse",
-      "goal": "субподряд и международные клиенты",
-      "question": "What do you use when Lighthouse numbers stop matching what users feel?",
-      "cta": "Curious what others run — drop your setup in the comments",
-      "share_hook": "Ссылку на сайт даём словами, не URL — минус 60% охвата за внешнюю ссылку",
-      "platforms": ["linkedin_personal"] },
-
-    { "date": "2026-09-05", "day": "сб", "format": "carousel", "pillar": "D", "slug": "case-tgpg", "status": "ready", "title": "Кейс TGPG.UZ",
-      "goal": "доказательство компетенции",
-      "question": "Какая задача у вас сейчас висит без решения дольше всего?",
-      "cta": "Опишите её в комментариях — разберу, чем это обычно закрывают",
-      "share_hook": "Последний слайд: что было и что стало, с замером — «покажите это своему разработчику»",
-      "platforms": ["instagram", "telegram", "facebook", "threads"] },
-
-    { "date": "2026-09-07", "day": "пн", "format": "telegram_short", "pillar": "F", "slug": "tg-zamer-nedeli", "status": "topic", "title": "Замер недели: что видно в первые три секунды",
-      "goal": "запустить канал как медиа, задать формат рубрики",
-      "question": "Сколько секунд грузится ваш сайт на телефоне в метро?",
-      "cta": "Скиньте домен в комментарии — замерю",
-      "share_hook": "Одно наблюдение + одна цифра, без картинки. Формат «Адового УХ», но про скорость",
-      "platforms": ["telegram"] },
-
-    { "date": "2026-09-08", "day": "вт", "format": "carousel", "pillar": "A", "slug": "tri-oshibki", "status": "ready", "title": "Три ошибки, которые видно почти в каждом замере",
-      "goal": "трафик на бесплатный аудит",
-      "question": "Какую из трёх вы у себя уже нашли?",
-      "cta": "Напишите номер в комментариях",
-      "share_hook": "Чек-лист из трёх пунктов — «сохраните и пришлите тому, кто вам делал сайт»",
-      "platforms": ["instagram", "telegram", "facebook", "threads"] },
-
-    { "date": "2026-09-09", "day": "ср", "format": "telegram_short", "pillar": "F", "slug": "tg-domen-hosting", "status": "ready", "title": "Домен, хостинг, сайт — что из этого что",
-      "goal": "ликбез, охват через полезность",
-      "question": "За что из этих трёх вы платите и не помните, кому?",
-      "cta": "Спросите в комментариях — помогу разобраться",
-      "share_hook": "Три определения в трёх строчках",
-      "platforms": ["telegram"] },
-
-    { "date": "2026-09-09", "day": "ср", "format": "linkedin_pdf", "pillar": "E", "slug": "en-pdf-audit-engine", "status": "topic", "title": "EN: How we score a website in 12 seconds — a PDF teardown",
-      "goal": "первый PDF-документ: формат с 7,00% ER при медиане 2 поста в месяц",
-      "question": "Which of these checks would you add first?",
-      "cta": "Tell me what your own pre-launch checklist covers",
-      "share_hook": "8-12 слайдов 1080×1350, последний — чек-лист под скачивание",
-      "platforms": ["linkedin_personal"] },
-
-    { "date": "2026-09-10", "day": "чт", "format": "carousel", "pillar": "B", "slug": "ceny-iz-chego", "status": "topic", "title": "Из чего складывается цена сайта: пять факторов",
-      "goal": "снять возражение «почему так дорого»",
-      "question": "Какой из пяти факторов вам никто ни разу не объяснял?",
-      "cta": "Напишите — разберу подробно в следующем посте",
-      "share_hook": "Разбивка цены по факторам — «перешлите, если вам называли цену без объяснений»",
-      "platforms": ["instagram", "telegram", "facebook", "threads"] },
-
-    { "date": "2026-09-11", "day": "пт", "format": "linkedin_text", "pillar": "E", "slug": "vibe-fabrika", "status": "ready", "title": "EN: I built a content factory in one evening",
-      "goal": "показать автоматизацию и продать её как услугу",
-      "question": "What part of your content workflow still eats the most time?",
-      "cta": "Curious where everyone else is stuck — comment below",
-      "share_hook": "Одна схема конвейера в тексте",
-      "platforms": ["linkedin_personal"] },
-
-    { "date": "2026-09-12", "day": "сб", "format": "carousel", "pillar": "D", "slug": "case-salomtv", "status": "topic", "title": "Кейс Salom TV",
-      "goal": "доказательство компетенции в сложных продуктах",
-      "question": "Что у вас сложнее — сам продукт или объяснить его клиенту?",
-      "cta": "Расскажите в комментариях, с чем воюете",
-      "share_hook": "Последний слайд: замер до и после",
-      "platforms": ["instagram", "telegram", "facebook", "threads"] },
-
-    { "date": "2026-09-14", "day": "пн", "format": "telegram_short", "pillar": "F", "slug": "tg-zamer-2", "status": "topic", "title": "Замер недели №2",
-      "goal": "рубрика набирает регулярность",
-      "question": "Угадаете, сколько весит главная страница?",
-      "cta": "Пишите догадки, ответ вечером",
-      "share_hook": "Интрига с цифрой — самый пересылаемый вид короткого поста",
-      "platforms": ["telegram"] },
-
-    { "date": "2026-09-15", "day": "вт", "format": "carousel", "pillar": "A", "slug": "audit-chto-proveryaem", "status": "topic", "title": "Что мы проверяем в бесплатном аудите",
-      "goal": "снять недоверие к лид-магниту",
-      "question": "Что бы вы хотели, чтобы проверили в первую очередь?",
-      "cta": "Напишите — добавлю в отчёт",
-      "share_hook": "Полный список проверок — «сохраните, пригодится при выборе подрядчика»",
-      "platforms": ["instagram", "telegram", "facebook", "threads"] },
-
-    { "date": "2026-09-16", "day": "ср", "format": "telegram_short", "pillar": "F", "slug": "tg-konstruktor", "status": "topic", "title": "Конструктор против кода: где потолок",
-      "goal": "спорная тема, комментарии",
-      "question": "Вы на конструкторе или на коде? И жалеете ли?",
-      "cta": "Спор в комментариях приветствуется",
-      "share_hook": "Одно наблюдение, которое хочется оспорить",
-      "platforms": ["telegram"] },
-
-    { "date": "2026-09-16", "day": "ср", "format": "linkedin_pdf", "pillar": "E", "slug": "en-pdf-pricing-engine", "status": "topic", "title": "EN: A deterministic pricing engine — and why not an LLM",
-      "goal": "техническая репутация, субподряд",
-      "question": "Where would you draw the line between rules and a model?",
-      "cta": "Would love to hear how you handle quoting",
-      "share_hook": "Схема движка на 10 слайдах",
-      "platforms": ["linkedin_personal"] },
-
-    { "date": "2026-09-17", "day": "чт", "format": "carousel", "pillar": "C", "slug": "sem-voprosov", "status": "topic", "title": "Семь вопросов подрядчику до того, как заплатили",
-      "goal": "сохранения, доверие, позиционирование",
-      "question": "Какой из семи вам ни разу не догадались задать?",
-      "cta": "Напишите номер — обсудим",
-      "share_hook": "Готовый список вопросов — самый пересылаемый формат: «отправьте другу, который ищет подрядчика»",
-      "platforms": ["instagram", "telegram", "facebook", "threads"] },
-
-    { "date": "2026-09-18", "day": "пт", "format": "linkedin_text", "pillar": "E", "slug": "en-radar", "status": "topic", "title": "EN: Radar — collecting and scoring 300 sites",
-      "goal": "субподряд",
-      "question": "How do you keep a crawler polite at that scale?",
-      "cta": "Open to war stories in the comments",
-      "share_hook": "Три вывода из данных радара",
-      "platforms": ["linkedin_personal"] },
-
-    { "date": "2026-09-19", "day": "сб", "format": "carousel", "pillar": "D", "slug": "case-osnova", "status": "topic", "title": "Кейс Osnova",
-      "goal": "кейс в edtech",
-      "question": "Сколько шагов у вас между «зашёл» и «оплатил»?",
-      "cta": "Напишите цифру — сравним",
-      "share_hook": "Схема пути пользователя до и после",
-      "platforms": ["instagram", "telegram", "facebook", "threads"] },
-
-    { "date": "2026-09-21", "day": "пн", "format": "telegram_short", "pillar": "F", "slug": "tg-zamer-3", "status": "topic", "title": "Замер недели №3",
-      "goal": "рубрика",
-      "question": "Что тяжелее — картинки или скрипты? Проверим",
-      "cta": "Ставьте реакцию, если хотите разбор своего сайта",
-      "share_hook": "Одна цифра, один вывод",
-      "platforms": ["telegram"] },
-
-    { "date": "2026-09-22", "day": "вт", "format": "carousel", "pillar": "A", "slug": "mobilnaya-versiya", "status": "topic", "title": "Пять признаков, что мобильной версии у вас нет",
-      "goal": "трафик на аудит",
-      "question": "Сколько признаков из пяти у вас совпало?",
-      "cta": "Напишите цифру в комментариях",
-      "share_hook": "Чек-лист на пять пунктов — «проверьте с телефона прямо сейчас и перешлите результат»",
-      "platforms": ["instagram", "telegram", "facebook", "threads"] },
-
-    { "date": "2026-09-23", "day": "ср", "format": "telegram_short", "pillar": "F", "slug": "tg-avtomatizacia", "status": "topic", "title": "Три вещи, которые мы автоматизировали у себя",
-      "goal": "продать автоматизацию как услугу",
-      "question": "Что у вас до сих пор делается руками, хотя не должно?",
-      "cta": "Напишите — подскажу, чем закрывается",
-      "share_hook": "Три строки, три инструмента",
-      "platforms": ["telegram"] },
-
-    { "date": "2026-09-23", "day": "ср", "format": "linkedin_pdf", "pillar": "E", "slug": "en-pdf-content-pipeline", "status": "topic", "title": "EN: When your content pipeline reads strangers' websites",
-      "goal": "техническая репутация, самый сильный EN-материал месяца",
-      "question": "How do you sandbox untrusted page content?",
-      "cta": "Genuinely want to hear your approach",
-      "share_hook": "12 слайдов, последний — схема изоляции",
-      "platforms": ["linkedin_personal"] },
-
-    { "date": "2026-09-24", "day": "чт", "format": "carousel", "pillar": "C", "slug": "kak-idet-rabota", "status": "topic", "title": "Что происходит после оплаты: как идёт работа",
-      "goal": "снять страх перед предоплатой",
-      "question": "На каком этапе вас в прошлый раз бросили?",
-      "cta": "Расскажите — соберу антирейтинг ошибок подрядчиков",
-      "share_hook": "Таймлайн этапов — «сохраните, чтобы сверять с подрядчиком»",
-      "platforms": ["instagram", "telegram", "facebook", "threads"] },
-
-    { "date": "2026-09-25", "day": "пт", "format": "linkedin_text", "pillar": "E", "slug": "en-subcontract", "status": "topic", "title": "EN: What a one-person studio can actually take on",
-      "goal": "прямой заход на субподряд для агентств",
-      "question": "Agencies — what do you outsource first when capacity runs out?",
-      "cta": "Reply here, I read everything",
-      "share_hook": "Список из четырёх типов задач",
-      "platforms": ["linkedin_personal"] },
-
-    { "date": "2026-09-26", "day": "сб", "format": "carousel", "pillar": "D", "slug": "case-govbot", "status": "topic", "title": "Кейс GovBot",
-      "goal": "кейс с ИИ, самый сильный по вау-эффекту",
-      "question": "Сколько обращений в день вы обрабатываете руками?",
-      "cta": "Напишите цифру — прикину, сколько из них можно снять",
-      "share_hook": "До и после в числах обращений",
-      "platforms": ["instagram", "telegram", "facebook", "threads"] },
-
-    { "date": "2026-09-28", "day": "пн", "format": "telegram_short", "pillar": "F", "slug": "tg-itogi", "status": "topic", "title": "Что намерили за месяц",
-      "goal": "первые собственные цифры вместо чужих",
-      "question": "Хотите, чтобы ваш сайт попал в выборку следующего месяца?",
-      "cta": "Пришлите домен в комментарии",
-      "share_hook": "Агрегат по отраслям, без списка худших",
-      "platforms": ["telegram"] },
-
-    { "date": "2026-09-29", "day": "вт", "format": "carousel", "pillar": "A", "slug": "itogi-sentyabrya", "status": "topic", "title": "Итоги месяца: что мы намерили",
-      "goal": "собственные данные как контент, анонс Индекса",
-      "question": "Как думаете, в какой отрасли сайты медленнее всего?",
-      "cta": "Голосуйте в комментариях, ответ на следующем слайде через неделю",
-      "share_hook": "Агрегированный рейтинг отраслей — «перешлите знакомому из этой сферы»",
-      "platforms": ["instagram", "telegram", "facebook", "threads"] },
-
-    { "date": "2026-09-30", "day": "ср", "format": "telegram_short", "pillar": "F", "slug": "tg-mesyac", "status": "topic", "title": "Что я понял за месяц публикаций",
-      "goal": "рефлексия, вовлечение",
-      "question": "Что из месяца было полезнее всего?",
-      "cta": "Напишите — по этому и буду строить октябрь",
-      "share_hook": "Честный список: что зашло и что провалилось",
-      "platforms": ["telegram"] }
+    {
+      "date": "2026-09-07",
+      "day": "пн",
+      "rubric": "razbor",
+      "template": "Ш4",
+      "tone": "dark",
+      "slug": "w1-razbor-kofeynya",
+      "status": "ready",
+      "title": "5 ошибок, из-за которых сайт кофейни теряет заказы",
+      "key": null,
+      "platforms": [
+        "instagram",
+        "telegram",
+        "facebook",
+        "threads"
+      ],
+      "slides": 5
+    },
+    {
+      "date": "2026-09-09",
+      "day": "ср",
+      "rubric": "radar",
+      "template": "Ш2",
+      "tone": "paper",
+      "slug": "w1-radar-ai",
+      "status": "ready",
+      "title": "7 бесплатных ИИ-сервисов вместо подрядчика на мелких задачах",
+      "key": "РАДАР",
+      "platforms": [
+        "instagram",
+        "telegram",
+        "facebook",
+        "threads"
+      ],
+      "slides": 5
+    },
+    {
+      "date": "2026-09-09",
+      "day": "ср",
+      "rubric": "linkedin",
+      "template": "PDF",
+      "slug": "en-pdf-audit-engine",
+      "status": "topic",
+      "title": "EN: How we score a website in 12 seconds — a PDF teardown",
+      "platforms": [
+        "linkedin_personal"
+      ]
+    },
+    {
+      "date": "2026-09-11",
+      "day": "пт",
+      "rubric": "cena",
+      "template": "Ш1",
+      "tone": "dark",
+      "slug": "w1-cena-sajt",
+      "status": "ready",
+      "title": "Почему у нас сайт от $1 000, когда на рынке есть за $150",
+      "key": null,
+      "platforms": [
+        "instagram",
+        "telegram",
+        "facebook",
+        "threads"
+      ],
+      "note": "ПЕРЕПИСАН 04.09.2026: прежняя версия строилась на «нашей цене от $450», которой нет ни в движке, ни на сайте",
+      "slides": 5
+    },
+    {
+      "date": "2026-09-11",
+      "day": "пт",
+      "rubric": "linkedin",
+      "template": "текст",
+      "slug": "en-factory",
+      "status": "topic",
+      "title": "EN: I built a content factory in one evening",
+      "platforms": [
+        "linkedin_personal"
+      ]
+    },
+    {
+      "date": "2026-09-13",
+      "day": "вс",
+      "rubric": "vibe",
+      "template": "Ш3",
+      "tone": "light",
+      "slug": "w1-vibe-prototip",
+      "status": "ready",
+      "title": "Прототип за вечер: пять промптов, которые сработали",
+      "key": null,
+      "platforms": [
+        "instagram",
+        "telegram",
+        "facebook",
+        "threads"
+      ],
+      "slides": 5
+    },
+    {
+      "date": "2026-09-14",
+      "day": "пн",
+      "rubric": "razbor",
+      "template": "Ш4",
+      "tone": "dark",
+      "slug": "w2-razbor-forma",
+      "status": "topic",
+      "title": "Сайт стоматологии: почему форма заявки не работает",
+      "key": null,
+      "note": "Обезличенно. Разбор формы: число полей, обязательные поля, что происходит после отправки",
+      "platforms": [
+        "instagram",
+        "telegram",
+        "facebook",
+        "threads"
+      ],
+      "slides": 5
+    },
+    {
+      "date": "2026-09-16",
+      "day": "ср",
+      "rubric": "radar",
+      "template": "Ш1",
+      "tone": "dark",
+      "slug": "w2-radar-stack",
+      "status": "topic",
+      "title": "Инструменты, которыми пользуюсь каждый день — и сколько за них плачу",
+      "key": null,
+      "note": "Прозрачность как контент: реальные суммы своих подписок. Тон чередуется — на этой неделе Радар тёмный, Разбор светлый",
+      "platforms": [
+        "instagram",
+        "telegram",
+        "facebook",
+        "threads"
+      ],
+      "slides": 4
+    },
+    {
+      "date": "2026-09-16",
+      "day": "ср",
+      "rubric": "linkedin",
+      "template": "PDF",
+      "slug": "en-pdf-pricing",
+      "status": "topic",
+      "title": "EN: A deterministic pricing engine — and why not an LLM",
+      "platforms": [
+        "linkedin_personal"
+      ]
+    },
+    {
+      "date": "2026-09-18",
+      "day": "пт",
+      "rubric": "case",
+      "template": "Ш5",
+      "tone": "dark",
+      "slug": "w2-case-1",
+      "status": "topic",
+      "title": "Первый кейс: задача → решение → цифра",
+      "key": "КЕЙС",
+      "note": "Взять из портфолио: govbot, tgpg, salomtv, osnova, careeros, contento, influencehub, uzdplus",
+      "platforms": [
+        "instagram",
+        "telegram",
+        "facebook",
+        "threads",
+        "linkedin_personal"
+      ],
+      "slides": 5
+    },
+    {
+      "date": "2026-09-18",
+      "day": "пт",
+      "rubric": "linkedin",
+      "template": "текст",
+      "slug": "en-lighthouse",
+      "status": "topic",
+      "title": "EN: Why we measure sites without Lighthouse",
+      "platforms": [
+        "linkedin_personal"
+      ]
+    },
+    {
+      "date": "2026-09-20",
+      "day": "вс",
+      "rubric": "vibe",
+      "template": "Ш3",
+      "tone": "light",
+      "slug": "w2-vibe-claude-gpt",
+      "status": "topic",
+      "title": "Claude против ChatGPT на реальной задаче вёрстки: что вышло",
+      "key": null,
+      "platforms": [
+        "instagram",
+        "telegram",
+        "facebook",
+        "threads"
+      ],
+      "slides": 1
+    },
+    {
+      "date": "2026-09-21",
+      "day": "пн",
+      "rubric": "razbor",
+      "template": "Ш4",
+      "tone": "dark",
+      "slug": "w3-razbor-skorost",
+      "status": "topic",
+      "title": "Тест скорости 5 сайтов ташкентских компаний — и что это стоит им в заявках",
+      "key": null,
+      "note": "Флагманский формат. Цифры строго из движка src/lib/audit/, названия компаний не публикуем — только отрасли",
+      "platforms": [
+        "instagram",
+        "telegram",
+        "facebook",
+        "threads"
+      ],
+      "slides": 5
+    },
+    {
+      "date": "2026-09-23",
+      "day": "ср",
+      "rubric": "radar",
+      "template": "Ш2",
+      "tone": "paper",
+      "slug": "w3-radar-bloki",
+      "status": "topic",
+      "title": "Готовые блоки и шаблоны, из которых можно собрать сайт без разработчика",
+      "key": "ШАБЛОН",
+      "platforms": [
+        "instagram",
+        "telegram",
+        "facebook",
+        "threads"
+      ],
+      "slides": 5
+    },
+    {
+      "date": "2026-09-23",
+      "day": "ср",
+      "rubric": "linkedin",
+      "template": "PDF",
+      "slug": "en-pdf-radar",
+      "status": "topic",
+      "title": "EN: Radar — collecting and scoring 300 sites",
+      "platforms": [
+        "linkedin_personal"
+      ]
+    },
+    {
+      "date": "2026-09-25",
+      "day": "пт",
+      "rubric": "cena",
+      "template": "Ш1",
+      "tone": "dark",
+      "slug": "w3-cena-magazin",
+      "status": "topic",
+      "title": "Что входит в интернет-магазин за $2 580",
+      "key": null,
+      "note": "РАЗБЛОКИРОВАН 04.09.2026: $2 580 получено из калькулятора (59+66+28=153 часа). Цифры $1200 в движке не существует",
+      "platforms": [
+        "instagram",
+        "telegram",
+        "facebook",
+        "threads"
+      ],
+      "slides": 5
+    },
+    {
+      "date": "2026-09-25",
+      "day": "пт",
+      "rubric": "linkedin",
+      "template": "текст",
+      "slug": "en-subcontract",
+      "status": "topic",
+      "title": "EN: What a one-person studio can actually take on",
+      "platforms": [
+        "linkedin_personal"
+      ]
+    },
+    {
+      "date": "2026-09-27",
+      "day": "вс",
+      "rubric": "vibe",
+      "template": "Ш3",
+      "tone": "light",
+      "slug": "w3-vibe-stack",
+      "status": "topic",
+      "title": "Стек, на котором я делаю всё: и почему именно он",
+      "key": null,
+      "platforms": [
+        "instagram",
+        "telegram",
+        "facebook",
+        "threads"
+      ],
+      "slides": 3
+    },
+    {
+      "date": "2026-09-28",
+      "day": "пн",
+      "rubric": "razbor",
+      "template": "Ш4",
+      "tone": "dark",
+      "slug": "w4-razbor-podpischik",
+      "status": "contingent",
+      "title": "Разбираю сайт подписчика: до и после",
+      "key": null,
+      "note": "Зависит от того, придёт ли домен в директ за три недели. Запасной вариант — второй обезличенный разбор из радара. Решение принимается 24 сентября Запасной вариант написан целиком — разбор автосервиса, макеты в Figma готовы.",
+      "platforms": [
+        "instagram",
+        "telegram",
+        "facebook",
+        "threads"
+      ],
+      "slides": 5
+    },
+    {
+      "date": "2026-09-30",
+      "day": "ср",
+      "rubric": "radar",
+      "template": "Ш2",
+      "tone": "paper",
+      "slug": "w4-radar-chek",
+      "status": "topic",
+      "title": "Чек-лист приёмки сайта: 20 пунктов, по которым проверить подрядчика",
+      "key": "ЧЕК",
+      "note": "Самый пересылаемый материал месяца по замыслу — двадцать пунктов это готовый артефакт, а не пост",
+      "platforms": [
+        "instagram",
+        "telegram",
+        "facebook",
+        "threads"
+      ],
+      "slides": 8
+    },
+    {
+      "date": "2026-09-30",
+      "day": "ср",
+      "rubric": "linkedin",
+      "template": "PDF",
+      "slug": "en-pdf-pipeline",
+      "status": "topic",
+      "title": "EN: When your content pipeline reads strangers' websites",
+      "platforms": [
+        "linkedin_personal"
+      ]
+    },
+    {
+      "date": "2026-10-02",
+      "day": "пт",
+      "rubric": "case",
+      "template": "Ш5",
+      "tone": "dark",
+      "slug": "w4-case-2",
+      "status": "topic",
+      "title": "Кейс №2 и сравнение с типовым решением",
+      "key": null,
+      "platforms": [
+        "instagram",
+        "telegram",
+        "facebook",
+        "threads",
+        "linkedin_personal"
+      ],
+      "slides": 5
+    },
+    {
+      "date": "2026-10-02",
+      "day": "пт",
+      "rubric": "linkedin",
+      "template": "текст",
+      "slug": "en-month-one",
+      "status": "topic",
+      "title": "EN: One month of building a studio's audience in public — the numbers",
+      "platforms": [
+        "linkedin_personal"
+      ]
+    },
+    {
+      "date": "2026-10-04",
+      "day": "вс",
+      "rubric": "vibe",
+      "template": "Ш3",
+      "tone": "light",
+      "slug": "w4-vibe-avtomat",
+      "status": "topic",
+      "title": "Как я автоматизировал собственный контент: схема из ИИ-сервисов",
+      "key": null,
+      "note": "Закрывает месяц и продаёт автоматизацию как услугу",
+      "platforms": [
+        "instagram",
+        "telegram",
+        "facebook",
+        "threads"
+      ],
+      "slides": 5
+    }
   ],
   "stories": [
-    { "date": "2026-09-05", "slug": "story-audit", "status": "ready", "title": "Проверь свой сайт за 60 секунд", "note": "ответы на сторис — сигнал «двусторонний разговор», растут на 88% за год" },
-    { "date": "2026-09-12", "slug": "story-ceny", "status": "topic", "title": "Калькулятор: цена за минуту" },
-    { "date": "2026-09-19", "slug": "story-case", "status": "topic", "title": "Кейс недели в трёх кадрах" },
-    { "date": "2026-09-26", "slug": "story-opros", "status": "topic", "title": "Опрос: что показать в октябре", "note": "опрос в сторис — самый дешёвый способ получить ответ, а ответ это сигнал ранжирования" }
+    {
+      "date": "2026-09-08",
+      "title": "Проверь свой сайт за 60 секунд",
+      "status": "ready",
+      "slug": "story-audit"
+    },
+    {
+      "date": "2026-09-15",
+      "title": "Опрос: какой из пяти пунктов есть у вас",
+      "status": "topic"
+    },
+    {
+      "date": "2026-09-22",
+      "title": "Кейс недели в трёх кадрах",
+      "status": "topic"
+    },
+    {
+      "date": "2026-09-29",
+      "title": "Опрос: что разобрать в октябре",
+      "status": "topic"
+    }
   ],
   "balance": {
-    "carousel_instagram": 11,
-    "telegram_short": 8,
-    "linkedin_pdf": 3,
-    "linkedin_text": 4,
-    "stories": 4,
-    "ready": 6,
-    "topic": 20,
-    "by_pillar": { "A": 4, "B": 2, "C": 2, "D": 4, "E": 7, "F": 8 },
-    "note": "Столпы A и D — половина карусельного объёма: это то, чего нет ни у одного конкурента (замеры) и то, что доказывает компетенцию (кейсы). E вынесен целиком в LinkedIn с личного профиля."
-  }
+    "instagram_posts": 16,
+    "linkedin_posts": 8,
+    "comment_keys": 4,
+    "ready": 4,
+    "topic": 17,
+    "blocked": 1,
+    "contingent": 1,
+    "by_rubric": {
+      "razbor": 4,
+      "radar": 4,
+      "cena": 2,
+      "case": 2,
+      "vibe": 4
+    },
+    "note": "Ключей ровно четыре из шестнадцати — по правилу «не чаще каждого третьего-четвёртого поста». РАДАР, КЕЙС, ШАБЛОН, ЧЕК."
+  },
+  "success_criteria_30d": {
+    "_comment": "Из разбора владельца §16. Это не 1000 подписчиков — это то, что реально достижимо за первый месяц",
+    "posts_published": 16,
+    "working_templates": 2,
+    "dm_from_comment_keys": 20,
+    "project_conversations": "1-2"
+  },
+  "profile_setup": {
+    "_comment": "Делается ДО первого поста плана, до 7 сентября. Это не лента, а статичные поверхности профиля: они отвечают на вопрос «вы вообще кто» и не требуют регулярности. Тексты готовы в docs/smm/PROFILE-CONTENT.md.",
+    "deadline": "2026-09-06",
+    "bio": {
+      "status": "ready",
+      "note": "Разблокировано: цены сверены с калькулятором. Сайты от $1 000, веб-приложения от $2 080, ИИ от $1 680, автоматизация от $1 130, мобильные от $2 590, UI/UX от $840"
+    },
+    "pinned_trio": [
+      {
+        "order": 1,
+        "slug": "pin-kto-my",
+        "template": "Ш1",
+        "tone": "dark",
+        "title": "Студия одного человека",
+        "status": "text-ready"
+      },
+      {
+        "order": 2,
+        "slug": "pin-chto-delaem",
+        "template": "Ш3",
+        "tone": "light",
+        "title": "Сайты, которые можно измерить",
+        "status": "text-ready"
+      },
+      {
+        "order": 3,
+        "slug": "pin-kak-nachat",
+        "template": "cta",
+        "tone": "dark",
+        "title": "Начать можно бесплатно",
+        "status": "text-ready"
+      }
+    ],
+    "highlights": [
+      {
+        "order": 1,
+        "name": "Работы",
+        "source": "public/projects — 8 обложек уже есть",
+        "status": "ready-to-assemble"
+      },
+      {
+        "order": 2,
+        "name": "Цены",
+        "source": "пост от 11 сентября",
+        "status": "pending"
+      },
+      {
+        "order": 3,
+        "name": "Аудит",
+        "source": "пост от 15 сентября",
+        "status": "pending"
+      },
+      {
+        "order": 4,
+        "name": "О студии",
+        "source": "6 кадров сторис, тексты готовы",
+        "status": "text-ready"
+      },
+      {
+        "order": 5,
+        "name": "Отзывы",
+        "source": "скриншоты переписок с разрешения клиента",
+        "status": "empty",
+        "note": "НЕ заполнять выдуманным. Пустой хайлайт лучше сочинённого отзыва"
+      }
+    ],
+    "portfolio": {
+      "projects": [
+        "govbot",
+        "tgpg",
+        "salomtv",
+        "osnova",
+        "careeros",
+        "contento",
+        "influencehub",
+        "uzdplus"
+      ],
+      "to_highlight": "все восемь сразу, до старта плана",
+      "to_feed": "по два в месяц как карусель Ш5 — задача, решение, цифра, стек и срок",
+      "blocker": "метрик по проектам нет. Перед кейсом в ленту либо цифра от клиента, либо собственный замер: скорость, число шагов до цели, количество полей в форме. Выдуманных цифр не будет"
+    }
+  },
+  "figma": {
+    "file": "https://www.figma.com/design/cl4r5b5haPBRXYVNLB9u8Q",
+    "name": "Skyline Digital · Instagram сентябрь 2026",
+    "built": "2026-09-04",
+    "ready": "80 макетов — 16 постов по 5 слайдов, страница «01 · Посты · сентябрь»",
+    "pending": "профиль достраивается плагином scripts/figma/profile-code.js — упёрлись в лимит вызовов Figma MCP на Starter",
+    "docs": "scripts/figma/FIGMA-FILE.md",
+    "content_source": [
+      "docs/smm/content/posts-w1-w2.json",
+      "docs/smm/content/posts-w3-w4.json"
+    ]
+  },
+  "formats_ref": "docs/smm/FORMATS.md — раскладка по форматам, 76 кадров вместо 80"
 }
