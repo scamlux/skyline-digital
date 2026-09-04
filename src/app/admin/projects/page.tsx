@@ -8,7 +8,9 @@ export default async function ProjectsAdminPage() {
   const db = getSupabaseAdmin();
   const { data } = await db
     .from("projects")
-    .select("id,slug,title,category,description,image,technologies,year,url,published,sort")
+    .select(
+      "id,slug,title,category,description,image,technologies,year,url,published,sort,client,role,brief,solution,result,metrics,gallery",
+    )
     .order("sort", { ascending: true })
     .order("year", { ascending: false });
 
@@ -18,6 +20,13 @@ export default async function ProjectsAdminPage() {
     image: r.image ?? "",
     technologies: Array.isArray(r.technologies) ? (r.technologies as string[]) : [],
     url: r.url ?? null,
+    client: r.client ?? null,
+    role: r.role ?? null,
+    brief: r.brief ?? null,
+    solution: r.solution ?? null,
+    result: r.result ?? null,
+    metrics: Array.isArray(r.metrics) ? r.metrics : [],
+    gallery: Array.isArray(r.gallery) ? r.gallery : [],
   })) as ProjectRow[];
 
   return (

@@ -195,7 +195,15 @@
     "category": "Kategoriya",
     "visit": "Saytni ochish",
     "ctaTitle": "Shunga o'xshash loyiha kerakmi?",
-    "cta": "Narxni hisoblash"
+    "cta": "Narxni hisoblash",
+    "client": "Mijoz",
+    "role": "Rol",
+    "brief": "Vazifa",
+    "solution": "Yechim",
+    "result": "Natija",
+    "gallery": "Galereya",
+    "prev": "Oldingi",
+    "next": "Keyingi"
   },
   "about": {
     "title": "Biz haqimizda",

@@ -10,21 +10,12 @@ import { getProjects } from "@/lib/portfolio";
 import { localeUrl, languageAlternates } from "@/lib/seo";
 import type { ProjectType } from "@/lib/pricing/types";
 import { PreviewCard } from "@/components/projects/PreviewCard";
+import { CASE_CATEGORY } from "@/lib/case-category";
 
 export const revalidate = 300;
 
 const SERVICE_KEYS = ["website", "webApp", "mobileApp", "ai", "automation", "uiux"] as const;
 type ServiceKey = (typeof SERVICE_KEYS)[number];
-
-/** Тип услуги → категория кейсов в портфолио. */
-const CASE_CATEGORY: Record<ServiceKey, string | null> = {
-  website: "web",
-  webApp: "web",
-  mobileApp: "mobile",
-  ai: "ai",
-  automation: "automation",
-  uiux: null, // дизайн — показываем свежие web-кейсы
-};
 
 export function generateStaticParams() {
   return routing.locales.flatMap((locale) => SERVICE_KEYS.map((slug) => ({ locale, slug })));

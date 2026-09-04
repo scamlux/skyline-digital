@@ -25,6 +25,12 @@ export interface ProposalRenderInput {
     date?: string;
     clientName?: string;
     projectName: string;
+    /** Контакты лида — двигают статусы чек-листа «От клиента ждём». */
+    hasEmail?: boolean;
+    hasTelegram?: boolean;
+    /** Иллюстрация слайда «Дизайн» — обложка похожего кейса из портфолио. */
+    designPreviewImage?: string;
+    designPreviewTitle?: string;
   };
 }
 
@@ -39,7 +45,7 @@ const C = {
   tableHead: "#C9D8EE",
   tableRowA: "#EDF2FA",
   tableRowB: "#F7FAFD",
-  cream: "#FDEBD3",
+  cream: "#FFE4CC",
   creamText: "#B4690E",
   orange: "#F0913A",
   red: "#C8392B",
@@ -172,29 +178,38 @@ function journeySteps(cfg: ProjectConfiguration) {
   ];
 }
 
-/** Deterministic "we expect from the client" checklist. */
-function clientChecklist(cfg: ProjectConfiguration) {
+/**
+ * Deterministic "we expect from the client" checklist. Statuses come from the
+ * lead's data: a supplied e-mail / Telegram / contact person flips the row to
+ * «Сделано», как в референсном КП со статусами «сделано / не сделано».
+ */
+function clientChecklist(
+  cfg: ProjectConfiguration,
+  known: { email?: boolean; telegram?: boolean; owner?: boolean },
+) {
   const f = new Set(cfg.features);
-  const groups: { group: string; items: string[] }[] = [
+  type Item = { text: string; done: boolean };
+  const it = (text: string, done = false): Item => ({ text, done });
+  const groups: { group: string; items: Item[] }[] = [
     {
       group: "Доступы",
       items: [
-        "Доступ к домену (или выбор нового)",
-        "Почта для приёма заявок",
-        "Telegram-чат для уведомлений",
+        it("Доступ к домену (или выбор нового)"),
+        it("Почта для приёма заявок", Boolean(known.email)),
+        it("Telegram-чат для уведомлений", Boolean(known.telegram)),
       ],
     },
     {
       group: "Команда со стороны клиента",
-      items: ["Ответственный за проект", "Пользователи для теста"],
+      items: [it("Ответственный за проект", Boolean(known.owner)), it("Пользователи для теста")],
     },
     {
       group: "Материалы",
       items: [
-        "Логотип и фирменные материалы",
-        "Тексты или тезисы о компании",
-        ...(f.has("ecommerce") ? ["Каталог товаров с ценами"] : []),
-        ...(f.has("rag") || f.has("knowledgeBase") ? ["Документы для базы знаний"] : []),
+        it("Логотип и фирменные материалы"),
+        it("Тексты или тезисы о компании"),
+        ...(f.has("ecommerce") ? [it("Каталог товаров с ценами")] : []),
+        ...(f.has("rag") || f.has("knowledgeBase") ? [it("Документы для базы знаний")] : []),
       ],
     },
   ];
@@ -273,7 +288,10 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
   const approach = techApproach(configuration, proposal.recommendedStack);
   const infra = infraRows(configuration, meta.projectName);
   const journey = journeySteps(configuration);
-  const checklist = clientChecklist(configuration);
+  const checklist = clientChecklist(configuration, {
+    email: Boolean(meta.hasEmail),
+    telegram: Boolean(meta.hasTelegram),
+  });
   const stages = stageColumns(pricing, proposal);
   const year = meta.date?.match(/\d{4}/)?.[0] ?? "2026";
   const featureList = configuration.features.map((k) => FEATURE_LABELS[k] ?? k);
@@ -337,6 +355,14 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
   .understand-card li:before { content: "—"; position: absolute; left: 0; color: ${C.orange}; }
   .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 
+  /* Design preview frame (slide 3) */
+  .design-frame { border: 1px solid ${C.line}; border-radius: 12px; overflow: hidden; }
+  .design-frame .bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; background: #F4F6F9; border-bottom: 1px solid ${C.line}; }
+  .design-frame .dot { width: 9px; height: 9px; border-radius: 50%; background: ${C.lightGrey}; }
+  .design-frame img { display: block; width: 100%; height: 230px; object-fit: cover; object-position: top; }
+  .design-caption { margin-top: 12px; font-size: 13px; color: ${C.grey}; }
+  .design-placeholder { border: 1px dashed ${C.line}; border-radius: 12px; padding: 28px; font-size: 15px; color: ${C.grey}; line-height: 1.6; }
+
   /* Journey */
   .journey { border: 1px solid ${C.line}; border-radius: 10px; overflow: hidden; }
   .journey-head { background: ${C.blue}; color: #fff; padding: 13px 20px; font-size: 16px; font-weight: bold; }
@@ -351,6 +377,7 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
   tr.group td { background: ${C.tableHead}; font-weight: bold; }
   tr.item td:first-child { background: ${C.tableRowA}; width: 430px; }
   tr.item td:last-child { background: ${C.cream}; color: ${C.creamText}; }
+  tr.item td.st-done { background: ${C.tableHead}; color: ${C.blue}; }
   tr.item { border-top: 2px solid #fff; }
 
   /* Stages */
@@ -440,25 +467,39 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
   ${logo}${pageNo(2)}
 </section>
 
-<!-- 3 · Understanding -->
+<!-- 3 · Design (превью макета — референс §9) -->
 <section class="slide">
-  ${slideTitle("Понимание задачи")}
+  ${slideTitle("Дизайн")}
   <div class="cols">
-    <div class="col-l">${esc(proposal.summary)}</div>
-    <div class="col-r">
-      <div class="understand-card">
+    <div class="col-l">
+      ${esc(proposal.summary)}
+      <div class="understand-card" style="margin-top:16px">
         <h3>Цели проекта</h3>
         <ul>${li(proposal.objectives.slice(0, 4))}</ul>
       </div>
-      <div class="understand-card">
+    </div>
+    <div class="col-r">
+      ${
+        meta.designPreviewImage
+          ? `<div class="design-frame">
+        <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+        <img src="${esc(meta.designPreviewImage)}" alt="${esc(meta.designPreviewTitle ?? "Пример работы")}" />
+      </div>
+      ${meta.designPreviewTitle ? `<div class="design-caption">Кейс: ${esc(meta.designPreviewTitle)}</div>` : ""}`
+          : `<div class="design-placeholder">Макет собираем в вашем фирменном стиле после утверждения структуры. Показываем 2–3 варианта главного экрана, дальше — единая система: сетка, типографика, компоненты.</div>`
+      }
+      <div class="understand-card" style="margin-top:16px">
+        <h3>Технологии и подход</h3>
+        <div class="chips">${approach.stack.map((s) => `<span class="chip">${esc(s)}</span>`).join("")}</div>
+      </div>
+      ${
+        featureList.length > 0
+          ? `<div class="understand-card">
         <h3>Выбранные функции</h3>
         <div class="chips">${featureList.map((f) => `<span class="chip">${esc(f)}</span>`).join("")}</div>
-      </div>
-      <div class="understand-card">
-        <h3>Технологии и подход</h3>
-        <ul>${li(approach.principles)}</ul>
-        <div class="chips" style="margin-top:12px">${approach.stack.map((s) => `<span class="chip">${esc(s)}</span>`).join("")}</div>
-      </div>
+      </div>`
+          : ""
+      }
     </div>
   </div>
   ${logo}${pageNo(3)}
@@ -494,7 +535,14 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
           .map(
             (g) => `
         <tr class="group"><td colspan="2">${esc(g.group)}</td></tr>
-        ${g.items.map((i) => `<tr class="item"><td>${esc(i)}</td><td>Не сделано</td></tr>`).join("")}`,
+        ${g.items
+          .map(
+            (i) =>
+              `<tr class="item"><td>${esc(i.text)}</td><td class="${i.done ? "st-done" : ""}">${
+                i.done ? "Сделано ✓" : "Не сделано"
+              }</td></tr>`,
+          )
+          .join("")}`,
           )
           .join("")}
       </table>

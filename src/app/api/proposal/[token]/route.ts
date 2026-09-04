@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { renderProposalHtml } from "@/templates/proposal/template";
-import { getSetting } from "@/lib/portfolio";
+import { getSetting, getProjects } from "@/lib/portfolio";
+import { pickCase } from "@/lib/case-category";
+import { SITE_URL } from "@/lib/seo";
 import { htmlToPdf } from "@/lib/pdf/render";
 import {
   sendTelegramDocumentBuffer,
@@ -130,6 +132,12 @@ export async function GET(
       year: "numeric",
     });
     const fxRate = await getSetting<number>("fx_rate", 12000);
+    const designCase = pickCase(await getProjects(), est.configuration?.projectType);
+    const designImage = designCase
+      ? designCase.image.startsWith("http")
+        ? designCase.image
+        : `${SITE_URL}${designCase.image}`
+      : undefined;
     const html = renderProposalHtml({
       fxRate,
       proposal: est.ai_result,
@@ -139,6 +147,10 @@ export async function GET(
         date,
         projectName: est.ai_result.projectTitle,
         clientName: lead?.client_name ?? undefined,
+        hasEmail: Boolean(lead?.email),
+        hasTelegram: Boolean(lead?.telegram),
+        designPreviewImage: designImage,
+        designPreviewTitle: designCase?.title,
       },
     });
     pdf = await htmlToPdf(html);

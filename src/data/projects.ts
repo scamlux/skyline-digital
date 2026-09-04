@@ -1,6 +1,12 @@
 /** Portfolio category used /projects filter. */
 export type ProjectCategory = "web" | "mobile" | "ai" | "automation";
 
+/** Метрика результата для деталки проекта. */
+export interface ProjectMetric {
+  value: string;
+  label: string;
+}
+
 export interface Project {
   slug: string;
   title: string;
@@ -11,6 +17,19 @@ export interface Project {
   technologies: string[];
   year: number;
   url?: string;
+  // ——— Редакторские поля деталки (§5). Все опциональны: код-каталог и
+  //     старые записи в БД рендерятся без них (graceful degrade). ———
+  client?: string;
+  role?: string;
+  /** Задача. */
+  brief?: string;
+  /** Решение. */
+  solution?: string;
+  /** Результат. */
+  result?: string;
+  metrics?: ProjectMetric[];
+  /** Пути/URL дополнительных изображений галереи. */
+  gallery?: string[];
 }
 
 export const projectCategories: { value: "all" | ProjectCategory; label: string }[] = [

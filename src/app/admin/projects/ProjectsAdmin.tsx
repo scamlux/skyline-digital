@@ -10,6 +10,8 @@ export interface ProjectRow extends ProjectInput {
 const EMPTY: ProjectInput = {
   slug: "", title: "", category: "web", description: "", image: "",
   technologies: [], year: new Date().getFullYear(), url: "", published: true, sort: 0,
+  client: null, role: null, brief: null, solution: null, result: null,
+  metrics: [], gallery: [],
 };
 
 const INPUT = "mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm";
@@ -96,6 +98,10 @@ function Editor({
 }) {
   const [f, setF] = useState<ProjectInput>(initial ?? EMPTY);
   const [tech, setTech] = useState((initial?.technologies ?? []).join(", "));
+  const [gallery, setGallery] = useState((initial?.gallery ?? []).join("\n"));
+  const [metrics, setMetrics] = useState(
+    (initial?.metrics ?? []).map((m) => `${m.value} | ${m.label}`).join("\n"),
+  );
   const set = (k: keyof ProjectInput, v: unknown) => setF((s) => ({ ...s, [k]: v }));
 
   return (
@@ -133,9 +139,43 @@ function Editor({
           </label>
         </div>
 
+        {/* Деталка проекта (§5): клиент, роль, задача→решение→результат, метрики, галерея */}
+        <div className="mt-6 border-t border-gray-200 pt-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Детальная страница</p>
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <div><label className="text-xs uppercase text-gray-500">Клиент</label>
+              <input value={f.client ?? ""} onChange={(e) => set("client", e.target.value || null)} className={INPUT} /></div>
+            <div><label className="text-xs uppercase text-gray-500">Роль</label>
+              <input value={f.role ?? ""} onChange={(e) => set("role", e.target.value || null)} className={INPUT} /></div>
+            <div className="col-span-2"><label className="text-xs uppercase text-gray-500">Задача</label>
+              <textarea value={f.brief ?? ""} onChange={(e) => set("brief", e.target.value || null)} rows={2} className={INPUT} /></div>
+            <div className="col-span-2"><label className="text-xs uppercase text-gray-500">Решение</label>
+              <textarea value={f.solution ?? ""} onChange={(e) => set("solution", e.target.value || null)} rows={2} className={INPUT} /></div>
+            <div className="col-span-2"><label className="text-xs uppercase text-gray-500">Результат</label>
+              <textarea value={f.result ?? ""} onChange={(e) => set("result", e.target.value || null)} rows={2} className={INPUT} /></div>
+            <div className="col-span-2"><label className="text-xs uppercase text-gray-500">Метрики (по строке: значение | подпись)</label>
+              <textarea value={metrics} onChange={(e) => setMetrics(e.target.value)} rows={3} placeholder="+38% | конверсия" className={INPUT} /></div>
+            <div className="col-span-2"><label className="text-xs uppercase text-gray-500">Галерея (по одному пути/URL на строку)</label>
+              <textarea value={gallery} onChange={(e) => setGallery(e.target.value)} rows={3} placeholder="/projects/name-2.jpg" className={INPUT} /></div>
+          </div>
+        </div>
+
         <button
           disabled={pending || !f.title || !f.slug}
-          onClick={() => onSave(initial?.id ?? null, { ...f, technologies: tech.split(",").map((s) => s.trim()).filter(Boolean) })}
+          onClick={() =>
+            onSave(initial?.id ?? null, {
+              ...f,
+              technologies: tech.split(",").map((s) => s.trim()).filter(Boolean),
+              gallery: gallery.split("\n").map((s) => s.trim()).filter(Boolean),
+              metrics: metrics
+                .split("\n")
+                .map((line) => {
+                  const [value, label] = line.split("|").map((s) => s.trim());
+                  return value && label ? { value, label } : null;
+                })
+                .filter((m): m is { value: string; label: string } => m !== null),
+            })
+          }
           className="mt-4 w-full rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50"
         >
           {pending ? "…" : "Сохранить"}

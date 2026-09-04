@@ -14,6 +14,11 @@ function revalidateAll() {
   }
 }
 
+export interface ProjectMetricInput {
+  value: string;
+  label: string;
+}
+
 export interface ProjectInput {
   slug: string;
   title: string;
@@ -25,6 +30,14 @@ export interface ProjectInput {
   url: string | null;
   published: boolean;
   sort: number;
+  // Редакторские поля деталки (§5).
+  client: string | null;
+  role: string | null;
+  brief: string | null;
+  solution: string | null;
+  result: string | null;
+  metrics: ProjectMetricInput[];
+  gallery: string[]; // paths/URLs
 }
 
 export async function saveProject(id: string | null, p: ProjectInput): Promise<{ ok: boolean; error?: string }> {

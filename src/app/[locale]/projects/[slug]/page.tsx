@@ -5,8 +5,9 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { projects } from "@/data/projects";
-import { getProject } from "@/lib/portfolio";
+import { getProject, getProjects } from "@/lib/portfolio";
 import { localeUrl, languageAlternates, SITE_URL, SITE_NAME } from "@/lib/seo";
+import { ProjectGallery } from "@/components/projects/ProjectGallery";
 
 export function generateStaticParams() {
   return routing.locales.flatMap((locale) =>
@@ -51,6 +52,18 @@ export default async function ProjectPage({
   const t = await getTranslations("project");
   const project = await getProject(slug);
   if (!project) notFound();
+
+  // Соседние проекты для навигации next/prev (по тому же порядку, что каталог).
+  const all = await getProjects();
+  const idx = all.findIndex((p) => p.slug === slug);
+  const prev = idx > 0 ? all[idx - 1] : null;
+  const nextProject = idx >= 0 && idx < all.length - 1 ? all[idx + 1] : null;
+  const metrics = project.metrics ?? [];
+  const story: { key: "brief" | "solution" | "result"; text: string }[] = [
+    ...(project.brief ? [{ key: "brief" as const, text: project.brief }] : []),
+    ...(project.solution ? [{ key: "solution" as const, text: project.solution }] : []),
+    ...(project.result ? [{ key: "result" as const, text: project.result }] : []),
+  ];
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -114,6 +127,22 @@ export default async function ProjectPage({
           </div>
         </div>
         <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 md:grid-cols-3 md:px-8 md:py-20">
+          {project.client && (
+            <div>
+              <h2 className="font-mono text-xs uppercase tracking-[0.15em] text-muted">
+                {t("client")}
+              </h2>
+              <p className="mt-2">{project.client}</p>
+            </div>
+          )}
+          {project.role && (
+            <div>
+              <h2 className="font-mono text-xs uppercase tracking-[0.15em] text-muted">
+                {t("role")}
+              </h2>
+              <p className="mt-2">{project.role}</p>
+            </div>
+          )}
           <div>
             <h2 className="font-mono text-xs uppercase tracking-[0.15em] text-muted">
               {t("category")}
@@ -153,6 +182,68 @@ export default async function ProjectPage({
             >
               {t("visit")} ↗
             </a>
+          </div>
+        )}
+
+        {/* Метрики результата */}
+        {metrics.length > 0 && (
+          <div className="border-t border-line">
+            <div className="mx-auto grid max-w-6xl gap-8 px-5 py-14 sm:grid-cols-3 md:px-8">
+              {metrics.map((m) => (
+                <div key={m.label}>
+                  <div className="font-display text-4xl font-medium md:text-5xl">{m.value}</div>
+                  <div className="mt-2 text-sm text-muted">{m.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Задача → Решение → Результат */}
+        {story.length > 0 && (
+          <div className="border-t border-line">
+            <div className="mx-auto max-w-6xl space-y-12 px-5 py-14 md:px-8 md:py-20">
+              {story.map((s) => (
+                <section key={s.key} className="grid gap-4 md:grid-cols-[200px_1fr]">
+                  <h2 className="font-display text-2xl font-medium md:text-3xl">{t(s.key)}</h2>
+                  <p className="max-w-2xl text-base leading-relaxed text-muted">{s.text}</p>
+                </section>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Галерея с лайтбоксом */}
+        {project.gallery && project.gallery.length > 0 && (
+          <div className="border-t border-line">
+            <div className="mx-auto max-w-6xl px-5 py-14 md:px-8 md:py-20">
+              <h2 className="font-display mb-8 text-2xl font-medium md:text-3xl">{t("gallery")}</h2>
+              <ProjectGallery images={project.gallery} title={project.title} />
+            </div>
+          </div>
+        )}
+
+        {/* Навигация next / prev */}
+        {(prev || nextProject) && (
+          <div className="border-t border-line">
+            <div className="mx-auto flex max-w-6xl items-stretch gap-4 px-5 py-10 md:px-8">
+              {prev ? (
+                <Link href={`/projects/${prev.slug}`} className="group flex-1 rounded-xl border border-line p-5 transition-colors hover:border-ink">
+                  <span className="font-mono text-xs uppercase tracking-wide text-muted">← {t("prev")}</span>
+                  <span className="mt-1 block font-medium">{prev.title}</span>
+                </Link>
+              ) : (
+                <span className="flex-1" />
+              )}
+              {nextProject ? (
+                <Link href={`/projects/${nextProject.slug}`} className="group flex-1 rounded-xl border border-line p-5 text-right transition-colors hover:border-ink">
+                  <span className="font-mono text-xs uppercase tracking-wide text-muted">{t("next")} →</span>
+                  <span className="mt-1 block font-medium">{nextProject.title}</span>
+                </Link>
+              ) : (
+                <span className="flex-1" />
+              )}
+            </div>
           </div>
         )}
 

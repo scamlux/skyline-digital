@@ -195,7 +195,15 @@
     "category": "Category",
     "visit": "Visit website",
     "ctaTitle": "Want something similar?",
-    "cta": "Calculate cost"
+    "cta": "Calculate cost",
+    "client": "Client",
+    "role": "Role",
+    "brief": "Challenge",
+    "solution": "Solution",
+    "result": "Result",
+    "gallery": "Gallery",
+    "prev": "Previous",
+    "next": "Next"
   },
   "about": {
     "title": "About us",

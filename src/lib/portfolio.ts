@@ -1,6 +1,6 @@
 import "server-only";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase/server";
-import { projects as codeProjects, type Project } from "@/data/projects";
+import { projects as codeProjects, type Project, type ProjectMetric } from "@/data/projects";
 
 /**
  * Portfolio loader: DB-backed (admin-managed) with the code catalog as a
@@ -12,7 +12,9 @@ export async function getProjects(): Promise<Project[]> {
     const db = getSupabaseAdmin();
     const { data, error } = await db
       .from("projects")
-      .select("slug,title,category,description,image,technologies,year,url")
+      .select(
+        "slug,title,category,description,image,technologies,year,url,client,role,brief,solution,result,metrics,gallery",
+      )
       .eq("published", true)
       .order("sort", { ascending: true })
       .order("year", { ascending: false });
@@ -26,6 +28,13 @@ export async function getProjects(): Promise<Project[]> {
       technologies: Array.isArray(r.technologies) ? (r.technologies as string[]) : [],
       year: r.year ?? new Date().getFullYear(),
       url: r.url ?? undefined,
+      client: r.client ?? undefined,
+      role: r.role ?? undefined,
+      brief: r.brief ?? undefined,
+      solution: r.solution ?? undefined,
+      result: r.result ?? undefined,
+      metrics: Array.isArray(r.metrics) ? (r.metrics as ProjectMetric[]) : [],
+      gallery: Array.isArray(r.gallery) ? (r.gallery as string[]) : [],
     }));
   } catch {
     return codeProjects;
