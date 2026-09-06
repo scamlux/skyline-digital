@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase/server";
 import { toTashkentDisplay } from "@/lib/content/tz";
 import { statusBadge } from "./Editor";
+import { Diagnostics } from "./Diagnostics";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,8 @@ export default async function ContentListPage({
           <Link href="/admin/content/new" className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white">+ Новый пост</Link>
         </div>
       </div>
+
+      <Diagnostics />
 
       <form className="mb-4 flex flex-wrap gap-2" action="/admin/content">
         <select name="status" defaultValue={sp.status ?? ""} className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm">
