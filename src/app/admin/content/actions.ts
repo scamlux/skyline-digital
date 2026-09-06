@@ -5,7 +5,9 @@ import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { savePost, renderPost, type ContentPostRow } from "@/lib/content/store";
 import { publishToTelegram } from "@/lib/content/publish-telegram";
 import { buildPost } from "@/lib/content/build";
+import { importPlan, type ContentPlan, type ImportReport } from "@/lib/content/import-plan";
 import type { GuardIssue } from "@/lib/content/types";
+import planData from "../../../../docs/smm/content-plan-2026-09.json";
 
 const reval = () => {
   revalidatePath("/admin/content");
@@ -77,6 +79,13 @@ export async function deletePostAction(id: string): Promise<{ ok: boolean }> {
   const { error } = await db.from("content_posts").delete().eq("id", id);
   reval();
   return { ok: !error };
+}
+
+/** Импорт месячного плана из docs/smm (ПРОМПТ-3 §1.3). Идемпотентно. */
+export async function importPlanAction(): Promise<ImportReport> {
+  const res = await importPlan(getSupabaseAdmin(), planData as unknown as ContentPlan);
+  reval();
+  return res;
 }
 
 /** HTML-превью слайдов для редактора (без браузера — iframe srcdoc). */

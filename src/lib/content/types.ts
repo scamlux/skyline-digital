@@ -94,7 +94,7 @@ export const captionSchema = z
   })
   .partial();
 
-export const PLATFORMS = ["telegram", "instagram", "threads", "linkedin"] as const;
+export const PLATFORMS = ["telegram", "instagram", "threads", "facebook", "linkedin"] as const;
 export type Platform = (typeof PLATFORMS)[number];
 
 export const postSpecSchema = z.object({

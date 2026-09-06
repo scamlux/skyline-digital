@@ -51,7 +51,7 @@
 ## Управление постингом из /admin/content (ПРОМПТ-3)
 - [x] **1.1 Крон + TZ.** `vercel.json` cron `*/15`, `src/lib/content/tz.ts` (toTashkent/fromTashkent, UTC+5 без DST), исправлен `slice(0,16)` в page/Editor/calendar, `CRON_SECRET` в `.env.example`. Тесты tz — зелёные.
 - [x] **1.2 Диагностика площадок.** `diagnostics.ts` (предикаты для крона) + блок «Диагностика» вверху /admin/content.
-- [ ] **1.3 Импорт плана.** `scripts/content/import-plan.mjs` + кнопка; маппинг slides→postSpecSchema (переименование полей по типам), идемпотентный upsert по slug, не трогает approved/scheduled/published, статус ready→review/draft→draft/blocked→blocked, отчёт.
+- [x] **1.3 Импорт плана.** import-plan.ts (маппинг по типам + идемпотентный upsert, не трогает approved/scheduled/published), кнопка «Импорт плана» + отчёт, scripts/content/import-plan.mjs (--dry). 16/16 постов валидны. Тесты — зелёные.
 - [ ] **1.6 QA-гейт.** guard.ts: цены из brain.md (ERROR на `от $N` вне {840,1000,1130,1680,2080,2590}), пустая подпись/нет вопроса/нет призыва-в-комментарии/хэштеги/слайды 1–10; warnings (TG>1024, последний слайд не cta, нет alt). Кнопка «Одобрить» дизейбл при error. Инвариант: все 13 ready проходят без ошибок.
 - [ ] **1.4 Instagram.** `publish-instagram.ts` (контейнер→публикация, карусель ≤10, JPEG q92 нативным puppeteer, STORIES), TTL signed URL ≥1800.
 - [ ] **1.5 Ручные напоминания.** статус `manual`; крон для facebook/linkedin/threads шлёт напоминание в чат лидов; кнопка «Опубликовано вручную».
