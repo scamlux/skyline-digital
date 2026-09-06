@@ -7,6 +7,7 @@ import {
   publishTelegramAction, deletePostAction, previewAction,
 } from "./actions";
 import type { GuardIssue } from "@/lib/content/types";
+import { toTashkentInput, fromTashkent } from "@/lib/content/tz";
 
 const STATUS_RU: Record<string, string> = {
   draft: "черновик", planned: "в плане", generating: "рендер…", generated: "срендерен",
@@ -39,7 +40,7 @@ export function Editor({
   const [issues, setIssues] = useState<GuardIssue[]>(guard);
   const [preview, setPreview] = useState<string[]>([]);
   const [msg, setMsg] = useState<string | null>(null);
-  const [when, setWhen] = useState(scheduledAt ? scheduledAt.slice(0, 16) : "");
+  const [when, setWhen] = useState(toTashkentInput(scheduledAt));
   const [pending, start] = useTransition();
 
   const run = (fn: () => Promise<{ ok: boolean; error?: string; permalink?: string }>, okMsg: string) =>
@@ -124,7 +125,7 @@ export function Editor({
             <input type="datetime-local" value={when} onChange={(e) => setWhen(e.target.value)}
               className="rounded-lg border border-gray-300 px-2 py-1 text-sm" />
             <button disabled={pending || !when} className={`${BTN} border border-gray-300 bg-white`}
-              onClick={() => run(async () => scheduleAction(id, new Date(when).toISOString()), "Поставлено в расписание")}>
+              onClick={() => run(async () => scheduleAction(id, fromTashkent(when)), "Поставлено в расписание")}>
               Запланировать
             </button>
           </div>

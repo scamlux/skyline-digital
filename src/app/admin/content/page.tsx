@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase/server";
+import { toTashkentDisplay } from "@/lib/content/tz";
 import { statusBadge } from "./Editor";
 
 export const dynamic = "force-dynamic";
@@ -76,7 +77,7 @@ export default async function ContentListPage({
                 <td className="p-3 text-gray-600">{(p.platforms ?? []).join(", ") || "—"}</td>
                 <td className="p-3">{statusBadge(p.status)}</td>
                 <td className="p-3 text-gray-500">
-                  {p.scheduled_at ? `📅 ${p.scheduled_at.slice(0, 16).replace("T", " ")}` : p.updated_at.slice(0, 10)}
+                  {p.scheduled_at ? `📅 ${toTashkentDisplay(p.scheduled_at)}` : p.updated_at.slice(0, 10)}
                 </td>
               </tr>
             ))}
