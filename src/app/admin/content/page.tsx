@@ -33,6 +33,7 @@ export default async function ContentListPage({
         </div>
         <div className="flex items-start gap-2">
           <ImportPlanButton />
+          <Link href="/admin/content/metrics" className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm">Метрики</Link>
           <Link href="/admin/content/calendar" className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm">Календарь</Link>
           <Link href="/admin/content/new" className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white">+ Новый пост</Link>
         </div>

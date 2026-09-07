@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase/server";
 import { publishDuePost } from "@/lib/content/publish";
+import { collectDueMetrics } from "@/lib/content/metrics";
 import type { ContentPostRow } from "@/lib/content/store";
 
 // Крон расписания (ПРОМПТ-3 §1.1/§1.4/§1.5): посты в статусе scheduled с
@@ -31,5 +32,7 @@ export async function GET(req: Request): Promise<NextResponse> {
     const publications = await publishDuePost(db, post);
     results.push({ slug: post.slug, publications });
   }
-  return NextResponse.json({ processed: results.length, results });
+  // Сбор метрик IG (24h / 7d) — тем же кроном (§1.7).
+  const metrics = await collectDueMetrics(db);
+  return NextResponse.json({ processed: results.length, results, metrics });
 }

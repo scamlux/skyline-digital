@@ -245,6 +245,7 @@ export async function importPlan(db: SupabaseClient, plan: ContentPlan): Promise
       title: spec.title,
       style: spec.style,
       format: spec.format,
+      rubric: p.rubric ?? null,
       platforms: spec.platforms,
       spec,
       caption: spec.caption,
