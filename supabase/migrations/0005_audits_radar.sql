@@ -5,7 +5,7 @@
 -- `proposals`. `radar_companies` holds contacts of businesses scraped from
 -- public directories — those are never exposed via any public API or /web-index.
 
-create table public.audits (
+create table if not exists public.audits (
   id            uuid primary key default gen_random_uuid(),
   url           text not null,
   host          text not null,
@@ -22,10 +22,10 @@ create table public.audits (
   source        text,           -- 'public' | 'radar'
   created_at    timestamptz not null default now()
 );
-create index audits_host_created_idx on public.audits (host, created_at desc);
-create index audits_source_idx on public.audits (source, created_at desc);
+create index if not exists audits_host_created_idx on public.audits (host, created_at desc);
+create index if not exists audits_source_idx on public.audits (source, created_at desc);
 
-create table public.radar_companies (
+create table if not exists public.radar_companies (
   id              uuid primary key default gen_random_uuid(),
   domain          text unique,           -- null when there is no site
   name            text not null,
@@ -44,7 +44,7 @@ create table public.radar_companies (
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()
 );
-create index radar_class_status_idx on public.radar_companies (class, outreach_status);
+create index if not exists radar_class_status_idx on public.radar_companies (class, outreach_status);
 
 -- Hermetic by default: enabled, zero policies → anon/authenticated see nothing,
 -- service role bypasses RLS.
