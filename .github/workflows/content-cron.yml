@@ -1,0 +1,22 @@
+# 15-минутная каденция публикаций (ПРОМПТ-3 §1.1) без Vercel Pro.
+# Vercel Hobby разрешает только суточный cron, поэтому плотный тикер живёт здесь:
+# GitHub Actions дёргает /api/cron/content каждые 15 минут. Эндпоинт идемпотентен
+# (scheduled_at <= now(), пост публикуется один раз), так что дубль с суточным
+# vercel-кроном безвреден. Секрет: repo Settings → Secrets → Actions → CRON_SECRET.
+name: content-cron
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tick content cron
+        run: |
+          set -e
+          code=$(curl -s -o /tmp/out.json -w "%{http_code}" -m 60 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://skyline-digital.uz/api/cron/content)
+          echo "HTTP $code"; cat /tmp/out.json
+          [ "$code" = "200" ]
