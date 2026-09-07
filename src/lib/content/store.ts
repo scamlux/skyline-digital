@@ -67,7 +67,7 @@ export async function savePost(
   return { ok: true, id: (data as { id: string }).id, issues };
 }
 
-/** Рендер поста: PNG → Storage (content/<slug>/NN.png) + content_renders. */
+/** Рендер поста: JPEG → Storage (content/<slug>/NN.jpg) + content_renders. */
 export async function renderPost(
   db: SupabaseClient,
   id: string,
@@ -79,13 +79,17 @@ export async function renderPost(
   await db.from("content_posts").update({ status: "generating" }).eq("id", id);
   try {
     const built = buildPost(post.spec);
-    const pngs = await renderSlides(built.slides, post.format as PostFormat);
+    // JPEG q92: Instagram принимает только JPEG, Telegram — тоже (§1.4).
+    const imgs = await renderSlides(built.slides, post.format as PostFormat, {
+      type: "jpeg",
+      quality: 92,
+    });
     const { w, h } = CANVAS[post.format as PostFormat] ?? CANVAS.post;
-    for (let i = 0; i < pngs.length; i++) {
-      const path = `${post.slug}/${String(i + 1).padStart(2, "0")}.png`;
+    for (let i = 0; i < imgs.length; i++) {
+      const path = `${post.slug}/${String(i + 1).padStart(2, "0")}.jpg`;
       const { error: upErr } = await db.storage
         .from("content")
-        .upload(path, pngs[i], { contentType: "image/png", upsert: true });
+        .upload(path, imgs[i], { contentType: "image/jpeg", upsert: true });
       if (upErr) throw new Error(`storage: ${upErr.message}`);
       await db.from("content_renders").upsert(
         {
@@ -94,7 +98,7 @@ export async function renderPost(
           storage_path: `content/${path}`,
           width: w,
           height: h,
-          bytes: pngs[i].length,
+          bytes: imgs[i].length,
           spec_hash: built.hash,
         },
         { onConflict: "post_id,slide_index,spec_hash" },
@@ -102,7 +106,7 @@ export async function renderPost(
     }
     // После рендера пост уходит на проверку (review) — по ТЗ §4.2.
     await db.from("content_posts").update({ status: "review", spec_hash: built.hash }).eq("id", id);
-    return { ok: true, slides: pngs.length };
+    return { ok: true, slides: imgs.length };
   } catch (e) {
     await db.from("content_posts").update({ status: "failed" }).eq("id", id);
     return { ok: false, error: String(e) };

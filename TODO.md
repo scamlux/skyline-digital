@@ -53,7 +53,7 @@
 - [x] **1.2 Диагностика площадок.** `diagnostics.ts` (предикаты для крона) + блок «Диагностика» вверху /admin/content.
 - [x] **1.3 Импорт плана.** import-plan.ts (маппинг по типам + идемпотентный upsert, не трогает approved/scheduled/published), кнопка «Импорт плана» + отчёт, scripts/content/import-plan.mjs (--dry). 16/16 постов валидны. Тесты — зелёные.
 - [x] **1.6 QA-гейт.** guard.ts переписан: цены из brain.md (ERROR на «от $N» вне прайса), нет вопроса/призыва-в-комментарии/хэштеги/слайды 1–10/пустая подпись/lighthouse; warnings TG>1024, последний не cta, нет alt. Кнопка «Одобрить» дизейбл при error + серверная перепроверка approveAction. Инвариант: 13 ready проходят.
-- [ ] **1.4 Instagram.** `publish-instagram.ts` (контейнер→публикация, карусель ≤10, JPEG q92 нативным puppeteer, STORIES), TTL signed URL ≥1800.
+- [x] **1.4 Instagram.** publish-instagram.ts (контейнер→media_publish, карусель ≤10, STORIES, poll статуса, ошибки Meta целиком), рендер JPEG q92 (store), signed URL TTL 1800; actions publishInstagram/retry/markManual; панель «Публикации» в [id].
 - [ ] **1.5 Ручные напоминания.** статус `manual`; крон для facebook/linkedin/threads шлёт напоминание в чат лидов; кнопка «Опубликовано вручную».
 - [ ] **1.7 Метрики.** сбор IG insights 24ч/7д → content_metrics; вкладка /admin/content/metrics с медианой по рубрике; миграция 0012 (окно сбора).
 

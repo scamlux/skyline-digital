@@ -3,6 +3,7 @@ import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase/server";
 import { CANVAS, type PostFormat } from "@/lib/content/types";
 import type { ContentPostRow } from "@/lib/content/store";
 import { Editor } from "../Editor";
+import { Publications, type PublicationRow } from "../Publications";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,18 @@ export default async function ContentEditPage({
   const post = data as ContentPostRow;
   const { w, h } = CANVAS[post.format as PostFormat] ?? CANVAS.post;
 
+  const { data: pubs } = await db
+    .from("content_publications")
+    .select("platform,status,error,permalink,published_at,created_at")
+    .eq("post_id", id)
+    .order("created_at", { ascending: false });
+  // Последняя публикация по каждой площадке (первая в порядке убывания).
+  const latest = new Map<string, PublicationRow>();
+  for (const p of (pubs ?? []) as (PublicationRow & { created_at: string })[]) {
+    if (!latest.has(p.platform)) latest.set(p.platform, p);
+  }
+  const canPublish = ["approved", "scheduled", "published"].includes(post.status);
+
   return (
     <div className="p-8">
       <h1 className="mb-6 text-2xl font-bold text-gray-900">{post.title}</h1>
@@ -29,6 +42,12 @@ export default async function ContentEditPage({
         scheduledAt={post.scheduled_at}
         guard={post.guard ?? []}
         aspect={h / w}
+      />
+      <Publications
+        postId={post.id}
+        platforms={post.platforms}
+        publications={[...latest.values()]}
+        canPublish={canPublish}
       />
     </div>
   );
