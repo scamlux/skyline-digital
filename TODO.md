@@ -54,7 +54,7 @@
 - [x] **1.3 Импорт плана.** import-plan.ts (маппинг по типам + идемпотентный upsert, не трогает approved/scheduled/published), кнопка «Импорт плана» + отчёт, scripts/content/import-plan.mjs (--dry). 16/16 постов валидны. Тесты — зелёные.
 - [x] **1.6 QA-гейт.** guard.ts переписан: цены из brain.md (ERROR на «от $N» вне прайса), нет вопроса/призыва-в-комментарии/хэштеги/слайды 1–10/пустая подпись/lighthouse; warnings TG>1024, последний не cta, нет alt. Кнопка «Одобрить» дизейбл при error + серверная перепроверка approveAction. Инвариант: 13 ready проходят.
 - [x] **1.4 Instagram.** publish-instagram.ts (контейнер→media_publish, карусель ≤10, STORIES, poll статуса, ошибки Meta целиком), рендер JPEG q92 (store), signed URL TTL 1800; actions publishInstagram/retry/markManual; панель «Публикации» в [id].
-- [ ] **1.5 Ручные напоминания.** статус `manual`; крон для facebook/linkedin/threads шлёт напоминание в чат лидов; кнопка «Опубликовано вручную».
+- [x] **1.5 Ручные напоминания.** publish.ts — оркестратор: API (TG/IG) публикует, facebook/linkedin/threads (и API без ключей) → одноразовое напоминание в чат лидов (заголовок, время, ссылка, картинки, подпись) + строка publication manual; крон переписан на publishDuePost, пост обрабатывается за 1 проход.
 - [ ] **1.7 Метрики.** сбор IG insights 24ч/7д → content_metrics; вкладка /admin/content/metrics с медианой по рубрике; миграция 0012 (окно сбора).
 
 _Верификация: pure-части (tz, импорт, guard) — vitest. End-to-end приёмка требует живых Supabase/Telegram/Meta/Vercel cron — здесь не воспроизводится._
