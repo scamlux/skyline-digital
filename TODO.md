@@ -58,3 +58,4 @@
 - [x] **1.7 Метрики.** миграция 0012 (window, rubric), metrics.ts (сбор IG insights 24h/7d, идемпотентно), крон собирает метрики, metrics-report.ts (медиана+красная серия, тесты), вкладка /admin/content/metrics. ПРИМЕНИТЬ 0012 через SQL-editor.
 
 _Верификация: pure-части (tz, импорт, guard) — vitest. End-to-end приёмка требует живых Supabase/Telegram/Meta/Vercel cron — здесь не воспроизводится._
+- [x] **Прод актуализирован (07.09).** Причина застоя: Vercel Hobby отклоняет cron чаще суточного — `*/15` ронял каждый деплой. Фикс: cron `5 7 * * *` + тикер GitHub Actions каждые 15 мин (.github/workflows/content-cron.yml). Деплой dpl_E5Dj75 задеплоен и promoted, домен отвечает новым кодом. PR #6. Осталось: секрет CRON_SECRET в GitHub Actions + мерж PR #6.
