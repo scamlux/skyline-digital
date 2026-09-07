@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
 import { buildPost, specHash } from "./build";
-import { runGuard, guardBlocks } from "./guard";
 import { listThemes, getTheme } from "./themes";
 import { postSpecSchema } from "./types";
 
@@ -60,50 +59,4 @@ describe("реестр тем", () => {
   });
 });
 
-describe("guard §3.3", () => {
-  const spec = postSpecSchema.parse(SPEC);
-
-  it("чистая спека проходит", () => {
-    const issues = runGuard(spec);
-    expect(guardBlocks(issues)).toBe(false);
-  });
-
-  it("чужая цена → предупреждение; с маркером «рыночная» — нет", () => {
-    const bad = postSpecSchema.parse({
-      ...SPEC,
-      slides: [{ type: "cover", title: "Сайт за $99" }],
-    });
-    expect(runGuard(bad).some((i) => i.code === "price")).toBe(true);
-    const ok = postSpecSchema.parse({
-      ...SPEC,
-      slides: [{ type: "cover", title: "Рыночная цена — $2000, у нас честнее" }],
-    });
-    expect(runGuard(ok).some((i) => i.code === "price")).toBe(false);
-  });
-
-  it("обещание срока → ошибка (блокирует)", () => {
-    const bad = postSpecSchema.parse({
-      ...SPEC,
-      slides: [{ type: "cover", title: "Сделаем за 5 дней" }],
-    });
-    const issues = runGuard(bad);
-    expect(issues.some((i) => i.code === "deadline" && i.level === "error")).toBe(true);
-    expect(guardBlocks(issues)).toBe(true);
-  });
-
-  it("Lighthouse утвердительно → ошибка; «не пользуемся» — ок", () => {
-    const bad = postSpecSchema.parse({ ...SPEC, slides: [{ type: "cover", title: "Проверяем Lighthouse" }] });
-    expect(runGuard(bad).some((i) => i.code === "lighthouse")).toBe(true);
-    const ok = postSpecSchema.parse({ ...SPEC, slides: [{ type: "cover", title: "Почему мы не пользуемся Lighthouse" }] });
-    expect(runGuard(ok).some((i) => i.code === "lighthouse")).toBe(false);
-  });
-
-  it("Threads: ровно один хэштег", () => {
-    const bad = postSpecSchema.parse({
-      ...SPEC,
-      platforms: ["threads"],
-      caption: { threads: "без хэштегов" },
-    });
-    expect(runGuard(bad).some((i) => i.code === "threads-hashtag")).toBe(true);
-  });
-});
+// Правила гейта покрыты в guard.test.ts (инвариант плана + точечные правила).

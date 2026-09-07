@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase/server";
+import { tashkentMonthStartUtc, tashkentDayOfMonth } from "@/lib/content/tz";
 
 export const dynamic = "force-dynamic";
 
@@ -15,8 +16,9 @@ export default async function ContentCalendarPage({
   const [y, m] = (sp.m ?? `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`)
     .split("-")
     .map(Number);
-  const first = new Date(Date.UTC(y, m - 1, 1));
-  const next = new Date(Date.UTC(y, m, 1));
+  // Границы месяца и раскладка — по календарю Ташкента (хранение — UTC).
+  const firstUtc = tashkentMonthStartUtc(y, m);
+  const nextUtc = tashkentMonthStartUtc(m === 12 ? y + 1 : y, m === 12 ? 1 : m + 1);
   const prevM = `${m === 1 ? y - 1 : y}-${String(m === 1 ? 12 : m - 1).padStart(2, "0")}`;
   const nextM = `${m === 12 ? y + 1 : y}-${String(m === 12 ? 1 : m + 1).padStart(2, "0")}`;
 
@@ -24,16 +26,16 @@ export default async function ContentCalendarPage({
   const { data } = await db
     .from("content_posts")
     .select("id,title,status,scheduled_at")
-    .gte("scheduled_at", first.toISOString())
-    .lt("scheduled_at", next.toISOString());
+    .gte("scheduled_at", firstUtc)
+    .lt("scheduled_at", nextUtc);
   const byDay = new Map<number, { id: string; title: string; status: string }[]>();
   for (const p of data ?? []) {
-    const d = new Date(p.scheduled_at as string).getUTCDate();
+    const d = tashkentDayOfMonth(p.scheduled_at as string);
     byDay.set(d, [...(byDay.get(d) ?? []), p]);
   }
 
   const daysInMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
-  const startDow = (first.getUTCDay() + 6) % 7; // Пн=0
+  const startDow = (new Date(Date.UTC(y, m - 1, 1)).getUTCDay() + 6) % 7; // Пн=0
   const cells: (number | null)[] = [
     ...Array.from({ length: startDow }, () => null),
     ...Array.from({ length: daysInMonth }, (_, i) => i + 1),

@@ -75,7 +75,7 @@ async function main() {
         console.error(`✗ ${spec.slug}: нечего рендерить — сначала build`);
         continue;
       }
-      const pngs = await renderSlides(htmls, spec.format as PostFormat);
+      const pngs = await renderSlides(htmls, spec.format as PostFormat, { type: "png" });
       pngs.forEach((buf, i) =>
         writeFileSync(join(dir, `${String(i + 1).padStart(2, "0")}.png`), buf),
       );

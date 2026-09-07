@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase/server";
-import { publishToTelegram } from "@/lib/content/publish-telegram";
+import { publishDuePost } from "@/lib/content/publish";
+import { collectDueMetrics } from "@/lib/content/metrics";
 import type { ContentPostRow } from "@/lib/content/store";
 
-// Крон расписания (ТЗ §7.4): посты в статусе scheduled с наступившей датой
-// публикуются в Telegram. Защита: CRON_SECRET в заголовке Authorization
-// (Vercel Cron подставляет его сам), без секрета — только 401.
+// Крон расписания (ПРОМПТ-3 §1.1/§1.4/§1.5): посты в статусе scheduled с
+// наступившей датой публикуются по настроенным API (Telegram-канал, Instagram),
+// а площадки без API дают напоминание в чат лидов. Сравнение scheduled_at (UTC)
+// <= now() снимает вопрос часового пояса. Защита: CRON_SECRET в заголовке
+// Authorization (Vercel Cron подставляет его сам), без секрета — 401.
 export const runtime = "nodejs";
 export const maxDuration = 300;
 
@@ -26,9 +29,10 @@ export async function GET(req: Request): Promise<NextResponse> {
     .limit(5);
   const results: Record<string, unknown>[] = [];
   for (const post of (data ?? []) as ContentPostRow[]) {
-    if (!post.platforms.includes("telegram")) continue;
-    const r = await publishToTelegram(db, post);
-    results.push({ slug: post.slug, ...r });
+    const publications = await publishDuePost(db, post);
+    results.push({ slug: post.slug, publications });
   }
-  return NextResponse.json({ processed: results.length, results });
+  // Сбор метрик IG (24h / 7d) — тем же кроном (§1.7).
+  const metrics = await collectDueMetrics(db);
+  return NextResponse.json({ processed: results.length, results, metrics });
 }

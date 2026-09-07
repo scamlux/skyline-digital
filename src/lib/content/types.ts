@@ -91,10 +91,11 @@ export const captionSchema = z
     threads: z.string().optional(),
     short: z.string().optional(),
     linkedin: z.string().optional(),
+    alt: z.string().optional(),
   })
   .partial();
 
-export const PLATFORMS = ["telegram", "instagram", "threads", "linkedin"] as const;
+export const PLATFORMS = ["telegram", "instagram", "threads", "facebook", "linkedin"] as const;
 export type Platform = (typeof PLATFORMS)[number];
 
 export const postSpecSchema = z.object({
