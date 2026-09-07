@@ -3,7 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 /**
  * Сбор метрик Instagram (ПРОМПТ-3 §1.7). GET /<IG_MEDIA_ID>/insights через сутки
  * (окно 24h) и через неделю (7d) после публикации → content_metrics. Идемпотентно
- * по уникальному индексу (publication_id, window). Имена полей insights зависят
+ * по индексу (publication_id, collect_window). Имена полей insights зависят
  * от версии Graph API — берём набор и раскладываем защитно (что пришло, то и пишем).
  */
 
@@ -63,9 +63,11 @@ export async function collectDueMetrics(
 
     const { data: have } = await db
       .from("content_metrics")
-      .select("window")
+      .select("collect_window")
       .eq("publication_id", p.id);
-    const done = new Set((have ?? []).map((r) => (r as { window: string }).window));
+    const done = new Set(
+      (have ?? []).map((r) => (r as { collect_window: string }).collect_window),
+    );
     const todo = windows.filter((w) => !done.has(w));
     if (!todo.length) continue;
 
@@ -79,8 +81,8 @@ export async function collectDueMetrics(
     const m = mapMetrics(ins);
     for (const w of todo) {
       await db.from("content_metrics").upsert(
-        { publication_id: p.id, window: w, collected_at: new Date().toISOString(), ...m },
-        { onConflict: "publication_id,window" },
+        { publication_id: p.id, collect_window: w, collected_at: new Date().toISOString(), ...m },
+        { onConflict: "publication_id,collect_window" },
       );
       collected++;
     }

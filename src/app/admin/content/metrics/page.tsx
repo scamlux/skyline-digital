@@ -6,7 +6,7 @@ import { buildRubricReports, type MetricRow } from "@/lib/content/metrics-report
 export const dynamic = "force-dynamic";
 
 interface MetricRecord {
-  window: string;
+  collect_window: string;
   views: number | null;
   saves: number | null;
   shares: number | null;
@@ -27,14 +27,14 @@ export default async function MetricsPage() {
   const { data } = await db
     .from("content_publications")
     .select(
-      "id, content_posts!inner(id,slug,title,rubric,scheduled_at), content_metrics(window,views,saves,shares,comments)",
+      "id, content_posts!inner(id,slug,title,rubric,scheduled_at), content_metrics(collect_window,views,saves,shares,comments)",
     )
     .eq("platform", "instagram");
 
   const rows: MetricRow[] = ((data ?? []) as unknown as PubRow[]).map((p) => {
     const best =
-      p.content_metrics?.find((m) => m.window === "7d") ??
-      p.content_metrics?.find((m) => m.window === "24h") ??
+      p.content_metrics?.find((m) => m.collect_window === "7d") ??
+      p.content_metrics?.find((m) => m.collect_window === "24h") ??
       null;
     const post = p.content_posts;
     return {
