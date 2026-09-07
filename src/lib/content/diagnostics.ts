@@ -25,9 +25,12 @@ function need(names: string[]): { ok: boolean; missing: string[] } {
   return { ok: missing.length === 0, missing };
 }
 
-/** Публикация в Telegram-канал доступна. */
+/** Публикация в Telegram-канал доступна (бот-админ канала + ID). */
 export function telegramChannelReady(): boolean {
-  return present("TELEGRAM_BOT_TOKEN") && present("TELEGRAM_CHANNEL_ID");
+  return (
+    (present("TELEGRAM_CHANNEL_BOT_TOKEN") || present("TELEGRAM_BOT_TOKEN")) &&
+    present("TELEGRAM_CHANNEL_ID")
+  );
 }
 
 /** Публикация в Instagram доступна. */
@@ -41,7 +44,12 @@ export function leadsChatReady(): boolean {
 }
 
 export function contentDiagnostics(): Diag[] {
-  const tg = need(["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHANNEL_ID"]);
+  const channelTokenOk = present("TELEGRAM_CHANNEL_BOT_TOKEN") || present("TELEGRAM_BOT_TOKEN");
+  const tgMissing = [
+    ...(channelTokenOk ? [] : ["TELEGRAM_CHANNEL_BOT_TOKEN"]),
+    ...(present("TELEGRAM_CHANNEL_ID") ? [] : ["TELEGRAM_CHANNEL_ID"]),
+  ];
+  const tg = { ok: tgMissing.length === 0, missing: tgMissing };
   const ig = need(["INSTAGRAM_BUSINESS_ID", "INSTAGRAM_ACCESS_TOKEN"]);
   const leads = need(["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID"]);
   const cron = need(["CRON_SECRET"]);

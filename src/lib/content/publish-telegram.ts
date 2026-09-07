@@ -7,10 +7,13 @@ import { signedRenderUrls, type ContentPostRow } from "./store";
  * медиа-группе ≤ 1024 симв. — если длиннее, картинки группой и текст
  * отдельным сообщением, external_id — ID первого.
  *
- * Секреты: TELEGRAM_BOT_TOKEN + TELEGRAM_CHANNEL_ID (канал ≠ чат лидов).
+ * Секреты: TELEGRAM_CHANNEL_BOT_TOKEN (бот-админ канала) + TELEGRAM_CHANNEL_ID.
+ * Канал и чат лидов — разные боты: TELEGRAM_CHANNEL_BOT_TOKEN постит в канал,
+ * а TELEGRAM_BOT_TOKEN (бот лидов) шлёт уведомления/напоминания в чат лидов.
+ * Для обратной совместимости (один бот на всё) — фолбэк на TELEGRAM_BOT_TOKEN.
  */
 
-const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TOKEN = process.env.TELEGRAM_CHANNEL_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
 const CHANNEL = process.env.TELEGRAM_CHANNEL_ID;
 
 export function isChannelConfigured(): boolean {
