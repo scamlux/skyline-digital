@@ -1,36 +1,54 @@
 import type { GuardIssue, PostSpec } from "./types";
 
 /**
- * Guard §3.3 — «цифры не сочиняются». Ошибка блокирует публикацию,
- * предупреждение — нет. Вызывается при сохранении поста и перед публикацией.
+ * QA-гейт перед аппрувом (ПРОМПТ-3 §1.6, перенос кодируемых пунктов из
+ * docs/smm/QA.md). `error` блокирует переход review → approved; `warning` — нет.
+ *
+ * Инвариант, который держат тесты: все `ready`-посты сентябрьского плана
+ * проходят гейт с нулём ошибок. Поэтому правила сформулированы точно, а не
+ * «на всякий случай»:
+ *  — наша цена заявляется на сайте конструкцией «от $N»; ошибка — только на
+ *    «от $N» с N вне опубликованного прайса brain.md. Рыночные и примерные
+ *    (~$N, «около $N», «за $N») цифры легитимны и не блокируются.
+ *  — призыв прокомментировать проверяется как «в комментари…», НЕ по
+ *    ключевому слову: ключ ставится лишь на каждый 3–4-й пост.
  */
 
-const ALLOWED_PRICES = ["от $450", "до $5000"];
-const MARKET_MARKER = /рыночн/i;
-const DEADLINE_RE = /(за\s+\d+\s+(дн|недел|месяц))|(сделаем\s+за)|(срок\s+\d+)/i;
-const PRICE_RE = /(?:от|до)?\s?\$\s?\d[\d\s,.]*/g;
+// Опубликованный прайс — docs/smm/brain.md §«Публичная цена на сайте».
+const OUR_PRICES = new Set([840, 1000, 1130, 1680, 2080, 2590]);
+// Именно «от $N» — так студия называет свою цену.
+const OUR_PRICE_RE = /от\s*\$\s*([\d][\d\s.,]*)/gi;
+const LIGHTHOUSE_RE = /lighthouse/i;
+const LIGHTHOUSE_OK_RE = /не\s+(пользуемся|используем)|без\s+lighthouse/i;
 
-/** Весь текст поста одним массивом [путь, текст]. */
+/** Собирает все строковые узлы поста как `[путь, текст]`. */
 function textNodes(spec: PostSpec): [string, string][] {
   const out: [string, string][] = [];
   const push = (path: string, v: unknown) => {
     if (typeof v === "string" && v.trim()) out.push([path, v]);
   };
+  const walk = (path: string, v: unknown) => {
+    if (typeof v === "string") push(path, v);
+    else if (Array.isArray(v)) v.forEach((item, j) => walk(`${path}[${j}]`, item));
+    else if (v && typeof v === "object")
+      for (const [k, vv] of Object.entries(v)) walk(`${path}.${k}`, vv);
+  };
   spec.slides.forEach((s, i) => {
-    for (const [k, v] of Object.entries(s)) {
-      if (typeof v === "string") push(`slides[${i}].${k}`, v);
-      else if (Array.isArray(v))
-        v.forEach((item, j) => {
-          if (typeof item === "string") push(`slides[${i}].${k}[${j}]`, item);
-          else if (item && typeof item === "object")
-            for (const [kk, vv] of Object.entries(item)) push(`slides[${i}].${k}[${j}].${kk}`, vv);
-        });
-      else if (v && typeof v === "object")
-        for (const [kk, vv] of Object.entries(v)) push(`slides[${i}].${k}.${kk}`, vv);
-    }
+    for (const [k, v] of Object.entries(s)) walk(`slides[${i}].${k}`, v);
   });
-  for (const [k, v] of Object.entries(spec.caption ?? {})) push(`caption.${k}`, v as string);
   return out;
+}
+
+/** Эффективная подпись для площадки (с фолбэком на default). */
+function captionFor(spec: PostSpec, p: string): string {
+  const c = spec.caption ?? {};
+  const byPlatform: Record<string, string | undefined> = {
+    instagram: c.instagram,
+    telegram: c.telegram,
+    threads: c.threads,
+    linkedin: c.linkedin,
+  };
+  return (byPlatform[p] ?? c.default ?? c.instagram ?? "").trim();
 }
 
 export function runGuard(spec: PostSpec): GuardIssue[] {
@@ -38,40 +56,87 @@ export function runGuard(spec: PostSpec): GuardIssue[] {
   const add = (level: GuardIssue["level"], code: string, message: string, path: string) =>
     issues.push({ level, code, message, path });
 
-  for (const [path, text] of textNodes(spec)) {
-    // Наша цена: допустимы только «от $450» и «до $5000»; прочие $-суммы —
-    // предупреждение, если рядом нет маркера «рыночная».
-    for (const m of text.matchAll(PRICE_RE)) {
-      const hit = m[0].trim().replace(/\s+/g, " ");
-      const allowed = ALLOWED_PRICES.some((a) => hit.startsWith(a) || a.startsWith(hit));
-      if (!allowed && !MARKET_MARKER.test(text)) {
-        add("warning", "price", `Сумма «${hit}» вне прайса (разрешены: ${ALLOWED_PRICES.join(", ")})`, path);
-      }
-    }
-    // Обещания сроков запрещены вне ссылки на калькулятор.
-    if (DEADLINE_RE.test(text) && !/калькулятор/i.test(text)) {
-      add("error", "deadline", "Обещание срока («за N дней/недель», «сделаем за») запрещено", path);
-    }
-    // Lighthouse в утвердительном контексте — мы им не пользуемся.
-    if (/lighthouse/i.test(text) && !/не\s+(пользуемся|используем)|без\s+lighthouse/i.test(text)) {
-      add("error", "lighthouse", "Упоминание Lighthouse: мы им не пользуемся", path);
+  const c = spec.caption ?? {};
+  const primary = (c.instagram ?? c.default ?? "").trim();
+  const tgCaption = (c.telegram ?? c.default ?? "").trim();
+
+  // Весь текст поста: слайды + все подписи — для ценовой и lighthouse-проверок.
+  const slideText = textNodes(spec)
+    .map((n) => n[1])
+    .join("\n");
+  const allText = `${slideText}\n${Object.values(c).join("\n")}`;
+
+  // ── ОШИБКИ (блокируют аппрув) ──
+
+  // Пустая подпись для площадки из platforms.
+  for (const p of spec.platforms) {
+    if (!captionFor(spec, p)) {
+      add("error", "caption-empty", `Пустая подпись для площадки «${p}»`, "caption");
     }
   }
 
-  // Длины подписей и хэштеги.
-  const c = spec.caption ?? {};
-  const tags = spec.hashtags ?? [];
-  const iг = `${c.instagram ?? c.default ?? ""}\n${tags.join(" ")}`;
-  if (iг.length > 2200) add("error", "caption-instagram", `Instagram: ${iг.length} > 2200 знаков`, "caption.instagram");
-  const th = c.threads ?? c.short ?? c.default ?? "";
-  if (th.length > 500) add("error", "caption-threads", `Threads: ${th.length} > 500 знаков`, "caption.threads");
-  const thTags = (th.match(/#[\wа-яё]+/gi) ?? []).length;
-  if (spec.platforms.includes("threads") && thTags !== 1) {
-    add("error", "threads-hashtag", `Threads: нужен ровно один хэштег, сейчас ${thTags}`, "caption.threads");
+  // Вопрос читателю (+36,7% комментариев).
+  if (!primary.includes("?")) {
+    add("error", "no-question", "В подписи нет вопроса читателю", "caption");
   }
-  const li = c.linkedin ?? "";
-  if (li.length > 3000) add("error", "caption-linkedin", `LinkedIn: ${li.length} > 3000 знаков`, "caption.linkedin");
-  if (tags.length > 30) add("error", "hashtags", `Хэштегов ${tags.length} > 30`, "hashtags");
+
+  // Призыв прокомментировать (+202,8% комментариев).
+  if (!/в\s+комментари/i.test(primary)) {
+    add("error", "no-comment-cta", "В подписи нет призыва прокомментировать", "caption");
+  }
+
+  // Хэштеги запрещены (−31,7% просмотров) — ни в поле, ни в тексте подписей.
+  const tags = spec.hashtags ?? [];
+  if (tags.length) {
+    add("error", "hashtags", `Хэштеги запрещены (в поле hashtags: ${tags.length})`, "hashtags");
+  }
+  const inlineTags = (Object.values(c).join(" ").match(/#[\wа-яё]+/gi) ?? []).length;
+  if (inlineTags) {
+    add("error", "hashtags-inline", `Хэштеги в подписи запрещены (${inlineTags})`, "caption");
+  }
+
+  // Число слайдов вне 1..10.
+  const n = spec.slides.length;
+  if (n < 1 || n > 10) {
+    add("error", "slides-count", `Слайдов ${n} — вне диапазона 1–10`, "slides");
+  }
+
+  // Наша цена «от $N» вне прайса brain.md.
+  OUR_PRICE_RE.lastIndex = 0;
+  const flagged = new Set<number>();
+  let m: RegExpExecArray | null;
+  while ((m = OUR_PRICE_RE.exec(allText))) {
+    const num = parseInt(m[1].replace(/[\s.,]/g, ""), 10);
+    if (!Number.isNaN(num) && !OUR_PRICES.has(num) && !flagged.has(num)) {
+      flagged.add(num);
+      add("error", "our-price", `Наша цена «от $${num}» не из прайса brain.md`, "slides");
+    }
+  }
+
+  // Lighthouse утвердительно — мы им не пользуемся.
+  if (LIGHTHOUSE_RE.test(allText) && !LIGHTHOUSE_OK_RE.test(allText)) {
+    add("error", "lighthouse", "Упоминание Lighthouse: мы им не пользуемся", "slides");
+  }
+
+  // ── ПРЕДУПРЕЖДЕНИЯ (не блокируют) ──
+
+  if (tgCaption.length > 1024) {
+    add(
+      "warning",
+      "tg-length",
+      `Telegram-подпись ${tgCaption.length} > 1024 — уйдёт отдельным сообщением`,
+      "caption.telegram",
+    );
+  }
+
+  const last = spec.slides[spec.slides.length - 1];
+  if (last && last.type !== "cta") {
+    add("warning", "last-not-cta", `Последний слайд «${last.type}», не спроектирован под CTA`, "slides");
+  }
+
+  if (spec.platforms.includes("instagram") && !(c.alt ?? "").trim()) {
+    add("warning", "no-alt", "Нет альтернативного текста (alt) для Instagram", "caption.alt");
+  }
 
   return issues;
 }

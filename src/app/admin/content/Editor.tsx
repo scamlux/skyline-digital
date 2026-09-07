@@ -42,6 +42,8 @@ export function Editor({
   const [msg, setMsg] = useState<string | null>(null);
   const [when, setWhen] = useState(toTashkentInput(scheduledAt));
   const [pending, start] = useTransition();
+  const errors = issues.filter((i) => i.level === "error");
+  const hasErrors = errors.length > 0;
 
   const run = (fn: () => Promise<{ ok: boolean; error?: string; permalink?: string }>, okMsg: string) =>
     start(async () => {
@@ -101,10 +103,20 @@ export function Editor({
                 Рендер PNG
               </button>
               {status === "review" && (
-                <button disabled={pending} className={`${BTN} bg-emerald-600 text-white`}
-                  onClick={() => run(async () => approveAction(id), "Одобрено")}>
-                  ✓ Одобрить (человек)
-                </button>
+                <span className="inline-flex items-center gap-2">
+                  <button
+                    disabled={pending || hasErrors}
+                    title={hasErrors ? "Есть ошибки гейта — исправьте перед аппрувом" : undefined}
+                    className={`${BTN} bg-emerald-600 text-white`}
+                    onClick={() => run(async () => approveAction(id), "Одобрено")}>
+                    ✓ Одобрить (человек)
+                  </button>
+                  {hasErrors && (
+                    <span className="text-xs text-red-600">
+                      блокируют: {errors.map((e) => e.code).join(", ")}
+                    </span>
+                  )}
+                </span>
               )}
               {["approved", "scheduled"].includes(status) && (
                 <button disabled={pending} className={`${BTN} bg-sky-600 text-white`}

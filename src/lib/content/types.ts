@@ -91,6 +91,7 @@ export const captionSchema = z
     threads: z.string().optional(),
     short: z.string().optional(),
     linkedin: z.string().optional(),
+    alt: z.string().optional(),
   })
   .partial();
 

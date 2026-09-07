@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { savePost, renderPost, type ContentPostRow } from "@/lib/content/store";
+import { runGuard, guardBlocks } from "@/lib/content/guard";
 import { publishToTelegram } from "@/lib/content/publish-telegram";
 import { buildPost } from "@/lib/content/build";
 import { importPlan, type ContentPlan, type ImportReport } from "@/lib/content/import-plan";
@@ -36,16 +37,31 @@ export async function renderAction(id: string): Promise<{ ok: boolean; slides?: 
   return res;
 }
 
-/** review → approved: только человек, только этой кнопкой (ТЗ §4.2). */
-export async function approveAction(id: string): Promise<{ ok: boolean }> {
+/**
+ * review → approved: только человек, только этой кнопкой (ТЗ §4.2).
+ * Серверная перепроверка QA-гейта (§1.6): аппрув невозможен, пока есть ошибки —
+ * даже если клиент их обошёл. Кнопка в UI дизейблится, это вторая линия обороны.
+ */
+export async function approveAction(id: string): Promise<{ ok: boolean; error?: string }> {
   const db = getSupabaseAdmin();
+  const { data } = await db.from("content_posts").select("*").eq("id", id).single();
+  if (!data) return { ok: false, error: "пост не найден" };
+  const post = data as ContentPostRow;
+  if (post.status !== "review") {
+    return { ok: false, error: `аппрув только из review (сейчас «${post.status}»)` };
+  }
+  const issues = runGuard(post.spec);
+  if (guardBlocks(issues)) {
+    const codes = issues.filter((i) => i.level === "error").map((i) => i.code).join(", ");
+    return { ok: false, error: `гейт не пройден: ${codes}` };
+  }
   const { error } = await db
     .from("content_posts")
-    .update({ status: "approved" })
+    .update({ status: "approved", guard: issues })
     .eq("id", id)
     .eq("status", "review");
   reval();
-  return { ok: !error };
+  return { ok: !error, error: error?.message };
 }
 
 export async function scheduleAction(id: string, when: string | null): Promise<{ ok: boolean }> {
