@@ -7,6 +7,7 @@ import {
   publishTelegramAction, deletePostAction, previewAction,
 } from "./actions";
 import type { GuardIssue } from "@/lib/content/types";
+import { toTashkentInput, fromTashkent } from "@/lib/content/tz";
 
 const STATUS_RU: Record<string, string> = {
   draft: "черновик", planned: "в плане", generating: "рендер…", generated: "срендерен",
@@ -39,8 +40,10 @@ export function Editor({
   const [issues, setIssues] = useState<GuardIssue[]>(guard);
   const [preview, setPreview] = useState<string[]>([]);
   const [msg, setMsg] = useState<string | null>(null);
-  const [when, setWhen] = useState(scheduledAt ? scheduledAt.slice(0, 16) : "");
+  const [when, setWhen] = useState(toTashkentInput(scheduledAt));
   const [pending, start] = useTransition();
+  const errors = issues.filter((i) => i.level === "error");
+  const hasErrors = errors.length > 0;
 
   const run = (fn: () => Promise<{ ok: boolean; error?: string; permalink?: string }>, okMsg: string) =>
     start(async () => {
@@ -100,10 +103,20 @@ export function Editor({
                 Рендер PNG
               </button>
               {status === "review" && (
-                <button disabled={pending} className={`${BTN} bg-emerald-600 text-white`}
-                  onClick={() => run(async () => approveAction(id), "Одобрено")}>
-                  ✓ Одобрить (человек)
-                </button>
+                <span className="inline-flex items-center gap-2">
+                  <button
+                    disabled={pending || hasErrors}
+                    title={hasErrors ? "Есть ошибки гейта — исправьте перед аппрувом" : undefined}
+                    className={`${BTN} bg-emerald-600 text-white`}
+                    onClick={() => run(async () => approveAction(id), "Одобрено")}>
+                    ✓ Одобрить (человек)
+                  </button>
+                  {hasErrors && (
+                    <span className="text-xs text-red-600">
+                      блокируют: {errors.map((e) => e.code).join(", ")}
+                    </span>
+                  )}
+                </span>
               )}
               {["approved", "scheduled"].includes(status) && (
                 <button disabled={pending} className={`${BTN} bg-sky-600 text-white`}
@@ -124,7 +137,7 @@ export function Editor({
             <input type="datetime-local" value={when} onChange={(e) => setWhen(e.target.value)}
               className="rounded-lg border border-gray-300 px-2 py-1 text-sm" />
             <button disabled={pending || !when} className={`${BTN} border border-gray-300 bg-white`}
-              onClick={() => run(async () => scheduleAction(id, new Date(when).toISOString()), "Поставлено в расписание")}>
+              onClick={() => run(async () => scheduleAction(id, fromTashkent(when)), "Поставлено в расписание")}>
               Запланировать
             </button>
           </div>

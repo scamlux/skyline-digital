@@ -47,3 +47,14 @@
 
 ## Мелкие отклонения КП ✅
 - [x] Слайд 3: превью дизайна вместо «понимания»; кремовый `#FFE4CC`; статусы чек-листа из данных — сделано 2026-09.
+
+## Управление постингом из /admin/content (ПРОМПТ-3)
+- [x] **1.1 Крон + TZ.** `vercel.json` cron `*/15`, `src/lib/content/tz.ts` (toTashkent/fromTashkent, UTC+5 без DST), исправлен `slice(0,16)` в page/Editor/calendar, `CRON_SECRET` в `.env.example`. Тесты tz — зелёные.
+- [x] **1.2 Диагностика площадок.** `diagnostics.ts` (предикаты для крона) + блок «Диагностика» вверху /admin/content.
+- [x] **1.3 Импорт плана.** import-plan.ts (маппинг по типам + идемпотентный upsert, не трогает approved/scheduled/published), кнопка «Импорт плана» + отчёт, scripts/content/import-plan.mjs (--dry). 16/16 постов валидны. Тесты — зелёные.
+- [x] **1.6 QA-гейт.** guard.ts переписан: цены из brain.md (ERROR на «от $N» вне прайса), нет вопроса/призыва-в-комментарии/хэштеги/слайды 1–10/пустая подпись/lighthouse; warnings TG>1024, последний не cta, нет alt. Кнопка «Одобрить» дизейбл при error + серверная перепроверка approveAction. Инвариант: 13 ready проходят.
+- [x] **1.4 Instagram.** publish-instagram.ts (контейнер→media_publish, карусель ≤10, STORIES, poll статуса, ошибки Meta целиком), рендер JPEG q92 (store), signed URL TTL 1800; actions publishInstagram/retry/markManual; панель «Публикации» в [id].
+- [x] **1.5 Ручные напоминания.** publish.ts — оркестратор: API (TG/IG) публикует, facebook/linkedin/threads (и API без ключей) → одноразовое напоминание в чат лидов (заголовок, время, ссылка, картинки, подпись) + строка publication manual; крон переписан на publishDuePost, пост обрабатывается за 1 проход.
+- [x] **1.7 Метрики.** миграция 0012 (window, rubric), metrics.ts (сбор IG insights 24h/7d, идемпотентно), крон собирает метрики, metrics-report.ts (медиана+красная серия, тесты), вкладка /admin/content/metrics. ПРИМЕНИТЬ 0012 через SQL-editor.
+
+_Верификация: pure-части (tz, импорт, guard) — vitest. End-to-end приёмка требует живых Supabase/Telegram/Meta/Vercel cron — здесь не воспроизводится._

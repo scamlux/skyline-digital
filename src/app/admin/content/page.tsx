@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase/server";
+import { toTashkentDisplay } from "@/lib/content/tz";
 import { statusBadge } from "./Editor";
+import { Diagnostics } from "./Diagnostics";
+import { ImportPlanButton } from "./ImportPlanButton";
 
 export const dynamic = "force-dynamic";
 
@@ -28,11 +31,15 @@ export default async function ContentListPage({
           <h1 className="text-2xl font-bold text-gray-900">Контент</h1>
           <p className="mt-1 text-sm text-gray-500">Студия постов · всего: {count ?? 0}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-start gap-2">
+          <ImportPlanButton />
+          <Link href="/admin/content/metrics" className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm">Метрики</Link>
           <Link href="/admin/content/calendar" className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm">Календарь</Link>
           <Link href="/admin/content/new" className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white">+ Новый пост</Link>
         </div>
       </div>
+
+      <Diagnostics />
 
       <form className="mb-4 flex flex-wrap gap-2" action="/admin/content">
         <select name="status" defaultValue={sp.status ?? ""} className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm">
@@ -76,7 +83,7 @@ export default async function ContentListPage({
                 <td className="p-3 text-gray-600">{(p.platforms ?? []).join(", ") || "—"}</td>
                 <td className="p-3">{statusBadge(p.status)}</td>
                 <td className="p-3 text-gray-500">
-                  {p.scheduled_at ? `📅 ${p.scheduled_at.slice(0, 16).replace("T", " ")}` : p.updated_at.slice(0, 10)}
+                  {p.scheduled_at ? `📅 ${toTashkentDisplay(p.scheduled_at)}` : p.updated_at.slice(0, 10)}
                 </td>
               </tr>
             ))}
