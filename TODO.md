@@ -59,3 +59,4 @@
 
 _Верификация: pure-части (tz, импорт, guard) — vitest. End-to-end приёмка требует живых Supabase/Telegram/Meta/Vercel cron — здесь не воспроизводится._
 - [x] **Прод актуализирован (07.09).** Причина застоя: Vercel Hobby отклоняет cron чаще суточного — `*/15` ронял каждый деплой. Фикс: cron `5 7 * * *` + тикер GitHub Actions каждые 15 мин (.github/workflows/content-cron.yml). Деплой dpl_E5Dj75 задеплоен и promoted, домен отвечает новым кодом. PR #6. Осталось: секрет CRON_SECRET в GitHub Actions + мерж PR #6.
+- [x] **Тикер переехал на cron-job.org (07.09).** GitHub Actions заблокирован биллингом аккаунта → тикер каждые 15 мин настроен на cron-job.org (аккаунт владельца), тестовый запуск 200 OK, заголовок Authorization с CRON_SECRET. Workflow content-cron отключён (gh workflow disable), включить обратно при починке биллинга: `gh workflow enable content-cron`.
