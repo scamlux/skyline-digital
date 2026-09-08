@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase/server";
 import { toTashkentDisplay } from "@/lib/content/tz";
-import { statusBadge } from "./Editor";
+import { statusBadge } from "./status-badge";
 import { Diagnostics } from "./Diagnostics";
 import { ImportPlanButton } from "./ImportPlanButton";
 
