@@ -11,6 +11,14 @@ export const metadata = { title: "Radar — база лидов", robots: { inde
 
 const PAGE_SIZE = 50;
 
+// Сортировка только по whitelist-колонкам: параметр вида `sort=grade.asc`.
+const SORTABLE = new Set(["name", "grade", "city", "industry", "source", "web_status", "verified_at"]);
+function parseSort(raw: string | undefined): { col: string; asc: boolean } {
+  const [col = "", dir = ""] = (raw ?? "").split(".");
+  if (SORTABLE.has(col)) return { col, asc: dir !== "desc" };
+  return { col: "verified_at", asc: false };
+}
+
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="p-8">
@@ -53,6 +61,8 @@ export default async function RadarAdminPage({
   if (sp.industry) query = query.eq("industry", sp.industry);
   if (sp.grade) query = query.eq("grade", sp.grade);
   if (sp.source) query = query.eq("source", sp.source);
+  if (sp.site === "yes") query = query.not("website", "is", null);
+  if (sp.site === "no") query = query.is("website", null);
   if (sp.city) query = query.ilike("city", `%${sp.city}%`);
   if (sp.q) {
     // Sanitise: PostgREST `or` uses commas/parens as syntax.
@@ -60,8 +70,9 @@ export default async function RadarAdminPage({
     if (safe) query = query.or(`name.ilike.%${safe}%,phone.ilike.%${safe}%`);
   }
 
+  const sort = parseSort(sp.sort);
   const { data, count } = await query
-    .order("verified_at", { ascending: false, nullsFirst: false })
+    .order(sort.col, { ascending: sort.asc, nullsFirst: false })
     .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
 
   const stats = await getStats(db);
@@ -70,6 +81,7 @@ export default async function RadarAdminPage({
     .select("key,label")
     .eq("active", true)
     .order("created_at", { ascending: true });
+  const industries = (queryRows ?? []) as { key: string; label: string }[];
 
   return (
     <Shell>
@@ -78,10 +90,10 @@ export default async function RadarAdminPage({
         <RunPanel industries={(queryRows ?? []) as { key: string; label: string }[]} />
       </div>
       <div className="mt-6">
-        <FilterBar />
+        <FilterBar industries={industries} />
       </div>
       <div className="mt-4">
-        <CompaniesTable rows={(data ?? []) as RadarRow[]} page={page} total={count ?? 0} />
+        <CompaniesTable rows={(data ?? []) as RadarRow[]} page={page} total={count ?? 0} industries={industries} />
       </div>
     </Shell>
   );
