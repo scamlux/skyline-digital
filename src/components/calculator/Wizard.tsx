@@ -540,7 +540,7 @@ function ResultView({ result }: { result: EstimateResponse }) {
       </ResultSection>
 
       <ResultSection title={t("features")}>
-        <ResultList items={proposal.features} />
+        <ResultList items={proposal.objectives} />
       </ResultSection>
 
       <ResultSection title={t("stack")}>
@@ -557,11 +557,11 @@ function ResultView({ result }: { result: EstimateResponse }) {
       </ResultSection>
 
       <ResultSection title={t("recommendations")}>
-        <ResultList items={proposal.recommendations} />
+        <p className="leading-relaxed text-mist">{proposal.whyUs}</p>
       </ResultSection>
 
       <ResultSection title={t("nextSteps")}>
-        <ResultList items={proposal.nextSteps} />
+        <p className="leading-relaxed text-mist">{proposal.nextStep}</p>
       </ResultSection>
 
       <div className="mt-10 flex flex-wrap items-center gap-4">

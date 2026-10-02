@@ -1,28 +1,44 @@
 import { z } from "zod";
 
 /**
- * Structured proposal returned by the model. This is the ONLY shape the AI is
- * allowed to produce (enforced via OpenAI structured outputs). Price and
- * timeline.weeks are echoed from the deterministic pricing engine — the model
- * must not alter them.
+ * Строгая по-слайдовая схема КП. Один AI-вызов возвращает УНИКАЛЬНЫЙ под
+ * клиента текст для каждого слайда (единый контекст гарантирован — вызов один).
+ *
+ * Разделение ответственности (ТЗ §7, §8):
+ *  — движок решает ЧТО (позиции, узлы, шаги, ВСЕ числа — цена/недели/рынок);
+ *  — модель решает КАК это сказано ИМЕННО под этого клиента (нарратив слайдов
+ *    на его языке, в его контексте). Модель не пишет ни одной цифры и не
+ *    выдумывает фактов/каналов/технологий вне переданного контекста.
+ *
+ * Каждое поле привязано к конкретному слайду эталонного КП (§9).
  */
 export const proposalSchema = z.object({
   projectTitle: z.string(),
+
+  // Слайд 2 — «Как устроена система»: клиенто-специфичный вводный нарратив.
+  infraNarrative: z.string(),
+
+  // Слайд 3 — «Дизайн / понимание задачи».
   summary: z.string(),
-  objectives: z.array(z.string()),
-  scope: z.array(z.string()),
-  features: z.array(z.string()),
-  recommendedStack: z.array(z.string()),
-  timeline: z.object({
-    weeks: z.number(),
-    phases: z.array(z.string()),
-  }),
-  price: z.object({
-    min: z.number(),
-    max: z.number(),
-  }),
-  recommendations: z.array(z.string()),
-  nextSteps: z.array(z.string()),
+  objectives: z.array(z.string()).min(2).max(5),
+  scope: z.array(z.string()).min(2).max(8),
+  designRationale: z.string(),
+  recommendedStack: z.array(z.string()).min(2).max(10),
+
+  // Слайд 4 — «Бизнес-процесс»: под клиента, но тот же реальный поток заявок.
+  processIntro: z.string(),
+  processSteps: z.array(z.object({ title: z.string(), text: z.string() })).min(4).max(6),
+
+  // Слайд 5 — «От клиента ждём»: вводный абзац (статусы пунктов — из данных лида).
+  checklistIntro: z.string(),
+
+  // Слайд 6 — «Этапы разработки»: что получает ЭТОТ клиент на каждом из 4 этапов
+  // (недели считает движок; здесь — только содержание под клиента).
+  stageDeliverables: z.array(z.string()).length(4),
+
+  // Слайд 8 — закрытие.
+  whyUs: z.string(),
+  nextStep: z.string(),
 });
 
 export type Proposal = z.infer<typeof proposalSchema>;

@@ -21,15 +21,58 @@ export interface RadarRow {
   verified_at: string | null;
 }
 
-export function CompaniesTable({ rows, page, total }: { rows: RadarRow[]; page: number; total: number }) {
+const WEB_STATUS_RU: Record<string, string> = {
+  ok: "работает",
+  no_site: "нет сайта",
+  unreachable: "недоступен",
+  timeout: "таймаут",
+  error: "ошибка",
+};
+
+const fmtDate = (iso: string | null) =>
+  iso ? `${iso.slice(8, 10)}.${iso.slice(5, 7)}.${iso.slice(0, 4)}` : "—";
+
+/** Колонки таблицы; key входит в SORTABLE-whitelist серверной страницы. */
+const COLUMNS: { key: string; label: string }[] = [
+  { key: "name", label: "Название" },
+  { key: "", label: "Телефон" },
+  { key: "grade", label: "Оценка" },
+  { key: "industry", label: "Отрасль" },
+  { key: "city", label: "Город" },
+  { key: "source", label: "Источник" },
+  { key: "verified_at", label: "Проверено" },
+  { key: "", label: "Сайт" },
+];
+
+export function CompaniesTable({
+  rows, page, total, industries,
+}: {
+  rows: RadarRow[];
+  page: number;
+  total: number;
+  industries: { key: string; label: string }[];
+}) {
   const [sel, setSel] = useState<RadarRow | null>(null);
   const sp = useSearchParams();
+  const industryLabel = new Map(industries.map((i) => [i.key, i.label]));
   const pages = Math.max(1, Math.ceil(total / 50));
-  const pageHref = (p: number) => {
+
+  const href = (patch: Record<string, string | null>) => {
     const q = new URLSearchParams(sp.toString());
-    q.set("page", String(p));
+    for (const [k, v] of Object.entries(patch)) {
+      if (v === null) q.delete(k);
+      else q.set(k, v);
+    }
     return `/admin/radar?${q.toString()}`;
   };
+
+  const sort = sp.get("sort") ?? "verified_at.desc";
+  const [sortCol, sortDir] = sort.split(".");
+  const sortHref = (col: string) =>
+    href({ sort: sortCol === col && sortDir !== "desc" ? `${col}.desc` : `${col}.asc`, page: null });
+
+  const from = total === 0 ? 0 : page * 50 + 1;
+  const to = Math.min(total, page * 50 + rows.length);
 
   return (
     <div>
@@ -37,13 +80,21 @@ export function CompaniesTable({ rows, page, total }: { rows: RadarRow[]; page: 
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-200 bg-gray-50 text-left text-xs uppercase text-gray-500">
-              <th className="p-3">Название</th>
-              <th className="p-3">Телефон</th>
-              <th className="p-3">Оценка</th>
-              <th className="p-3">Отрасль</th>
-              <th className="p-3">Город</th>
-              <th className="p-3">Источник</th>
-              <th className="p-3">Сайт</th>
+              {COLUMNS.map((c, i) =>
+                c.key ? (
+                  <th key={i} className="p-0">
+                    <Link
+                      href={sortHref(c.key)}
+                      className={`block p-3 hover:text-gray-900 ${sortCol === c.key ? "text-gray-900" : ""}`}
+                    >
+                      {c.label}
+                      {sortCol === c.key && <span className="ml-1">{sortDir === "desc" ? "↓" : "↑"}</span>}
+                    </Link>
+                  </th>
+                ) : (
+                  <th key={i} className="p-3">{c.label}</th>
+                ),
+              )}
             </tr>
           </thead>
           <tbody>
@@ -56,9 +107,10 @@ export function CompaniesTable({ rows, page, total }: { rows: RadarRow[]; page: 
                   ) : "—"}
                 </td>
                 <td className="p-3"><CellGrade grade={r.grade} /></td>
-                <td className="p-3 text-gray-600">{r.industry}</td>
+                <td className="p-3 text-gray-600">{industryLabel.get(r.industry) ?? r.industry}</td>
                 <td className="p-3 text-gray-600">{r.city ?? "—"}</td>
                 <td className="p-3 text-gray-600">{r.source ?? "—"}</td>
+                <td className="p-3 text-gray-500">{fmtDate(r.verified_at)}</td>
                 <td className="p-3">
                   {r.website ? (
                     <a href={r.website} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-blue-600">↗</a>
@@ -68,8 +120,8 @@ export function CompaniesTable({ rows, page, total }: { rows: RadarRow[]; page: 
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={7} className="p-10 text-center text-gray-400">
-                  Нет данных. Запустите сбор: <code>npm run radar -- --all</code>
+                <td colSpan={COLUMNS.length} className="p-10 text-center text-gray-400">
+                  Ничего не найдено. Снимите фильтры или запустите сбор: <code>npm run radar -- --all</code>
                 </td>
               </tr>
             )}
@@ -78,15 +130,15 @@ export function CompaniesTable({ rows, page, total }: { rows: RadarRow[]; page: 
       </div>
 
       <div className="mt-3 flex items-center justify-between text-sm text-gray-600">
-        <span>Всего: {total}</span>
+        <span>{from}–{to} из {total}</span>
         <div className="flex items-center gap-2">
-          {page > 0 && <Link href={pageHref(page - 1)} className="rounded border border-gray-300 px-3 py-1">← Назад</Link>}
+          {page > 0 && <Link href={href({ page: String(page - 1) })} className="rounded border border-gray-300 px-3 py-1">← Назад</Link>}
           <span className="px-2">{page + 1} / {pages}</span>
-          {page + 1 < pages && <Link href={pageHref(page + 1)} className="rounded border border-gray-300 px-3 py-1">Вперёд →</Link>}
+          {page + 1 < pages && <Link href={href({ page: String(page + 1) })} className="rounded border border-gray-300 px-3 py-1">Вперёд →</Link>}
         </div>
       </div>
 
-      {sel && <Drawer row={sel} onClose={() => setSel(null)} />}
+      {sel && <Drawer row={sel} industryLabel={industryLabel} onClose={() => setSel(null)} />}
     </div>
   );
 }
@@ -100,7 +152,13 @@ function Field({ label, value }: { label: string; value: string | null }) {
   );
 }
 
-function Drawer({ row, onClose }: { row: RadarRow; onClose: () => void }) {
+function Drawer({
+  row, industryLabel, onClose,
+}: {
+  row: RadarRow;
+  industryLabel: Map<string, string>;
+  onClose: () => void;
+}) {
   const [pending, start] = useTransition();
   const [reason, setReason] = useState("");
   const [name, setName] = useState(row.name);
@@ -154,11 +212,11 @@ function Drawer({ row, onClose }: { row: RadarRow; onClose: () => void }) {
 
         <dl className="mt-4 space-y-1 text-sm">
           <Field label="Email" value={row.email} />
-          <Field label="Отрасль" value={row.industry} />
+          <Field label="Отрасль" value={industryLabel.get(row.industry) ?? row.industry} />
           <Field label="Источник" value={row.source} />
-          <Field label="Web-статус" value={row.web_status} />
+          <Field label="Web-статус" value={row.web_status ? (WEB_STATUS_RU[row.web_status] ?? row.web_status) : null} />
           <Field label="Соцсети" value={(row.social_links ?? []).join(", ") || null} />
-          <Field label="Проверено" value={row.verified_at} />
+          <Field label="Проверено" value={fmtDate(row.verified_at)} />
         </dl>
         <div className="mt-6 space-y-3">
           <button

@@ -114,7 +114,7 @@ export default async function EstimatePage({
             <List items={proposal.scope} />
           </Block>
           <Block title={tr("features")}>
-            <List items={proposal.features} />
+            <List items={proposal.objectives} />
           </Block>
           <Block title={tr("stack")}>
             <div className="flex flex-wrap gap-2">
@@ -129,10 +129,10 @@ export default async function EstimatePage({
             </div>
           </Block>
           <Block title={tr("recommendations")}>
-            <List items={proposal.recommendations} />
+            <p className="leading-relaxed">{proposal.whyUs}</p>
           </Block>
           <Block title={tr("nextSteps")}>
-            <List items={proposal.nextSteps} />
+            <p className="leading-relaxed">{proposal.nextStep}</p>
           </Block>
 
           <div className="mt-12 flex flex-wrap items-center gap-4">

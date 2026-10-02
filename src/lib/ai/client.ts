@@ -57,22 +57,15 @@ export async function generateProposal(input: {
     }
 
     // Валидатор чисел (§8): чужие $-суммы в прозе → официальная вилка движка.
+    // Числа (цена, недели, рынок) живут только в движке и подставляются в
+    // шаблоне; схема КП их вообще не содержит, так что модели нечего ломать.
     const range = `$${input.pricing.totalMin}–$${input.pricing.totalMax}`;
     const cleaned = enforceEngineNumbers(
       parsed,
       [input.pricing.totalMin, input.pricing.totalMax, input.pricing.total, input.pricing.subtotal],
       range,
     );
-
-    // Enforce deterministic values — the AI never decides money or duration.
-    return {
-      ...cleaned,
-      price: { min: input.pricing.totalMin, max: input.pricing.totalMax },
-      timeline: {
-        ...cleaned.timeline,
-        weeks: input.pricing.estimatedWeeks,
-      },
-    };
+    return cleaned;
   } catch (err) {
     void logAiCall({
       touchpoint: "proposal",
@@ -95,16 +88,21 @@ export function fallbackProposal(input: {
   info: ProjectInfo;
   pricing: PricingResult;
 }): Proposal {
-  const { configuration, info, pricing } = input;
+  const { info } = input;
   const title = info.projectName?.trim() || "Ваш проект";
-  const featureCount = configuration.features?.length ?? 0;
 
+  // Фолбэк: КП всё равно выдаётся (§8). Текст шаблонный — уникальность даёт
+  // только модель; но структура совпадает со строгой схемой, числа подставит
+  // шаблон из движка.
   return {
     projectTitle: title,
+    infraNarrative:
+      "Система собрана так, чтобы вы видели и управляли всем сами: сайт для клиентов, " +
+      "админ-панель для контента и заявки, которые приходят напрямую вам.",
     summary:
       `Предварительная смета по проекту «${title}». Расчёт стоимости и сроков ` +
-      `выполнен автоматически. Детальное коммерческое предложение мы подготовим и ` +
-      `согласуем с вами индивидуально после короткого созвона.`,
+      `выполнен автоматически. Детальное коммерческое предложение согласуем ` +
+      `индивидуально после короткого созвона.`,
     objectives: [
       "Уточнить цели и ключевые сценарии проекта",
       "Согласовать состав работ и приоритеты",
@@ -116,28 +114,28 @@ export function fallbackProposal(input: {
       "Разработка и интеграции",
       "Тестирование, запуск и передача проекта",
     ],
-    features:
-      featureCount > 0
-        ? [`Выбрано опций: ${featureCount}`, "Полный список согласуем на созвоне"]
-        : ["Базовый набор функций", "Расширения обсудим на созвоне"],
+    designRationale:
+      "Дизайн соберём в вашем фирменном стиле: единая сетка, типографика и компоненты, " +
+      "адаптив под мобильные и десктоп.",
     recommendedStack: ["Next.js", "TypeScript", "PostgreSQL", "Vercel"],
-    timeline: {
-      weeks: pricing.estimatedWeeks,
-      phases: [
-        "Аналитика и проектирование",
-        "Дизайн",
-        "Разработка",
-        "Тестирование и запуск",
-      ],
-    },
-    price: { min: pricing.totalMin, max: pricing.totalMax },
-    recommendations: [
-      "Рекомендуем короткий вводный созвон для уточнения деталей",
+    processIntro: "Путь клиента — от первого касания до заявки у вас в Telegram.",
+    processSteps: [
+      { title: "Клиент находит вас", text: "Поиск, рекомендации или реклама приводят его к вам." },
+      { title: "Изучает и убеждается", text: "Первый экран и кейсы снимают вопросы доверия." },
+      { title: "Оставляет заявку", text: "Короткая форма — имя и контакт, ничего лишнего." },
+      { title: "Заявка приходит мгновенно", text: "Telegram и почта — уведомление за пару секунд." },
     ],
-    nextSteps: [
-      "Свяжемся с вами для подтверждения деталей",
-      "Подготовим финальное коммерческое предложение",
+    checklistIntro:
+      "Эти материалы нужны по ходу работы — начать можно без них, соберём вместе на первой неделе.",
+    stageDeliverables: [
+      "Инициация, дизайн, сервер",
+      "Разработка основных экранов",
+      "Наполнение, заявки, интеграции",
+      "Тестирование, обучение, запуск",
     ],
+    whyUs:
+      "Берём проект под ключ: дизайн, разработку, запуск и поддержку — один подрядчик, одна ответственность.",
+    nextStep: "Свяжемся с вами, подтвердим детали и подготовим финальное коммерческое предложение.",
   };
 }
 

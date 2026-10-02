@@ -165,19 +165,6 @@ function techApproach(cfg: ProjectConfiguration, aiStack: string[]) {
   return { principles, stack: stack.slice(0, 8) };
 }
 
-/** Deterministic 6-step client journey. */
-function journeySteps(cfg: ProjectConfiguration) {
-  const t = TYPE_LABELS[cfg.projectType] ?? "Продукт";
-  return [
-    { title: "Клиент ищет решение", text: "Google, рекомендации или реклама приводят его к вам." },
-    { title: `Попадает в ${t.toLowerCase()}`, text: "Первый экран сразу отвечает: кто вы и чем полезны." },
-    { title: "Изучает и убеждается", text: "Услуги, кейсы и цифры снимают вопросы доверия." },
-    { title: "Оставляет заявку", text: "Короткая форма — имя и контакт, ничего лишнего." },
-    { title: "Заявка приходит мгновенно", text: "Telegram и почта — уведомление за 2–3 секунды." },
-    { title: "Менеджер связывается", text: "Контакт, история и контекст уже под рукой." },
-  ];
-}
-
 /**
  * Deterministic "we expect from the client" checklist. Statuses come from the
  * lead's data: a supplied e-mail / Telegram / contact person flips the row to
@@ -226,17 +213,15 @@ function stageColumns(pricing: PricingResult, proposal: Proposal) {
       : `${Math.round(a)}–${Math.round(b)} неделя`;
   const labels = [rng(1, q), rng(q, q * 2), rng(q * 2, q * 3), rng(q * 3, w)];
   const defaults = [
-    "Инициация,\nдизайн,\nсервер",
-    "Разработка\nосновных\nэкранов",
-    "Наполнение,\nзаявки,\nинтеграции",
-    "Тестирование,\nобучение,\nзапуск",
+    "Инициация, дизайн, сервер",
+    "Разработка основных экранов",
+    "Наполнение, заявки, интеграции",
+    "Тестирование, обучение, запуск",
   ];
-  // Use AI phases only when they map 1:1 onto the four columns; otherwise the
-  // deterministic defaults (padding AI phases duplicates content).
-  const aiPhases = proposal.timeline.phases.map((p) =>
-    p.replace(/^(Этап|Фаза|Phase|Stage)\s*\d+\s*[:.—-]?\s*/i, "").replace(/\s*\(.*?\)\s*$/, ""),
-  );
-  const phases = aiPhases.length === 4 ? aiPhases : defaults;
+  // Недели считает движок (§7). Содержание этапов — клиенто-специфичное от
+  // модели (ровно 4 строки); фолбэк на детерминированные дефолты.
+  const d = proposal.stageDeliverables ?? [];
+  const phases = d.length === 4 ? d : defaults;
   const colors = ["#178E8E", "#9C34D0", "#F0913A", "#5CB85C"];
   return labels.map((label, i) => ({ label, text: phases[i], color: colors[i] }));
 }
@@ -253,9 +238,72 @@ function marketTable(pricing: PricingResult) {
   return { rows, total, months };
 }
 
+/**
+ * Заполняет недостающие по-слайдовые поля дефолтами (и мигрирует старые
+ * поля КП, если они есть) — чтобы и старые сметы, и частичный ответ модели
+ * рендерились без падений.
+ */
+function normalizeProposal(p: Proposal): Proposal {
+  const o = p as Proposal & {
+    recommendations?: string[];
+    nextSteps?: string[];
+    features?: string[];
+  };
+  const steps =
+    Array.isArray(o.processSteps) && o.processSteps.length >= 4
+      ? o.processSteps
+      : [
+          { title: "Клиент находит вас", text: "Поиск, рекомендации или реклама приводят его к вам." },
+          { title: "Изучает и убеждается", text: "Первый экран и кейсы снимают вопросы доверия." },
+          { title: "Оставляет заявку", text: "Короткая форма — имя и контакт, ничего лишнего." },
+          { title: "Заявка приходит мгновенно", text: "Telegram и почта — уведомление за пару секунд." },
+        ];
+  const deliverables =
+    Array.isArray(o.stageDeliverables) && o.stageDeliverables.length === 4
+      ? o.stageDeliverables
+      : [
+          "Инициация, дизайн, сервер",
+          "Разработка основных экранов",
+          "Наполнение, заявки, интеграции",
+          "Тестирование, обучение, запуск",
+        ];
+  return {
+    projectTitle: o.projectTitle ?? "Ваш проект",
+    infraNarrative:
+      o.infraNarrative ??
+      "Кто пользуется системой, где вы управляете контентом и в каком месте видите каждую заявку.",
+    summary: o.summary ?? "",
+    objectives: o.objectives?.length ? o.objectives : o.features ?? [],
+    scope: o.scope ?? [],
+    designRationale:
+      o.designRationale ??
+      "Дизайн соберём в вашем фирменном стиле: единая сетка, типографика и компоненты, адаптив.",
+    recommendedStack: o.recommendedStack ?? ["Next.js", "TypeScript", "PostgreSQL", "Vercel"],
+    processIntro: o.processIntro ?? "Путь вашего клиента — от первого касания до заявки у вас в Telegram.",
+    processSteps: steps,
+    checklistIntro:
+      o.checklistIntro ??
+      "Эти материалы нужны по ходу работы — начать можно без них, соберём вместе на первой неделе.",
+    stageDeliverables: deliverables,
+    whyUs:
+      o.whyUs ??
+      (o.recommendations?.length
+        ? o.recommendations.join(" ")
+        : "Берём проект под ключ: дизайн, разработка, запуск и поддержка — один подрядчик."),
+    nextStep:
+      o.nextStep ??
+      o.nextSteps?.[0] ??
+      "Подтвердите проект и выберите предпочтительный вариант бюджета.",
+  };
+}
+
 export function renderProposalHtml(input: ProposalRenderInput): string {
   const FX = input.fxRate && input.fxRate > 0 ? input.fxRate : FX_RATE;
-  const { proposal, pricing, configuration, meta } = input;
+  const { pricing, configuration, meta } = input;
+  // Нормализация: сметы, выданные до строгого по-слайдового шаблона, хранят
+  // ai_result в старой схеме (без infraNarrative/processSteps/…). Заполняем
+  // недостающие поля дефолтами, чтобы старые КП рендерились без падений.
+  const proposal = normalizeProposal(input.proposal);
   // Guard: estimates snapshotted before the open-unit-economics rollout have no
   // roleBreakdown/subtotal/total — fall back to the mid-range figure so old
   // proposals still render.
@@ -287,7 +335,6 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
   const postpay = total - prepay;
   const approach = techApproach(configuration, proposal.recommendedStack);
   const infra = infraRows(configuration, meta.projectName);
-  const journey = journeySteps(configuration);
   const checklist = clientChecklist(configuration, {
     email: Boolean(meta.hasEmail),
     telegram: Boolean(meta.hasTelegram),
@@ -404,6 +451,7 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
   .price-card .save { display: inline-block; margin-top: 12px; background: rgba(255,255,255,0.25); font-size: 13px; font-weight: bold; padding: 5px 12px; border-radius: 6px; }
   .price-note { font-size: 13px; color: ${C.grey}; line-height: 1.5; margin-top: 16px; width: 300px; }
   .footnote { font-size: 12.5px; color: ${C.grey}; margin-top: 22px; line-height: 1.5; max-width: 1080px; }
+  .why-us { font-size: 14px; color: ${C.ink}; margin-top: 16px; line-height: 1.5; max-width: 1080px; border-left: 3px solid ${C.blue}; padding-left: 14px; }
 
   /* Payment */
   table.pay { border-collapse: collapse; width: 470px; }
@@ -444,8 +492,7 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
   ${slideTitle("Как устроена система")}
   <div class="cols">
     <div class="col-l">
-      Без технических терминов: кто пользуется системой, где вы сами управляете
-      контентом и в каком месте видите каждую заявку.
+      ${esc(proposal.infraNarrative)}
       <div class="muted small" style="margin-top:16px">Схема собрана по конфигурации вашего проекта.</div>
     </div>
     <div class="col-r">
@@ -485,8 +532,8 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
         <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
         <img src="${esc(meta.designPreviewImage)}" alt="${esc(meta.designPreviewTitle ?? "Пример работы")}" />
       </div>
-      ${meta.designPreviewTitle ? `<div class="design-caption">Кейс: ${esc(meta.designPreviewTitle)}</div>` : ""}`
-          : `<div class="design-placeholder">Макет собираем в вашем фирменном стиле после утверждения структуры. Показываем 2–3 варианта главного экрана, дальше — единая система: сетка, типографика, компоненты.</div>`
+      <div class="design-caption">${esc(proposal.designRationale)}${meta.designPreviewTitle ? ` Кейс: ${esc(meta.designPreviewTitle)}.` : ""}</div>`
+          : `<div class="design-placeholder">${esc(proposal.designRationale)}</div>`
       }
       <div class="understand-card" style="margin-top:16px">
         <h3>Технологии и подход</h3>
@@ -509,11 +556,11 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
 <section class="slide">
   ${slideTitle("Бизнес-процесс системы")}
   <div class="cols">
-    <div class="col-l">Путь клиента: от поиска до заявки у вас в Telegram — шесть шагов.</div>
+    <div class="col-l">${esc(proposal.processIntro)}</div>
     <div class="col-r">
       <div class="journey">
         <div class="journey-head">Путь клиента</div>
-        ${journey
+        ${proposal.processSteps
           .map(
             (s, i) => `
         <div class="step"><div class="step-num">${i + 1}</div><div><b>${esc(s.title)}</b><p>${esc(s.text)}</p></div></div>`,
@@ -547,7 +594,7 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
           .join("")}
       </table>
     </div>
-    <div class="col-l" style="padding-top:8px">Эти материалы нужны по ходу работы — начать можно без них, соберём вместе на первой неделе.</div>
+    <div class="col-l" style="padding-top:8px">${esc(proposal.checklistIntro)}</div>
   </div>
   ${logo}${pageNo(5)}
 </section>
@@ -635,6 +682,7 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
     </table>
   </div>
   <div class="footnote">Оплата в сумах по курсу на день платежа (в расчёте — ${uzs(FX)}). Второй платёж — после запуска и подписания акта.</div>
+  <div class="why-us">${esc(proposal.whyUs)}</div>
   <div class="contact-card">
     <div class="contact-main">
       <div class="contact-brand-name">Skyline Digital</div>
@@ -648,7 +696,7 @@ export function renderProposalHtml(input: ProposalRenderInput): string {
     </div>
     <div class="contact-next">
       <div class="contact-next-l">Следующий шаг</div>
-      <div class="contact-next-v">→ ${esc(proposal.nextSteps[0] ?? "Подтвердите проект и выберите предпочтительный вариант бюджета.")}</div>
+      <div class="contact-next-v">→ ${esc(proposal.nextStep)}</div>
     </div>
   </div>
   ${logo}${pageNo(8)}

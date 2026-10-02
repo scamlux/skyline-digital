@@ -3,8 +3,10 @@
 import { useRouter, useSearchParams } from "next/navigation";
 
 const SELECT = "rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm";
+// Ключи фильтров — для кнопки «Сбросить» (sort намеренно не сбрасываем).
+const FILTER_KEYS = ["industry", "grade", "source", "site", "city", "q"];
 
-export function FilterBar() {
+export function FilterBar({ industries }: { industries: { key: string; label: string }[] }) {
   const router = useRouter();
   const sp = useSearchParams();
 
@@ -16,20 +18,32 @@ export function FilterBar() {
     router.push(`/admin/radar?${p.toString()}`);
   };
   const val = (k: string) => sp.get(k) ?? "";
+  const hasFilters = FILTER_KEYS.some((k) => sp.get(k));
+  const reset = () => {
+    const p = new URLSearchParams(sp.toString());
+    FILTER_KEYS.forEach((k) => p.delete(k));
+    p.delete("page");
+    router.push(`/admin/radar?${p.toString()}`);
+  };
 
   return (
     <div className="flex flex-wrap items-center gap-2">
       <select className={SELECT} value={val("industry")} onChange={(e) => set("industry", e.target.value)}>
         <option value="">Все отрасли</option>
-        <option value="dentistry">Стоматология</option>
-        <option value="auto">Автосервис</option>
-        <option value="beauty">Красота</option>
+        {industries.map((i) => (
+          <option key={i.key} value={i.key}>{i.label}</option>
+        ))}
       </select>
       <select className={SELECT} value={val("grade")} onChange={(e) => set("grade", e.target.value)}>
         <option value="">Все оценки</option>
-        <option value="A">A</option>
-        <option value="B">B</option>
-        <option value="C">C</option>
+        <option value="A">A — без сайта</option>
+        <option value="B">B — слабый сайт</option>
+        <option value="C">C — сильный сайт</option>
+      </select>
+      <select className={SELECT} value={val("site")} onChange={(e) => set("site", e.target.value)}>
+        <option value="">Сайт: любой</option>
+        <option value="yes">Есть сайт</option>
+        <option value="no">Нет сайта</option>
       </select>
       <select className={SELECT} value={val("source")} onChange={(e) => set("source", e.target.value)}>
         <option value="">Все источники</option>
@@ -50,6 +64,11 @@ export function FilterBar() {
         defaultValue={val("q")}
         onKeyDown={(e) => e.key === "Enter" && set("q", e.currentTarget.value)}
       />
+      {hasFilters && (
+        <button onClick={reset} className="rounded-lg px-3 py-2 text-sm text-gray-500 hover:text-gray-900">
+          ✕ Сбросить
+        </button>
+      )}
     </div>
   );
 }
