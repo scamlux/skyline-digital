@@ -60,3 +60,15 @@
 _Верификация: pure-части (tz, импорт, guard) — vitest. End-to-end приёмка требует живых Supabase/Telegram/Meta/Vercel cron — здесь не воспроизводится._
 - [x] **Прод актуализирован (07.09).** Причина застоя: Vercel Hobby отклоняет cron чаще суточного — `*/15` ронял каждый деплой. Фикс: cron `5 7 * * *` + тикер GitHub Actions каждые 15 мин (.github/workflows/content-cron.yml). Деплой dpl_E5Dj75 задеплоен и promoted, домен отвечает новым кодом. PR #6. Осталось: секрет CRON_SECRET в GitHub Actions + мерж PR #6.
 - [x] **Тикер переехал на cron-job.org (07.09).** GitHub Actions заблокирован биллингом аккаунта → тикер каждые 15 мин настроен на cron-job.org (аккаунт владельца), тестовый запуск 200 OK, заголовок Authorization с CRON_SECRET. Workflow content-cron отключён (gh workflow disable), включить обратно при починке биллинга: `gh workflow enable content-cron`.
+
+## Продажи и лидогенерация (исследование 2026-10-08)
+Карта каналов и план — [`docs/business/LEAD-CHANNELS-2026-10.md`](docs/business/LEAD-CHANNELS-2026-10.md), детали — приложения A–E там же.
+- [ ] 🔴 **Решение владельца:** юрформа (ИП сейчас / ООО + IT Park позже), оптовая B2B-сетка для white-label, стартовая ставка Upwork, политика по РФ — §7.
+- [ ] ⏰ OSCE RFQ/UZB/EED/010/2026 — подать до **22.10.2026** (UNGM 316162).
+- [ ] Регистрации: UNGM Basic + Individual Consultant, UNDP Quantum, alerts.worldbank.org (Uzbekistan), Payoneer.
+- [ ] Карточки Google Business / Яндекс Бизнес / 2GIS + 10 отзывов.
+- [ ] Код: коллектор тендеров в радаре (UNGM/OSCE/World Bank/банки UZ) → Telegram.
+- [ ] Код: Telegram-монитор бизнес-чатов по ключам ru/uz.
+- [ ] Код: страницы `/white-label` и `/partners` (реферальные 10% → `leads.source`).
+- [ ] Код: публичный EN-инструмент аудита + нишевые EN-лендинги.
+- [ ] Радар: с 01.11.2026 без массовых SMS/обзвонов (постановление о рекламе); базы ПДн — на серверах в UZ.
