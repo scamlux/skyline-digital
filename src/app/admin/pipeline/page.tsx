@@ -5,6 +5,10 @@ import { formatQuote } from "@/lib/pipeline/quote";
 import { STATUS_RU, typeLabelRu } from "@/lib/pipeline/labels";
 import { OPPORTUNITY_STATUSES, type OpportunityRow } from "@/lib/pipeline/types";
 import { OpportunityActions, RunButton } from "./PipelineClient";
+import { SetupPanel } from "./SetupPanel";
+import { setupStatus } from "@/lib/pipeline/setup";
+import { GMAIL_FILTER_FROM, gmailForwardScript } from "@/lib/pipeline/gmail-script";
+import { currentSiteUrl } from "./site-url";
 
 export const dynamic = "force-dynamic";
 
@@ -31,10 +35,13 @@ export default async function PipelinePage({
 
   let q = db.from("opportunities").select("*").in("status", tab.statuses);
   if (sp.source) q = q.eq("source", sp.source);
-  const [{ data }, { data: runs }, { data: counts }] = await Promise.all([
+  const siteUrl = await currentSiteUrl();
+  const ingestSecret = process.env.PIPELINE_INGEST_SECRET;
+  const [{ data }, { data: runs }, { data: counts }, checks] = await Promise.all([
     q.order("score", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false }).limit(100),
     db.from("pipeline_runs").select("*").order("started_at", { ascending: false }).limit(1),
     db.from("opportunities").select("status"),
+    setupStatus(db, siteUrl),
   ]);
   const rows = (data ?? []) as OpportunityRow[];
   const lastRun = runs?.[0] as { started_at: string; stats: Record<string, unknown> | null; errors: Record<string, string> | null } | undefined;
@@ -57,6 +64,12 @@ export default async function PipelinePage({
       <p className="mb-6 text-sm text-gray-500">
         Система находит, оценивает и готовит отклик. Решение и отправка — за тобой: кнопки здесь или в Telegram.
       </p>
+
+      <SetupPanel
+        checks={checks}
+        gmailScript={ingestSecret ? gmailForwardScript(siteUrl, ingestSecret) : null}
+        gmailFilter={GMAIL_FILTER_FROM}
+      />
 
       <div className="mb-6 grid gap-4 lg:grid-cols-[2fr_3fr]">
         <div className="rounded-xl border border-gray-200 bg-white p-4">

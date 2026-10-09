@@ -279,3 +279,13 @@ describe("config", () => {
     expect(readPipelineConfig({ PIPELINE_ROUTINES: "off" }).routines).toBe(false);
   });
 });
+
+describe("gmailForwardScript", () => {
+  it("embeds the ingest URL and secret as JS string literals", async () => {
+    const { gmailForwardScript } = await import("./gmail-script");
+    const s = gmailForwardScript("https://skyline-digital.uz/", 'se"cret');
+    expect(s).toContain('const URL = "https://skyline-digital.uz/api/pipeline/ingest";');
+    expect(s).toContain('const SECRET = "se\\"cret";');
+    expect(s).toContain("everyMinutes(15)");
+  });
+});

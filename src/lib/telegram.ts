@@ -297,3 +297,33 @@ export function isTrustedSender(chatId: unknown, fromId: unknown, chatType?: str
   const owner = process.env.TELEGRAM_OWNER_ID;
   return Boolean(owner) && chatType === "private" && String(fromId) === String(owner);
 }
+
+// ——— Вебхук бота: подключение из админки без ручного curl ———
+
+export interface WebhookInfo {
+  url: string;
+  pending_update_count: number;
+  last_error_message?: string;
+  last_error_date?: number;
+}
+
+export async function getTelegramWebhookInfo(): Promise<WebhookInfo | null> {
+  if (!TOKEN) return null;
+  try {
+    const res = await fetch(api("getWebhookInfo"));
+    const data = await res.json();
+    return data.ok ? (data.result as WebhookInfo) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Регистрирует вебхук на наш роут; secret_token Telegram шлёт в каждом апдейте. */
+export function setTelegramWebhook(url: string, secretToken: string): Promise<SendResult> {
+  return call("setWebhook", {
+    url,
+    secret_token: secretToken,
+    allowed_updates: ["message", "callback_query"],
+    drop_pending_updates: true,
+  });
+}
