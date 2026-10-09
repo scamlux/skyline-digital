@@ -12,10 +12,12 @@ import {
   DollarSign,
   Settings,
   Megaphone,
+  Workflow,
 } from "lucide-react";
 
 const NAV = [
   { href: "/admin", label: "Обзор", icon: LayoutDashboard, exact: true },
+  { href: "/admin/pipeline", label: "Конвейер заказов", icon: Workflow },
   { href: "/admin/leads", label: "Заявки", icon: Inbox },
   { href: "/admin/estimates", label: "Сметы и КП", icon: Calculator },
   { href: "/admin/audits", label: "Аудиты сайтов", icon: Gauge },
