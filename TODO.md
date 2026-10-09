@@ -67,8 +67,10 @@ _Верификация: pure-части (tz, импорт, guard) — vitest. E
 - [ ] ⏰ OSCE RFQ/UZB/EED/010/2026 — подать до **22.10.2026** (UNGM 316162).
 - [ ] Регистрации: UNGM Basic + Individual Consultant, UNDP Quantum, alerts.worldbank.org (Uzbekistan), Payoneer.
 - [ ] Карточки Google Business / Яндекс Бизнес / 2GIS + 10 отзывов.
-- [ ] Код: коллектор тендеров в радаре (UNGM/OSCE/World Bank/банки UZ) → Telegram.
-- [ ] Код: Telegram-монитор бизнес-чатов по ключам ru/uz.
+- [x] **Конвейер заказов** (ADR 0004, `docs/business/PIPELINE.md`) — сделано 2026-10-09: сборщики World Bank / Reddit / публичные TG-каналы / RSS / Freelancehunt, приём писем-оповещений `/api/pipeline/ingest`, пересылка боту, префильтр → ИИ-оценка → цена движком → черновик отклика → карточка с кнопками; рутины профилей и недельная сводка; `/admin/pipeline`. Тесты: парсеры, префильтр, цена, карточки, рутины, сквозной прогон на имитациях.
+- [ ] 🔴 **Включить конвейер (владелец):** применить `0013_pipeline.sql`; env `TELEGRAM_WEBHOOK_SECRET`, `PIPELINE_INGEST_SECRET`, `PIPELINE_TG_CHANNELS`; `setWebhook`; Gmail → Apps Script — шаги в `docs/business/PIPELINE.md`.
+- [ ] Конвейер: проверить сборщики вживую после деплоя (форматы World Bank / t.me/s / Freelancehunt проверены только на образцах — сеть среды разработки закрыта).
+- [ ] Конвейер: сборщики UNGM / OSCE / банков UZ (нет открытого API — пока через письма-оповещения UNGM Tender Alert и Google Alerts в RSS).
 - [ ] Код: страницы `/white-label` и `/partners` (реферальные 10% → `leads.source`).
 - [ ] Код: публичный EN-инструмент аудита + нишевые EN-лендинги.
 - [ ] Радар: с 01.11.2026 без массовых SMS/обзвонов (постановление о рекламе); базы ПДн — на серверах в UZ.
