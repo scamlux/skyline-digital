@@ -30,6 +30,8 @@
 
 ## Подключение (один раз, ~30 минут)
 
+> Хочешь, чтобы всё сделали агенты, — готовые промпты для Claude Code и Claude в браузере: [`AUTOPILOT-PROMPTS.md`](AUTOPILOT-PROMPTS.md). Вебхук теперь подключается кнопкой в `/admin/pipeline`, а скрипт Gmail отдаётся там же с уже подставленным секретом.
+
 ### 1. База
 SQL Editor в Supabase → вставить и выполнить `supabase/migrations/0013_pipeline.sql`.
 

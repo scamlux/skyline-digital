@@ -69,6 +69,8 @@ _Верификация: pure-части (tz, импорт, guard) — vitest. E
 - [ ] Карточки Google Business / Яндекс Бизнес / 2GIS + 10 отзывов.
 - [x] **Конвейер заказов** (ADR 0004, `docs/business/PIPELINE.md`) — сделано 2026-10-09: сборщики World Bank / Reddit / публичные TG-каналы / RSS / Freelancehunt, приём писем-оповещений `/api/pipeline/ingest`, пересылка боту, префильтр → ИИ-оценка → цена движком → черновик отклика → карточка с кнопками; рутины профилей и недельная сводка; `/admin/pipeline`. Тесты: парсеры, префильтр, цена, карточки, рутины, сквозной прогон на имитациях.
 - [ ] 🔴 **Включить конвейер (владелец):** применить `0013_pipeline.sql`; env `TELEGRAM_WEBHOOK_SECRET`, `PIPELINE_INGEST_SECRET`, `PIPELINE_TG_CHANNELS`; `setWebhook`; Gmail → Apps Script — шаги в `docs/business/PIPELINE.md`.
+- [ ] Агентам: промпты включения конвейера — `docs/business/AUTOPILOT-PROMPTS.md` (сначала Claude Code, потом Claude в браузере).
+- [ ] Админка на мобильном: боковое меню фиксированной ширины во всех разделах — на 390px контент сжимается (видно на screenshots/admin-pipeline-setup-mobile.png).
 - [ ] Конвейер: проверить сборщики вживую после деплоя (форматы World Bank / t.me/s / Freelancehunt проверены только на образцах — сеть среды разработки закрыта).
 - [ ] Конвейер: сборщики UNGM / OSCE / банков UZ (нет открытого API — пока через письма-оповещения UNGM Tender Alert и Google Alerts в RSS).
 - [ ] Код: страницы `/white-label` и `/partners` (реферальные 10% → `leads.source`).
