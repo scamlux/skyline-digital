@@ -216,3 +216,84 @@ export function formatProposalMessage(p: ProposalForTelegram): string {
   msg += `\nВерсия: v${p.version}\nДата: ${esc(created)}`;
   return msg;
 }
+
+// ——— Inline-кнопки (конвейер заказов, ADR 0004) ———
+
+export interface InlineButton {
+  text: string;
+  callback_data?: string;
+  url?: string;
+}
+export type InlineKeyboard = InlineButton[][];
+
+async function call(method: string, body: Record<string, unknown>): Promise<SendResult> {
+  if (!TOKEN) return { ok: false, error: "not_configured" };
+  try {
+    const res = await fetch(api(method), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!data.ok) {
+      console.error(`[telegram] ${method} failed:`, data.error_code, data.description);
+      return { ok: false, error: `${data.error_code}: ${data.description}` };
+    }
+    return { ok: true, messageId: data.result?.message_id };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`[telegram] ${method} error:`, msg);
+    return { ok: false, error: msg };
+  }
+}
+
+/** HTML-сообщение с inline-клавиатурой в чат лидов. Never throws. */
+export function sendTelegramWithKeyboard(
+  text: string,
+  keyboard: InlineKeyboard,
+  opts: { replyTo?: number } = {},
+): Promise<SendResult> {
+  if (!isTelegramConfigured()) return Promise.resolve({ ok: false, error: "not_configured" });
+  return call("sendMessage", {
+    chat_id: CHAT_ID,
+    text,
+    parse_mode: "HTML",
+    disable_web_page_preview: true,
+    reply_markup: { inline_keyboard: keyboard },
+    ...(opts.replyTo ? { reply_parameters: { message_id: opts.replyTo } } : {}),
+  });
+}
+
+/** Заменить клавиатуру у уже отправленного сообщения. */
+export function editTelegramKeyboard(messageId: number, keyboard: InlineKeyboard): Promise<SendResult> {
+  return call("editMessageReplyMarkup", {
+    chat_id: CHAT_ID,
+    message_id: messageId,
+    reply_markup: { inline_keyboard: keyboard },
+  });
+}
+
+/** Ответ на нажатие кнопки (всплывашка у владельца). */
+export function answerTelegramCallback(callbackQueryId: string, text: string): Promise<SendResult> {
+  return call("answerCallbackQuery", { callback_query_id: callbackQueryId, text });
+}
+
+/** Чат лидов — единственный, от которого принимаются команды бота. */
+export function isOwnerChat(chatId: unknown): boolean {
+  return Boolean(CHAT_ID) && String(chatId) === String(CHAT_ID);
+}
+
+/** Короткий ответ в конкретный чат (личка владельца, откуда переслали заказ). */
+export function replyTelegram(chatId: number | string, text: string): Promise<SendResult> {
+  return call("sendMessage", { chat_id: chatId, text, parse_mode: "HTML", disable_web_page_preview: true });
+}
+
+/**
+ * Кто может управлять ботом: чат лидов или личка владельца
+ * (TELEGRAM_OWNER_ID — числовой id аккаунта владельца).
+ */
+export function isTrustedSender(chatId: unknown, fromId: unknown, chatType?: string): boolean {
+  if (isOwnerChat(chatId)) return true;
+  const owner = process.env.TELEGRAM_OWNER_ID;
+  return Boolean(owner) && chatType === "private" && String(fromId) === String(owner);
+}

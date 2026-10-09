@@ -3,6 +3,7 @@ import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase/server";
 import { publishDuePost } from "@/lib/content/publish";
 import { collectDueMetrics } from "@/lib/content/metrics";
 import type { ContentPostRow } from "@/lib/content/store";
+import { runPipeline } from "@/lib/pipeline/run";
 
 // Крон расписания (ПРОМПТ-3 §1.1/§1.4/§1.5): посты в статусе scheduled с
 // наступившей датой публикуются по настроенным API (Telegram-канал, Instagram),
@@ -34,5 +35,9 @@ export async function GET(req: Request): Promise<NextResponse> {
   }
   // Сбор метрик IG (24h / 7d) — тем же кроном (§1.7).
   const metrics = await collectDueMetrics(db);
-  return NextResponse.json({ processed: results.length, results, metrics });
+  // Конвейер заказов едет на том же 15-минутном тикере (cron-job.org) и сам
+  // троттлится до PIPELINE_INTERVAL_MIN — отдельный крон заводить не нужно.
+  // Сбой конвейера не должен ронять публикацию контента.
+  const pipeline = await runPipeline(db, { trigger: "cron" }).catch((err) => ({ error: String(err) }));
+  return NextResponse.json({ processed: results.length, results, metrics, pipeline });
 }
