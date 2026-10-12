@@ -60,3 +60,19 @@
 _Верификация: pure-части (tz, импорт, guard) — vitest. End-to-end приёмка требует живых Supabase/Telegram/Meta/Vercel cron — здесь не воспроизводится._
 - [x] **Прод актуализирован (07.09).** Причина застоя: Vercel Hobby отклоняет cron чаще суточного — `*/15` ронял каждый деплой. Фикс: cron `5 7 * * *` + тикер GitHub Actions каждые 15 мин (.github/workflows/content-cron.yml). Деплой dpl_E5Dj75 задеплоен и promoted, домен отвечает новым кодом. PR #6. Осталось: секрет CRON_SECRET в GitHub Actions + мерж PR #6.
 - [x] **Тикер переехал на cron-job.org (07.09).** GitHub Actions заблокирован биллингом аккаунта → тикер каждые 15 мин настроен на cron-job.org (аккаунт владельца), тестовый запуск 200 OK, заголовок Authorization с CRON_SECRET. Workflow content-cron отключён (gh workflow disable), включить обратно при починке биллинга: `gh workflow enable content-cron`.
+
+## Продажи и лидогенерация (исследование 2026-10-08)
+Карта каналов и план — [`docs/business/LEAD-CHANNELS-2026-10.md`](docs/business/LEAD-CHANNELS-2026-10.md), детали — приложения A–E там же.
+- [ ] 🔴 **Решение владельца:** юрформа (ИП сейчас / ООО + IT Park позже), оптовая B2B-сетка для white-label, стартовая ставка Upwork, политика по РФ — §7.
+- [ ] ⏰ OSCE RFQ/UZB/EED/010/2026 — подать до **22.10.2026** (UNGM 316162).
+- [ ] Регистрации: UNGM Basic + Individual Consultant, UNDP Quantum, alerts.worldbank.org (Uzbekistan), Payoneer.
+- [ ] Карточки Google Business / Яндекс Бизнес / 2GIS + 10 отзывов.
+- [x] **Конвейер заказов** (ADR 0004, `docs/business/PIPELINE.md`) — сделано 2026-10-09: сборщики World Bank / Reddit / публичные TG-каналы / RSS / Freelancehunt, приём писем-оповещений `/api/pipeline/ingest`, пересылка боту, префильтр → ИИ-оценка → цена движком → черновик отклика → карточка с кнопками; рутины профилей и недельная сводка; `/admin/pipeline`. Тесты: парсеры, префильтр, цена, карточки, рутины, сквозной прогон на имитациях.
+- [ ] 🔴 **Включить конвейер (владелец):** применить `0013_pipeline.sql`; env `TELEGRAM_WEBHOOK_SECRET`, `PIPELINE_INGEST_SECRET`, `PIPELINE_TG_CHANNELS`; `setWebhook`; Gmail → Apps Script — шаги в `docs/business/PIPELINE.md`.
+- [ ] Агентам: промпты включения конвейера — `docs/business/AUTOPILOT-PROMPTS.md` (сначала Claude Code, потом Claude в браузере).
+- [ ] Админка на мобильном: боковое меню фиксированной ширины во всех разделах — на 390px контент сжимается (видно на screenshots/admin-pipeline-setup-mobile.png).
+- [ ] Конвейер: проверить сборщики вживую после деплоя (форматы World Bank / t.me/s / Freelancehunt проверены только на образцах — сеть среды разработки закрыта).
+- [ ] Конвейер: сборщики UNGM / OSCE / банков UZ (нет открытого API — пока через письма-оповещения UNGM Tender Alert и Google Alerts в RSS).
+- [ ] Код: страницы `/white-label` и `/partners` (реферальные 10% → `leads.source`).
+- [ ] Код: публичный EN-инструмент аудита + нишевые EN-лендинги.
+- [ ] Радар: с 01.11.2026 без массовых SMS/обзвонов (постановление о рекламе); базы ПДн — на серверах в UZ.
