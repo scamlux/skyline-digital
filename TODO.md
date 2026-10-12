@@ -67,16 +67,8 @@ _Верификация: pure-части (tz, импорт, guard) — vitest. E
 - [ ] ⏰ OSCE RFQ/UZB/EED/010/2026 — подать до **22.10.2026** (UNGM 316162).
 - [ ] Регистрации: UNGM Basic + Individual Consultant, UNDP Quantum, alerts.worldbank.org (Uzbekistan), Payoneer.
 - [ ] Карточки Google Business / Яндекс Бизнес / 2GIS + 10 отзывов.
-- [x] **Конвейер заказов** (ADR 0004, `docs/business/PIPELINE.md`) — сделано 2026-10-09: сборщики World Bank / Reddit / публичные TG-каналы / RSS / Freelancehunt, приём писем-оповещений `/api/pipeline/ingest`, пересылка боту, префильтр → ИИ-оценка → цена движком → черновик отклика → карточка с кнопками; рутины профилей и недельная сводка; `/admin/pipeline`. Тесты: парсеры, префильтр, цена, карточки, рутины, сквозной прогон на имитациях.
-- [x] Конвейер в проде (2026-10-12, промпт 1): PR #8 смёржен в master, деплой Ready на skyline-digital.uz; env `TELEGRAM_WEBHOOK_SECRET`, `PIPELINE_INGEST_SECRET`, `PIPELINE_TG_CHANNELS` (8 каналов) заданы в Production и Preview; `/api/telegram/webhook` и `/api/pipeline/ingest` без секрета → 401.
-- [x] **Миграция `0013_pipeline.sql` применена** (2026-10-12, SQL-editor проекта skyline-digital; Supabase MCP видит только govbot/contento, поэтому через браузер). Проверено: `opportunities` 28 колонок, `pipeline_runs` 6, `pipeline_routine_runs` 2, RLS включён на всех. Позитивный тест `/api/pipeline/ingest` с Bearer → 200, `inserted: 1`. Первый прогон крона: собрано telegram 155 + worldbank 100, добавлено 248.
-- [ ] Конвейер: Reddit `r/forhire` отдаёт HTTP 403 с серверов Vercel (блокирует дата-центры) — источник не работает, нужен OAuth-доступ к API Reddit либо отключить через `PIPELINE_SOURCES`. В базе осталась тестовая запись ingest (`Test: need a Next.js landing page`, статус rejected) — можно удалить.
-- [ ] 🔴 **Осталось владельцу/агенту (миграция уже применена):** `setWebhook` бота (кнопка в админке) и Gmail → Apps Script — шаги в `docs/business/PIPELINE.md`.
-- [ ] Конвейер: свежесть TG-каналов проверена только на существование (бот: публичные каналы), `t.me` недоступен из среды разработки; после миграции посмотреть по ответу прогона, какие каналы пустые, и убрать их из `PIPELINE_TG_CHANNELS`. `itjobstashkent` исключён — это супергруппа без ленты `t.me/s`.
-- [ ] Агентам: промпты включения конвейера — `docs/business/AUTOPILOT-PROMPTS.md` (сначала Claude Code, потом Claude в браузере).
-- [ ] Админка на мобильном: боковое меню фиксированной ширины во всех разделах — на 390px контент сжимается (видно на screenshots/admin-pipeline-setup-mobile.png).
-- [ ] Конвейер: проверить сборщики вживую после деплоя (форматы World Bank / t.me/s / Freelancehunt проверены только на образцах — сеть среды разработки закрыта).
-- [ ] Конвейер: сборщики UNGM / OSCE / банков UZ (нет открытого API — пока через письма-оповещения UNGM Tender Alert и Google Alerts в RSS).
+- [x] ~~Конвейер заказов~~ — **ОТМЕНЁН 2026-10-12 по решению владельца, всё откачено** (код, миграция 0013, env, вебхук бота, Gmail-фильтр). Вместо него — ручное ведение профилей на биржах (Upwork, Freelancehunt, Contra и др.): владелец регистрируется, агент заполняет профили фактами с сайта.
+- [ ] Админка на мобильном: боковое меню фиксированной ширины во всех разделах — на 390px контент сжимается.
 - [ ] Код: страницы `/white-label` и `/partners` (реферальные 10% → `leads.source`).
 - [ ] Код: публичный EN-инструмент аудита + нишевые EN-лендинги.
 - [ ] Радар: с 01.11.2026 без массовых SMS/обзвонов (постановление о рекламе); базы ПДн — на серверах в UZ.
