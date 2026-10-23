@@ -117,7 +117,29 @@
       "start": "Starting at",
       "step": "Step",
       "what": "What happens",
-      "how": "How it works"
+      "how": "How it works",
+      "eyebrow": "Digital agency · Tashkent",
+      "scroll": "Scroll",
+      "philosophyPill": "Philosophy",
+      "philosophy": "Great products are born where <b>engineering precision</b> meets <b>design intuition</b>. Every pixel, every interaction, every line of code is a chance to build something that <b>moves people</b>.",
+      "finalA": "Got a project?",
+      "finalB": "Let’s talk.",
+      "calc": "Estimate",
+      "close": "Close",
+      "skip": "Skip",
+      "loading": "Loading",
+      "openSite": "Open site",
+      "caseMore": "Project details",
+      "footNav": "Navigation",
+      "home": "Home",
+      "preWords": [
+        "WEBSITES",
+        "APPS",
+        "AI",
+        "AUTOMATION",
+        "DESIGN",
+        "LAUNCH"
+      ]
     }
   },
   "services": {
