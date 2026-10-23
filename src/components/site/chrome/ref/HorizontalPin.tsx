@@ -22,12 +22,15 @@ export function HorizontalPin({
   children,
   trackClassName = "",
   ariaLabel,
+  progressBar = false,
 }: {
   id: string;
   head: React.ReactNode;
   children: React.ReactNode;
   trackClassName?: string;
   ariaLabel: string;
+  /** Полоса прогресса под лентой (эталон: `.r-hbar`). */
+  progressBar?: boolean;
 }) {
   const secRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -119,6 +122,11 @@ export function HorizontalPin({
         <div ref={trackRef} className={`r-htrack ${trackClassName}`.trim()}>
           {children}
         </div>
+        {progressBar && (
+          <div className="r-hbar" aria-hidden="true">
+            <span />
+          </div>
+        )}
       </div>
     </section>
   );

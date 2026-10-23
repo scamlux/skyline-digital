@@ -86,6 +86,7 @@ export async function RefHome({ params }: HomeVariantProps) {
       <HorizontalPin
         id="r-work"
         ariaLabel={t("projectsTitle")}
+        progressBar
         head={
           <div className="r-hhead">
             <div>
