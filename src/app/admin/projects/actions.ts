@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
+import { BRAND_ACCENT_KEYS, SITE_VERSIONS, isBrandAccent, isSiteVersion } from "@/lib/site/version";
 
 const now = () => new Date().toISOString();
 
@@ -98,16 +99,29 @@ export async function saveSetting(key: string, rawValue: string): Promise<{ ok: 
   } catch {
     value = rawValue; // plain string
   }
+  // Ключи, от которых зависит весь публичный сайт, принимаем только из списка —
+  // сырой key-value редактор тоже пишет сюда.
+  if (key === "site_version" && !isSiteVersion(value)) {
+    return { ok: false, error: `site_version: допустимо ${SITE_VERSIONS.join(" | ")}` };
+  }
+  if (key === "brand_accent" && !isBrandAccent(value)) {
+    return { ok: false, error: `brand_accent: допустимо ${BRAND_ACCENT_KEYS.join(" | ")}` };
+  }
   const { error } = await db
     .from("settings")
     .upsert({ key, value, updated_at: now() }, { onConflict: "key" });
   revalidatePath("/admin/settings");
+  // Вариант/акцент меняют каркас всех публичных страниц (ADR 0007).
+  if (!error && SITE_WIDE_KEYS.has(key)) revalidatePath("/", "layout");
   return { ok: !error, error: error?.message };
 }
+
+const SITE_WIDE_KEYS = new Set(["site_version", "brand_accent"]);
 
 export async function deleteSetting(key: string): Promise<{ ok: boolean }> {
   const db = getSupabaseAdmin();
   const { error } = await db.from("settings").delete().eq("key", key);
   revalidatePath("/admin/settings");
+  if (!error && SITE_WIDE_KEYS.has(key)) revalidatePath("/", "layout");
   return { ok: !error };
 }

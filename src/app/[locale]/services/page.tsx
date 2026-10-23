@@ -6,6 +6,7 @@ import { Reveal } from "@/components/ui/Reveal";
 import { basePriceUsd } from "@/lib/pricing/rules";
 import { formatUsd } from "@/lib/utils";
 import { localeUrl, languageAlternates } from "@/lib/seo";
+import { withOldShell } from "@/components/site/SiteShell";
 
 const SERVICE_KEYS = [
   "website",
@@ -33,7 +34,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function ServicesPage({
+async function ServicesPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
@@ -138,3 +139,5 @@ export default async function ServicesPage({
     </main>
   );
 }
+
+export default withOldShell(ServicesPage);

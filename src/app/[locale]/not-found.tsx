@@ -1,7 +1,8 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { withOldShell } from "@/components/site/SiteShell";
 
-export default function NotFound() {
+function NotFound() {
   const t = useTranslations("notFound");
   return (
     <main className="bg-night text-day">
@@ -19,3 +20,5 @@ export default function NotFound() {
     </main>
   );
 }
+
+export default withOldShell(NotFound);

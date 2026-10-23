@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { Section } from "@/components/ui/Section";
 import { Reveal } from "@/components/ui/Reveal";
 import { localeUrl, languageAlternates } from "@/lib/seo";
+import { withOldShell } from "@/components/site/SiteShell";
 
 const STACK = [
   "Next.js",
@@ -33,7 +34,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function AboutPage({
+async function AboutPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
@@ -107,3 +108,5 @@ export default async function AboutPage({
     </main>
   );
 }
+
+export default withOldShell(AboutPage);

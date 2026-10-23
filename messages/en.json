@@ -110,6 +110,14 @@
         "devops": "DevOps",
         "tools": "Tools"
       }
+    },
+    "ref": {
+      "scrollHint": "Scroll — this section moves sideways",
+      "allServices": "All services",
+      "start": "Starting at",
+      "step": "Step",
+      "what": "What happens",
+      "how": "How it works"
     }
   },
   "services": {

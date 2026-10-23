@@ -11,6 +11,7 @@ import { localeUrl, languageAlternates } from "@/lib/seo";
 import type { ProjectType } from "@/lib/pricing/types";
 import { PreviewCard } from "@/components/projects/PreviewCard";
 import { CASE_CATEGORY } from "@/lib/case-category";
+import { withOldShell } from "@/components/site/SiteShell";
 
 export const revalidate = 300;
 
@@ -39,7 +40,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function ServiceDetailPage({
+async function ServiceDetailPage({
   params,
 }: {
   params: Promise<{ locale: string; slug: string }>;
@@ -173,3 +174,5 @@ export default async function ServiceDetailPage({
     </main>
   );
 }
+
+export default withOldShell(ServiceDetailPage);

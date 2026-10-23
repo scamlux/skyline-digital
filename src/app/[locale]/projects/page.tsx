@@ -3,6 +3,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { ProjectsGrid } from "@/components/projects/ProjectsGrid";
 import { getProjects } from "@/lib/portfolio";
 import { localeUrl, languageAlternates } from "@/lib/seo";
+import { withOldShell } from "@/components/site/SiteShell";
 
 export async function generateMetadata({
   params,
@@ -21,7 +22,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function ProjectsPage({
+async function ProjectsPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
@@ -57,3 +58,5 @@ export default async function ProjectsPage({
     </main>
   );
 }
+
+export default withOldShell(ProjectsPage);

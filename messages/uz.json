@@ -110,6 +110,14 @@
         "devops": "DevOps",
         "tools": "Vositalar"
       }
+    },
+    "ref": {
+      "scrollHint": "Aylantiring — blok yon tomonga suriladi",
+      "allServices": "Barcha xizmatlar",
+      "start": "Boshlanish",
+      "step": "Bosqich",
+      "what": "Nima boʻladi",
+      "how": "Qanday tashkil etilgan"
     }
   },
   "services": {
