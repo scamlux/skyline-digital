@@ -1,6 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState } from "react";
+import { lockScroll } from "./scrollLock";
 
 const SEEN_KEY = "r-pre-seen";
 const DURATION = 1750;
@@ -27,7 +28,6 @@ export function RefPreloader({ words, labels }: { words: string[]; labels: { ski
     let seen = false;
     try {
       seen = sessionStorage.getItem(SEEN_KEY) === "1";
-      sessionStorage.setItem(SEEN_KEY, "1");
     } catch {}
     if (seen) {
       if (rootRef.current) rootRef.current.style.display = "none";
@@ -46,8 +46,7 @@ export function RefPreloader({ words, labels }: { words: string[]; labels: { ski
       if (barRef.current) barRef.current.style.width = `${pct}%`;
     };
 
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const unlock = lockScroll();
     let finished = false;
     let raf = 0;
     const timers: number[] = [];
@@ -55,10 +54,24 @@ export function RefPreloader({ words, labels }: { words: string[]; labels: { ski
       if (finished) return;
       finished = true;
       cancelAnimationFrame(raf);
-      document.body.style.overflow = prevOverflow;
+      // Флаг ставим по завершении (а не на старте): двойной эффект StrictMode в dev не прячет слой.
+      try {
+        sessionStorage.setItem(SEEN_KEY, "1");
+      } catch {}
+      unlock();
+      document.removeEventListener("keydown", onKey);
       setPhase("done");
       timers.push(window.setTimeout(() => setPhase("gone"), 700));
     };
+
+    // Пока слой на экране, Tab не уходит под него (там шапка и карточки), Esc — пропустить.
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") finish();
+      if (e.key !== "Tab") return;
+      e.preventDefault();
+      rootRef.current?.querySelector<HTMLElement>(".pskip")?.focus();
+    };
+    document.addEventListener("keydown", onKey);
 
     const root = rootRef.current;
     root?.addEventListener("click", finish);
@@ -90,7 +103,8 @@ export function RefPreloader({ words, labels }: { words: string[]; labels: { ski
       cancelAnimationFrame(raf);
       timers.forEach(clearTimeout);
       root?.removeEventListener("click", finish);
-      if (!finished) document.body.style.overflow = prevOverflow;
+      document.removeEventListener("keydown", onKey);
+      unlock();
     };
   }, [words]);
 

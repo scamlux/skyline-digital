@@ -1299,3 +1299,9 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Контейнеры меню и кейса фокусируются программно (запасная точка фокус-ловушки) — без рамки. */
+[data-site="ref"] .r-menu:focus,
+[data-site="ref"] .r-case:focus {
+  outline: none;
+}

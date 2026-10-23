@@ -125,6 +125,7 @@ export function RefCaseModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="r-case-title"
+      tabIndex={-1}
     >
       <div ref={mediaRef} className="rc-media">
         <Image src={current.image} alt="" fill sizes="100vw" priority />

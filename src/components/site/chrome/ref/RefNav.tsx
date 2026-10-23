@@ -71,6 +71,7 @@ export function RefNav({
         role="dialog"
         aria-modal="true"
         aria-label={labels.menu}
+        tabIndex={-1}
         inert={!open}
       >
         <div className="mtop">
