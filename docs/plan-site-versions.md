@@ -5,6 +5,9 @@
 > (**Studio** и **Референс**) в реальный проект Skyline Digital и дать мне
 > переключать активный вариант из админки — **не трогая текущий («старый») дизайн**.
 > Прототип: артефакт `claude.ai/artifact/3sa6opoSTEwRxMNrTxbesp` (три версии + эффекты).
+>
+> **Спутники:** `docs/reference/artifact-skyline.html` — пиксельный эталон
+> (+ `docs/reference/README.md`); `docs/TZ-site-versions.md` — прямое промпт-ТЗ для Claude Code.
 
 ---
 
