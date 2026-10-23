@@ -244,3 +244,43 @@
 [data-site="studio"] .s-pnav .nx{text-align:right; align-items:flex-end}
 /* Шапка-панель внутренних страниц стоит первой — поднимаем панели над её скруглением. */
 [data-site="studio"] .s-phead + .panel{margin-top:-38px}
+
+/* ===== Услуги ===== */
+[data-site="studio"] .s-svgrid{display:grid; grid-template-columns:repeat(2,1fr); gap:22px}
+@media(max-width:860px){ [data-site="studio"] .s-svgrid{grid-template-columns:1fr} }
+[data-site="studio"] .s-svcard{position:relative; background:var(--card); border:1px solid var(--line); border-radius:22px; padding:30px 28px; transition:border-color .3s, transform .4s cubic-bezier(.2,.7,.2,1), box-shadow .4s}
+[data-site="studio"] .s-svcard:hover{border-color:var(--acc); transform:translateY(-4px); box-shadow:0 22px 50px -28px rgba(0,0,0,.35)}
+[data-site="studio"] .s-svcard .top{display:flex; justify-content:space-between; align-items:baseline}
+[data-site="studio"] .s-svcard .no{font-size:13px; font-weight:700; color:var(--mut); letter-spacing:.1em}
+[data-site="studio"] .s-svcard .pr{font-size:22px; font-weight:800; color:var(--acc); letter-spacing:-.03em}
+[data-site="studio"] .s-svcard .pr .f{font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--mut); font-weight:600}
+[data-site="studio"] .s-svcard h2{font-size:clamp(26px,3vw,34px); font-weight:800; letter-spacing:-.035em; margin-top:16px}
+[data-site="studio"] .s-svcard h2 a{text-decoration:none}
+[data-site="studio"] .s-svcard h2 a::after{content:""; position:absolute; inset:0; border-radius:22px}
+[data-site="studio"] .s-svcard h2 a:focus-visible{outline:none}
+[data-site="studio"] .s-svcard:has(h2 a:focus-visible){outline:2px solid var(--acc); outline-offset:3px}
+[data-site="studio"] .s-svcard > p{color:var(--ink2); font-size:15px; line-height:1.6; margin-top:12px}
+[data-site="studio"] .s-svcard .cols{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:22px; padding-top:20px; border-top:1px solid var(--line)}
+[data-site="studio"] .s-svcard h3{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--mut); font-weight:700}
+[data-site="studio"] .s-svcard ul{list-style:none; margin:10px 0 0; padding:0; display:grid; gap:6px; font-size:14px; color:var(--ink2)}
+[data-site="studio"] .s-svcard li::before{content:"— "; color:var(--acc)}
+@media(max-width:520px){ [data-site="studio"] .s-svcard .cols{grid-template-columns:1fr} }
+[data-site="studio"] .s-pricecta{display:flex; flex-wrap:wrap; align-items:center; gap:22px; margin-top:28px}
+[data-site="studio"] .s-pricecta .btn-fill{margin-top:0}
+[data-site="studio"] .s-pricecta > span{color:#a9a9b0; font-size:14px}
+[data-site="studio"] .s-pricecta b{color:#fff; font-size:22px; font-weight:800; letter-spacing:-.03em}
+[data-site="studio"] .s-incl{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(3,1fr); gap:12px}
+@media(max-width:900px){ [data-site="studio"] .s-incl{grid-template-columns:repeat(2,1fr)} }
+@media(max-width:560px){ [data-site="studio"] .s-incl{grid-template-columns:1fr} }
+[data-site="studio"] .s-incl li{display:flex; justify-content:space-between; align-items:baseline; gap:12px; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px 18px; font-size:14.5px; color:var(--ink2)}
+[data-site="studio"] .s-incl li span{font-size:12.5px; font-weight:700; color:var(--acc); white-space:nowrap}
+[data-site="studio"] .s-cases{margin-top:64px}
+[data-site="studio"] .s-cases .sec-head .r a{color:var(--acc); text-decoration:none; font-weight:600}
+[data-site="studio"] .s-faq{margin-top:64px; max-width:820px}
+[data-site="studio"] .s-faq h2{font-size:clamp(28px,4vw,42px); font-weight:700; margin-bottom:18px}
+[data-site="studio"] .s-faq details{border-bottom:1px solid var(--line); padding:18px 0}
+[data-site="studio"] .s-faq summary{cursor:pointer; list-style:none; font-weight:600; font-size:17px; display:flex; justify-content:space-between; gap:16px}
+[data-site="studio"] .s-faq summary::-webkit-details-marker{display:none}
+[data-site="studio"] .s-faq summary::after{content:"+"; color:var(--acc); font-weight:700; transition:transform .25s}
+[data-site="studio"] .s-faq details[open] summary::after{transform:rotate(45deg)}
+[data-site="studio"] .s-faq details p{color:var(--ink2); font-size:15px; line-height:1.65; margin-top:10px; max-width:64ch}

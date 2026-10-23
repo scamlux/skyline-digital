@@ -151,3 +151,10 @@
 [data-site] [data-filter="automation"] > [data-cat]:not([data-cat="automation"]) {
   display: none;
 }
+[data-site] .v-filter-empty:empty {
+  display: none;
+}
+[data-site] .v-filter-empty {
+  margin: 0 0 24px;
+  opacity: 0.7;
+}

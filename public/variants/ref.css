@@ -1347,3 +1347,181 @@
     border-radius: 16px;
   }
 }
+
+/* ===================== услуги ===================== */
+[data-site="ref"] .r-svlist {
+  border-top: 1px solid var(--r-line);
+}
+[data-site="ref"] .r-svrow {
+  border-bottom: 1px solid var(--r-line);
+  padding-block: clamp(26px, 3.4vw, 44px);
+}
+[data-site="ref"] .r-svhead {
+  display: grid;
+  grid-template-columns: 56px 1fr auto 40px;
+  align-items: baseline;
+  gap: 18px;
+  transition: padding 0.5s var(--r-ease);
+}
+[data-site="ref"] .r-svhead:hover {
+  padding-left: 18px;
+}
+[data-site="ref"] .r-svhead .no {
+  font-size: 13px;
+  color: var(--r-dim);
+  letter-spacing: 0.14em;
+  font-variant-numeric: tabular-nums;
+}
+[data-site="ref"] .r-svhead h2 {
+  font-size: clamp(32px, 6vw, 80px);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 0.95;
+  margin: 0;
+  transition: color 0.3s;
+}
+[data-site="ref"] .r-svhead:hover h2 {
+  color: var(--r-acc);
+}
+[data-site="ref"] .r-svhead .pr {
+  font-size: clamp(18px, 2vw, 24px);
+  font-weight: 800;
+  color: var(--r-acc);
+  white-space: nowrap;
+}
+[data-site="ref"] .r-svhead .ar {
+  font-size: 22px;
+  color: var(--r-dim);
+  justify-self: end;
+}
+[data-site="ref"] .r-svbody {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 48px;
+  margin: 18px 0 0 74px;
+  color: var(--r-dim);
+  font-size: 15px;
+  line-height: 1.6;
+}
+[data-site="ref"] .r-svbody p {
+  margin: 0;
+  max-width: 48ch;
+}
+[data-site="ref"] .r-svbody .r-lane {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+[data-site="ref"] .r-svbody .r-lane dd {
+  color: var(--r-txt);
+}
+@media (max-width: 760px) {
+  [data-site="ref"] .r-svhead {
+    grid-template-columns: 1fr auto;
+  }
+  [data-site="ref"] .r-svhead .no,
+  [data-site="ref"] .r-svhead .ar {
+    display: none;
+  }
+  [data-site="ref"] .r-svbody {
+    grid-template-columns: 1fr;
+    margin-left: 0;
+  }
+}
+[data-site="ref"] .r-svprice {
+  font-size: clamp(22px, 2.6vw, 30px);
+  font-weight: 800;
+  color: var(--r-acc);
+}
+[data-site="ref"] .r-svprice span {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--r-dim);
+  font-weight: 700;
+  margin-right: 6px;
+}
+[data-site="ref"] .r-incl {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--r-line);
+}
+[data-site="ref"] .r-incl li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 14px;
+  padding: 20px 20px 20px 0;
+  border-bottom: 1px solid var(--r-line);
+  font-size: 16px;
+}
+[data-site="ref"] .r-incl li span {
+  color: var(--r-acc);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+@media (max-width: 900px) {
+  [data-site="ref"] .r-incl {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 560px) {
+  [data-site="ref"] .r-incl {
+    grid-template-columns: 1fr;
+  }
+}
+[data-site="ref"] .r-pgrid3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+[data-site="ref"] .r-pgrid3 .r-pcard:nth-child(even) {
+  margin-top: 0;
+}
+@media (max-width: 900px) {
+  [data-site="ref"] .r-pgrid3 {
+    grid-template-columns: 1fr;
+  }
+}
+[data-site="ref"] .r-faq {
+  border-top: 1px solid var(--r-line);
+  max-width: 900px;
+}
+[data-site="ref"] .r-faq details {
+  border-bottom: 1px solid var(--r-line);
+  padding-block: 24px;
+}
+[data-site="ref"] .r-faq summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: clamp(19px, 2.2vw, 26px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+}
+[data-site="ref"] .r-faq summary::-webkit-details-marker {
+  display: none;
+}
+[data-site="ref"] .r-faq summary::after {
+  content: "+";
+  color: var(--r-acc);
+  transition: transform 0.3s var(--r-ease);
+}
+[data-site="ref"] .r-faq details[open] summary::after {
+  transform: rotate(45deg);
+}
+[data-site="ref"] .r-faq details p {
+  color: var(--r-dim);
+  font-size: 16px;
+  line-height: 1.65;
+  max-width: 66ch;
+  margin: 14px 0 0;
+}
+/* При фильтре скрытые карточки сбивают «шахматку» — отключаем сдвиг. */
+[data-site="ref"] .r-pgrid[data-filter] .r-pcard:nth-child(even) {
+  margin-top: 0;
+}

@@ -9,8 +9,9 @@ import { StudioFinal } from "@/components/site/chrome/studio/StudioFinal";
 /** Каталог проектов в варианте Studio: тёмная шапка-панель, фильтр, сетка карточек как на главной. */
 export async function StudioProjects({ params }: { params: Promise<{ locale: string }> }) {
   await params;
-  const [t, th, tst, projects] = await Promise.all([
+  const [t, tpr, th, tst, projects] = await Promise.all([
     getTranslations("projects"),
+    getTranslations("project"),
     getTranslations("home"),
     getTranslations("home.studio"),
     getProjects(),
@@ -31,7 +32,8 @@ export async function StudioProjects({ params }: { params: Promise<{ locale: str
           <FilterBar
             className="s-filter"
             targetId="s-pgrid"
-            label={t("title")}
+            label={tpr("category")}
+            emptyText={t("empty")}
             options={projectCategories.map((c) => ({ value: c.value, label: t(`categories.${c.value}`) }))}
           />
           {projects.length === 0 ? (

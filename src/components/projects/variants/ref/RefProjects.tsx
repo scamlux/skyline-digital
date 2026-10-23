@@ -11,8 +11,9 @@ const pad = (n: number) => String(n).padStart(2, "0");
 /** Каталог проектов в варианте «Референс»: фильтр, сетка карточек, кейс с depth-открытием. */
 export async function RefProjects({ params }: { params: Promise<{ locale: string }> }) {
   await params;
-  const [t, th, tr, projects] = await Promise.all([
+  const [t, tpr, th, tr, projects] = await Promise.all([
     getTranslations("projects"),
+    getTranslations("project"),
     getTranslations("home"),
     getTranslations("home.ref"),
     getProjects(),
@@ -38,7 +39,8 @@ export async function RefProjects({ params }: { params: Promise<{ locale: string
         <FilterBar
           className="r-filter"
           targetId="r-pgrid"
-          label={t("title")}
+          label={tpr("category")}
+          emptyText={t("empty")}
           options={projectCategories.map((c) => ({ value: c.value, label: t(`categories.${c.value}`) }))}
         />
       </section>
