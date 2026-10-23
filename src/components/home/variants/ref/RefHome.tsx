@@ -57,7 +57,7 @@ export async function RefHome({ params }: HomeVariantProps) {
         <div className="r-in">
           <p className="r-eyebrow">{t("ref.eyebrow")}</p>
           <h1 className="r-mark">
-            <span className="sr-only-ref">{t("hero.title").replaceAll("*", "")}</span>
+            <span className="sr-only-v">{t("hero.title").replaceAll("*", "")}</span>
             <span aria-hidden="true">
               {MARK.map((ch, i) => (
                 <span key={i} className={i % 2 ? "ch o" : "ch"}>

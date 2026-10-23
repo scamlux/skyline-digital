@@ -2,8 +2,8 @@
 
 import { useCallback, useRef, useState } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
-import { RefLocales } from "./RefLocales";
-import { useDialog } from "./useDialog";
+import { Locales } from "../shared/Locales";
+import { useDialog } from "../shared/useDialog";
 
 export type RefNavItem = { href: string; label: string };
 
@@ -101,7 +101,7 @@ export function RefNav({
               {c.label}
             </a>
           ))}
-          <RefLocales />
+          <Locales />
         </div>
       </div>
     </>

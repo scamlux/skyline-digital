@@ -2,6 +2,7 @@ import { setRequestLocale } from "next-intl/server";
 import type { SiteVersion } from "@/lib/site/version";
 import { OldChrome } from "./chrome/OldChrome";
 import { RefChrome } from "./chrome/RefChrome";
+import { StudioChrome } from "./chrome/StudioChrome";
 
 /**
  * Вариантный каркас публичной страницы (Header/Footer/preloader/курсор).
@@ -20,6 +21,7 @@ const CHROME: Partial<
   Record<SiteVersion, (props: { children: React.ReactNode }) => React.ReactNode | Promise<React.ReactNode>>
 > = {
   old: OldChrome,
+  studio: StudioChrome,
   ref: RefChrome,
 };
 

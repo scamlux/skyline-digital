@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "@/i18n/navigation";
-import { useDialog } from "@/components/site/chrome/ref/useDialog";
+import { useDialog } from "@/components/site/chrome/shared/useDialog";
 
 export type RefCase = {
   slug: string;

@@ -4,44 +4,9 @@
  * где отрисован RefChrome. Так CSS и шрифт не попадают на страницы старого дизайна
  * (импорт .css из компонента Turbopack кладёт в CSS всех маршрутов) — ADR 0007.
  *
- * Значения — из эталона docs/reference/artifact-skyline.html (#ver-ref, #preload, #rcursor).
- * Всё под [data-site="ref"] (прелоадер и курсор — тоже внутри обёртки).
+ * Значения — из эталона docs/reference/artifact-skyline.html (#ver-ref, #rcursor).
+ * Всё под [data-site="ref"]. Шрифт Onest и прелоадер — в shared.css (общие со Studio).
  */
-
-/* Onest — SIL Open Font License 1.1 (public/fonts/onest/OFL.txt). Self-hosted;
-   unicode-range как у Google Fonts: латиница (включая ʻ U+02BB для узбекского) и кириллица. */
-@font-face {
-  font-family: "Onest";
-  font-style: normal;
-  font-weight: 400 800;
-  font-display: swap;
-  src: url(/fonts/onest/onest-cyrillic-ext.woff2) format("woff2");
-  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
-}
-@font-face {
-  font-family: "Onest";
-  font-style: normal;
-  font-weight: 400 800;
-  font-display: swap;
-  src: url(/fonts/onest/onest-cyrillic.woff2) format("woff2");
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-@font-face {
-  font-family: "Onest";
-  font-style: normal;
-  font-weight: 400 800;
-  font-display: swap;
-  src: url(/fonts/onest/onest-latin-ext.woff2) format("woff2");
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-@font-face {
-  font-family: "Onest";
-  font-style: normal;
-  font-weight: 400 800;
-  font-display: swap;
-  src: url(/fonts/onest/onest-latin.woff2) format("woff2");
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
 
 /* ===================== токены и база ===================== */
 [data-site="ref"] {
@@ -104,103 +69,6 @@
   pointer-events: none;
   opacity: 0.05;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-.sr-only-ref {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-}
-
-/* ===================== прелоадер (эталон: #preload) ===================== */
-[data-site="ref"] .r-pre {
-  position: fixed;
-  inset: 0;
-  z-index: 2000;
-  background: #0b0d14;
-  display: grid;
-  place-items: center;
-  transition: opacity 0.6s ease, visibility 0.6s;
-}
-[data-site="ref"] .r-pre.done {
-  opacity: 0;
-  visibility: hidden;
-}
-[data-site="ref"] .r-pre .pword {
-  font-size: clamp(34px, 8vw, 88px);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  color: #fff;
-  position: relative;
-  text-transform: uppercase;
-}
-[data-site="ref"] .r-pre .pword::before,
-[data-site="ref"] .r-pre .pword::after {
-  content: attr(data-t);
-  position: absolute;
-  inset: 0;
-}
-[data-site="ref"] .r-pre .pword::before {
-  color: var(--acc-ink);
-  clip-path: inset(0 0 55% 0);
-}
-[data-site="ref"] .r-pre .pword::after {
-  color: #fff;
-  clip-path: inset(52% 0 0 0);
-  opacity: 0.55;
-}
-[data-site="ref"] .r-pre.gl .pword::before {
-  animation: r-glb 0.5s steps(2) infinite;
-}
-[data-site="ref"] .r-pre.gl .pword::after {
-  animation: r-gla 0.55s steps(2) infinite;
-}
-[data-site="ref"] .r-pre .ppct {
-  position: absolute;
-  bottom: 9%;
-  left: 0;
-  right: 0;
-  text-align: center;
-  color: #8fa0c0;
-  font-size: 14px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.14em;
-}
-[data-site="ref"] .r-pre .pskip {
-  position: absolute;
-  top: calc(20px + env(safe-area-inset-top, 0px));
-  right: 22px;
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 11.5px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  font-weight: 600;
-  z-index: 2;
-  background: none;
-  border: 0;
-}
-[data-site="ref"] .r-pre .pskip:hover {
-  color: #fff;
-}
-[data-site="ref"] .r-pre .pbar {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  height: 3px;
-  width: 0;
-  background: var(--acc-ink);
-  transition: width 0.1s linear;
-}
-@keyframes r-glb {
-  0%, 100% { transform: translateX(0); }
-  40% { transform: translateX(-4px); }
-}
-@keyframes r-gla {
-  0%, 100% { transform: translateX(0); }
-  40% { transform: translateX(4px); }
 }
 
 /* ===================== курсор (эталон: #rcursor) ===================== */
@@ -1264,8 +1132,6 @@
 
 /* ===================== reduced motion ===================== */
 @media (prefers-reduced-motion: reduce) {
-  [data-site="ref"] .r-pre.gl .pword::before,
-  [data-site="ref"] .r-pre.gl .pword::after,
   [data-site="ref"] .r-glow,
   [data-site="ref"] .r-mark .ch,
   [data-site="ref"] .r-marq-t,

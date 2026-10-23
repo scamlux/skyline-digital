@@ -8,14 +8,14 @@ const DURATION = 1750;
 const FINAL = "SKYLINE";
 
 /**
- * Прелоадер Референса (эталон: `#preload`): слова-услуги с глитчем, проценты,
+ * Прелоадер вариантов Studio и Референс (эталон: `#preload`): слова-услуги с глитчем, проценты,
  * полоса снизу, «Пропустить». Показывается один раз за сессию вкладки.
  *
  * Слой приходит в HTML сразу (иначе контент мигнул бы до гидрации), а инлайн-скрипт
  * прячет его до первой отрисовки, если в этой сессии прелоадер уже был.
  * Без JS слой скрыт через <noscript>.
  */
-export function RefPreloader({ words, labels }: { words: string[]; labels: { skip: string; loading: string } }) {
+export function Preloader({ words, labels }: { words: string[]; labels: { skip: string; loading: string } }) {
   const [phase, setPhase] = useState<"run" | "done" | "gone">("run");
   const [glitch, setGlitch] = useState(true);
   const rootRef = useRef<HTMLDivElement>(null);

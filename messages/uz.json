@@ -140,6 +140,24 @@
         "DIZAYN",
         "ISHGA TUSHIRISH"
       ]
+    },
+    "studio": {
+      "heroTitle": "Sizga <w></w> olib keladigan saytlar, ilovalar va AI",
+      "heroWords": [
+        "arizalar",
+        "sotuvlar",
+        "mijozlar",
+        "oʻsish"
+      ],
+      "workNote": "Veb, mobil, AI va avtomatlashtirish.",
+      "servicesNote": "Boshlangʻich narx — aniq narxni kalkulyator hisoblaydi.",
+      "processNote": "Besh qadam — arizadan ishga tushirishgacha.",
+      "caroHint": "Yon tomonga suring →",
+      "prev": "Oldingi",
+      "next": "Keyingi",
+      "more": "Batafsil",
+      "sections": "Boʻlimlar",
+      "heroSub": "Saytdan AI-mahsulotgacha — loyihalaymiz, ishlab chiqamiz va ishga tushiramiz."
     }
   },
   "services": {
