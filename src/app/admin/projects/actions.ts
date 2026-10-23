@@ -122,5 +122,6 @@ export async function deleteSetting(key: string): Promise<{ ok: boolean }> {
   const db = getSupabaseAdmin();
   const { error } = await db.from("settings").delete().eq("key", key);
   revalidatePath("/admin/settings");
+  if (!error && SITE_WIDE_KEYS.has(key)) revalidatePath("/", "layout");
   return { ok: !error };
 }
