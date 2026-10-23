@@ -8,7 +8,9 @@ import { projects } from "@/data/projects";
 import { getProject, getProjects } from "@/lib/portfolio";
 import { localeUrl, languageAlternates, SITE_URL, SITE_NAME } from "@/lib/seo";
 import { ProjectGallery } from "@/components/projects/ProjectGallery";
-import { withOldShell } from "@/components/site/SiteShell";
+import { withVariants } from "@/components/site/withVariants";
+import { RefProject } from "@/components/projects/variants/ref/RefProject";
+import { StudioProject } from "@/components/projects/variants/studio/StudioProject";
 
 export function generateStaticParams() {
   return routing.locales.flatMap((locale) =>
@@ -266,4 +268,4 @@ async function ProjectPage({
   );
 }
 
-export default withOldShell(ProjectPage);
+export default withVariants({ old: ProjectPage, studio: StudioProject, ref: RefProject });

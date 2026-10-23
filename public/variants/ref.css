@@ -1171,3 +1171,179 @@
 [data-site="ref"] .r-case:focus {
   outline: none;
 }
+
+/* ===================== внутренние страницы ===================== */
+[data-site="ref"] .r-phead {
+  padding-top: clamp(120px, 15vw, 190px);
+  padding-bottom: clamp(30px, 4vw, 56px);
+}
+[data-site="ref"] .r-ptitle {
+  font-size: clamp(52px, 11vw, 150px);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 0.9;
+  margin: 0;
+}
+[data-site="ref"] .r-pintro {
+  color: var(--r-dim);
+  font-size: clamp(16px, 1.8vw, 20px);
+  line-height: 1.55;
+  max-width: 54ch;
+  margin: 26px 0 0;
+}
+[data-site="ref"] .r-back {
+  color: var(--r-dim);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+[data-site="ref"] .r-back:hover {
+  color: var(--r-acc);
+}
+[data-site="ref"] .r-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 36px;
+}
+[data-site="ref"] .r-filter button {
+  background: none;
+  color: var(--r-dim);
+  border: 1px solid var(--r-line);
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+  transition: 0.25s;
+}
+[data-site="ref"] .r-filter button:hover {
+  color: var(--r-txt);
+  border-color: var(--r-txt);
+}
+[data-site="ref"] .r-filter button[aria-pressed="true"] {
+  background: var(--r-acc);
+  border-color: var(--r-acc);
+  color: #0a0a0b;
+}
+[data-site="ref"] .r-psec {
+  padding-top: 0;
+}
+[data-site="ref"] .r-pgrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: clamp(36px, 5vw, 64px) clamp(22px, 3vw, 40px);
+}
+[data-site="ref"] .r-pgrid .r-pcard {
+  width: auto;
+}
+[data-site="ref"] .r-pgrid .r-pcard:nth-child(even) {
+  margin-top: clamp(0px, 8vw, 110px);
+}
+@media (max-width: 760px) {
+  [data-site="ref"] .r-pgrid {
+    grid-template-columns: 1fr;
+  }
+  [data-site="ref"] .r-pgrid .r-pcard:nth-child(even) {
+    margin-top: 0;
+  }
+}
+[data-site="ref"] .r-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px 48px;
+  margin: 36px 0 0;
+  padding-top: 26px;
+  border-top: 1px solid var(--r-line);
+}
+[data-site="ref"] .r-meta dt {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--r-dim);
+  font-weight: 700;
+}
+[data-site="ref"] .r-meta dd {
+  margin: 8px 0 0;
+  font-size: 15px;
+}
+[data-site="ref"] .r-meta .rc-tags {
+  margin-top: 8px;
+}
+[data-site="ref"] .r-phead .r-hcta {
+  margin-top: 32px;
+}
+[data-site="ref"] .r-cover {
+  position: relative;
+  z-index: 2;
+  height: min(78vh, 760px);
+  margin: 0 var(--r-gutter);
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid var(--r-line);
+}
+[data-site="ref"] .r-cover img {
+  object-fit: cover;
+  object-position: top center;
+}
+[data-site="ref"] .r-story {
+  display: grid;
+  gap: clamp(44px, 6vw, 80px);
+}
+[data-site="ref"] .r-story .r-label {
+  margin-bottom: 18px;
+}
+[data-site="ref"] .r-storyt {
+  font-size: clamp(22px, 3vw, 38px);
+  font-weight: 500;
+  line-height: 1.32;
+  letter-spacing: -0.02em;
+  max-width: 34ch;
+  margin: 0;
+}
+[data-site="ref"] .r-gal {
+  padding-top: 0;
+}
+[data-site="ref"] .r-pnav {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  border-top: 1px solid var(--r-line);
+  padding-block: 44px;
+}
+[data-site="ref"] .r-pnav a {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+[data-site="ref"] .r-pnav a span {
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--r-dim);
+  font-weight: 700;
+}
+[data-site="ref"] .r-pnav a b {
+  font-size: clamp(26px, 4.4vw, 56px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  transition: color 0.3s;
+}
+[data-site="ref"] .r-pnav a:hover b {
+  color: var(--r-acc);
+}
+[data-site="ref"] .r-pnav .nx {
+  text-align: right;
+  align-items: flex-end;
+}
+@media (max-width: 760px) {
+  /* Скриншот сайта горизонтальный — на мобилке высокий кадр обрезал бы его в полоску. */
+  [data-site="ref"] .r-cover {
+    height: auto;
+    aspect-ratio: 16 / 10;
+    border-radius: 16px;
+  }
+}

@@ -3,7 +3,9 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { ProjectsGrid } from "@/components/projects/ProjectsGrid";
 import { getProjects } from "@/lib/portfolio";
 import { localeUrl, languageAlternates } from "@/lib/seo";
-import { withOldShell } from "@/components/site/SiteShell";
+import { withVariants } from "@/components/site/withVariants";
+import { RefProjects } from "@/components/projects/variants/ref/RefProjects";
+import { StudioProjects } from "@/components/projects/variants/studio/StudioProjects";
 
 export async function generateMetadata({
   params,
@@ -59,4 +61,4 @@ async function ProjectsPage({
   );
 }
 
-export default withOldShell(ProjectsPage);
+export default withVariants({ old: ProjectsPage, studio: StudioProjects, ref: RefProjects });
