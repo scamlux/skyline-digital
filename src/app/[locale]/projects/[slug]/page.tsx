@@ -8,6 +8,7 @@ import { projects } from "@/data/projects";
 import { getProject, getProjects } from "@/lib/portfolio";
 import { localeUrl, languageAlternates, SITE_URL, SITE_NAME } from "@/lib/seo";
 import { ProjectGallery } from "@/components/projects/ProjectGallery";
+import { withOldShell } from "@/components/site/SiteShell";
 
 export function generateStaticParams() {
   return routing.locales.flatMap((locale) =>
@@ -42,7 +43,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function ProjectPage({
+async function ProjectPage({
   params,
 }: {
   params: Promise<{ locale: string; slug: string }>;
@@ -264,3 +265,5 @@ export default async function ProjectPage({
     </main>
   );
 }
+
+export default withOldShell(ProjectPage);

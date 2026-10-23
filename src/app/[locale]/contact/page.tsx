@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { localeUrl, languageAlternates } from "@/lib/seo";
 import { CONTACTS, CONTACT_LINKS, telegramHandle } from "@/lib/contact";
+import { withOldShell } from "@/components/site/SiteShell";
 
 export async function generateMetadata({
   params,
@@ -22,7 +23,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function ContactPage({
+async function ContactPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
@@ -100,3 +101,5 @@ export default async function ContactPage({
     </main>
   );
 }
+
+export default withOldShell(ContactPage);

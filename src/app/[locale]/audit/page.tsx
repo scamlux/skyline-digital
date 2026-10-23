@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { AuditRunner } from "@/components/audit/AuditRunner";
 import { localeUrl, languageAlternates } from "@/lib/seo";
+import { withOldShell } from "@/components/site/SiteShell";
 
 export async function generateMetadata({
   params,
@@ -20,7 +21,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function AuditPage({
+async function AuditPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
@@ -48,3 +49,5 @@ export default async function AuditPage({
     </main>
   );
 }
+
+export default withOldShell(AuditPage);

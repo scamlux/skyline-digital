@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Wizard } from "@/components/calculator/Wizard";
 import { localeUrl, languageAlternates } from "@/lib/seo";
+import { withOldShell } from "@/components/site/SiteShell";
 
 export async function generateMetadata({
   params,
@@ -20,7 +21,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function CalculatorPage({
+async function CalculatorPage({
   params,
   searchParams,
 }: {
@@ -57,3 +58,5 @@ export default async function CalculatorPage({
     </main>
   );
 }
+
+export default withOldShell(CalculatorPage);

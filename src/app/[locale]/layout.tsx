@@ -6,9 +6,6 @@ import { Unbounded, Golos_Text, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { routing } from "@/i18n/routing";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import { Loader } from "@/components/ui/Loader";
 import {
   SITE_NAME,
   SITE_URL,
@@ -133,10 +130,8 @@ export default async function LocaleLayout({
           }}
         />
         <NextIntlClientProvider>
-          <Loader />
-          <Header />
-          <div className="flex-1">{children}</div>
-          <Footer />
+          {/* Каркас (Header/Footer/Loader) — в странице: <SiteShell>, вариант выбирается постранично. */}
+          {children}
         </NextIntlClientProvider>
         <Analytics />
         <SpeedInsights />

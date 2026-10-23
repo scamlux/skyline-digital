@@ -7,6 +7,7 @@ import { ROLE_LABELS } from "@/lib/pricing/roles";
 import type { Proposal } from "@/lib/ai/schema";
 import { formatUsd } from "@/lib/utils";
 import { ProposalDownloadGate } from "@/components/estimate/ProposalDownloadGate";
+import { withOldShell } from "@/components/site/SiteShell";
 
 export const dynamic = "force-dynamic";
 
@@ -35,7 +36,7 @@ async function fetchEstimate(token: string) {
   };
 }
 
-export default async function EstimatePage({
+async function EstimatePage({
   params,
 }: {
   params: Promise<{ locale: string; token: string }>;
@@ -245,3 +246,5 @@ function List({ items }: { items: string[] }) {
     </ul>
   );
 }
+
+export default withOldShell(EstimatePage);
