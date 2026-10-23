@@ -549,24 +549,6 @@ p{margin:0}
 #ver-ref .r-preview img{width:100%;height:100%;object-fit:cover;object-position:top center}
 #ver-ref .r-preview.on{opacity:1; transform:translate(-50%,-50%) scale(1)}
 @media(max-width:760px){ #ver-ref .r-preview{display:none} }
-/* reference projects — horizontal card gallery */
-#ver-ref .r-gal{display:flex; gap:22px; overflow-x:auto; scroll-snap-type:x proximity; padding-bottom:8px; -webkit-overflow-scrolling:touch; scrollbar-width:none; cursor:grab}
-#ver-ref .r-gal::-webkit-scrollbar{display:none}
-#ver-ref .r-gal.drag{cursor:grabbing}
-#ver-ref .r-gal.drag *{pointer-events:none}
-#ver-ref .r-pcard{flex:0 0 auto; width:min(76vw,440px); scroll-snap-align:start; cursor:pointer; outline:none}
-#ver-ref .r-pcimg{position:relative; aspect-ratio:16/11; border-radius:16px; overflow:hidden; border:1px solid var(--r-line); background:rgba(255,255,255,.03)}
-#ver-ref .r-pcimg img{width:100%; height:100%; object-fit:cover; object-position:top center; display:block; transition:transform .6s cubic-bezier(.2,.7,.2,1); will-change:transform}
-#ver-ref .r-pcard:hover .r-pcimg img, #ver-ref .r-pcard:focus-visible .r-pcimg img{transform:scale(1.045)}
-#ver-ref .r-pcard:hover .r-pcimg, #ver-ref .r-pcard:focus-visible .r-pcimg{border-color:var(--r-acc)}
-#ver-ref .r-pcopen{position:absolute; top:14px; right:14px; width:40px; height:40px; border-radius:50%; display:grid; place-items:center; font-size:18px; color:#0a0a0b; background:var(--r-acc); opacity:0; transform:translateY(-6px) scale(.9); transition:.3s cubic-bezier(.2,.7,.2,1)}
-#ver-ref .r-pcard:hover .r-pcopen, #ver-ref .r-pcard:focus-visible .r-pcopen{opacity:1; transform:none}
-#ver-ref .r-pcbd{display:flex; align-items:baseline; justify-content:space-between; gap:14px; margin-top:16px}
-#ver-ref .r-pcn{font-size:clamp(22px,2.4vw,30px); font-weight:800; letter-spacing:-.03em; transition:color .3s}
-#ver-ref .r-pcard:hover .r-pcn, #ver-ref .r-pcard:focus-visible .r-pcn{color:var(--r-acc)}
-#ver-ref .r-pcc{font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--r-dim); white-space:nowrap}
-#ver-ref .r-galhint{margin-top:26px; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--r-dim)}
-@media(max-width:760px){ #ver-ref .r-pcard{width:82vw} }
 /* services */
 #ver-ref .r-svc{border-top:1px solid var(--r-line)}
 #ver-ref .r-srow{display:grid; grid-template-columns:54px 1fr auto auto; gap:22px; align-items:center; padding:26px 0; border-bottom:1px solid var(--r-line); text-decoration:none; color:inherit; transition:padding .4s cubic-bezier(.2,.7,.2,1), background .3s}
@@ -902,14 +884,14 @@ p{margin:0}
 
   <section class="r-sec" id="r-work">
     <p class="r-label">Избранные работы — 04 проекта</p>
-    <div class="r-gal" id="rGal">
-      <article class="r-pcard" data-prev="tgpg" tabindex="0" role="button" aria-label="TGPG.UZ — открыть кейс"><div class="r-pcimg"><img alt="TGPG.UZ — превью"><span class="r-pcopen" aria-hidden="true">↗</span></div><div class="r-pcbd"><span class="r-pcn">TGPG.UZ</span><span class="r-pcc">Веб · CMS · 2026</span></div></article>
-      <article class="r-pcard" data-prev="salomtv" tabindex="0" role="button" aria-label="Salom TV — открыть кейс"><div class="r-pcimg"><img alt="Salom TV — превью"><span class="r-pcopen" aria-hidden="true">↗</span></div><div class="r-pcbd"><span class="r-pcn">Salom TV</span><span class="r-pcc">Веб · Стриминг · 2025</span></div></article>
-      <article class="r-pcard" data-prev="osnova" tabindex="0" role="button" aria-label="Osnova — открыть кейс"><div class="r-pcimg"><img alt="Osnova — превью"><span class="r-pcopen" aria-hidden="true">↗</span></div><div class="r-pcbd"><span class="r-pcn">Osnova</span><span class="r-pcc">Веб · Edtech · AI · 2025</span></div></article>
-      <article class="r-pcard" data-prev="uzdplus" tabindex="0" role="button" aria-label="UZD+ — открыть кейс"><div class="r-pcimg"><img alt="UZD+ — превью"><span class="r-pcopen" aria-hidden="true">↗</span></div><div class="r-pcbd"><span class="r-pcn">UZD+</span><span class="r-pcc">Веб · Стриминг · 2024</span></div></article>
+    <div class="r-work">
+      <a class="r-row" data-prev="tgpg" href="https://tgpg.uz" target="_blank" rel="noopener"><span class="rn">TGPG.UZ</span><span class="rm"><span class="rc">Веб · CMS</span><span class="ra">↗</span><span class="rc">2026</span></span></a>
+      <a class="r-row" data-prev="salomtv" href="https://salomtv.uz" target="_blank" rel="noopener"><span class="rn">Salom&nbsp;TV</span><span class="rm"><span class="rc">Веб · Стриминг</span><span class="ra">↗</span><span class="rc">2025</span></span></a>
+      <a class="r-row" data-prev="osnova" href="https://osnovaedu.uz" target="_blank" rel="noopener"><span class="rn">Osnova</span><span class="rm"><span class="rc">Веб · Edtech · AI</span><span class="ra">↗</span><span class="rc">2025</span></span></a>
+      <a class="r-row" data-prev="uzdplus" href="https://uzdplus.uz" target="_blank" rel="noopener"><span class="rn">UZD+</span><span class="rm"><span class="rc">Веб · Стриминг</span><span class="ra">↗</span><span class="rc">2024</span></span></a>
     </div>
-    <p class="r-galhint">Листайте вбок или тащите →</p>
   </section>
+  <div class="r-preview" id="rPreview" aria-hidden="true"><img id="rPrevImg" alt=""></div>
 
   <section class="r-hsec" id="r-svc">
     <div class="r-hsticky">
@@ -1189,16 +1171,12 @@ p{margin:0}
       a.addEventListener('click',function(e){ var id=this.getAttribute('href').slice(1); var t= id==='r-top'?ref:document.getElementById(id);
         if(t){ e.preventDefault(); menu&&menu.classList.remove('open'); if(id==='r-top'){ window.scrollTo({top:0,behavior:reduce?'auto':'smooth'}); } else { var y=t.getBoundingClientRect().top+window.scrollY-30; window.scrollTo({top:y,behavior:reduce?'auto':'smooth'}); } } });
     });
-    /* project gallery: fill card covers from IMG, enable drag-to-scroll */
-    ref.querySelectorAll('.r-pcard').forEach(function(card){ var k=card.getAttribute('data-prev'); var im=card.querySelector('img'); if(im&&IMG[k]) im.src=IMG[k]; });
-    var gal=document.getElementById('rGal');
-    if(gal){ var down=false, moved=false, sx=0, sl=0;
-      gal.addEventListener('pointerdown',function(e){ down=true; moved=false; sx=e.clientX; sl=gal.scrollLeft; });
-      gal.addEventListener('pointermove',function(e){ if(!down)return; var dx=e.clientX-sx; if(Math.abs(dx)>6){ moved=true; gal.classList.add('drag'); } gal.scrollLeft=sl-dx; });
-      function galUp(){ down=false; setTimeout(function(){ gal.classList.remove('drag'); },0); }
-      gal.addEventListener('pointerup',galUp); gal.addEventListener('pointerleave',galUp); gal.addEventListener('pointercancel',galUp);
-      gal.addEventListener('click',function(e){ if(moved){ e.preventDefault(); e.stopPropagation(); } },true);
-    }
+    var prev=document.getElementById('rPreview'), pimg=document.getElementById('rPrevImg');
+    ref.querySelectorAll('.r-row').forEach(function(row){
+      row.addEventListener('mouseenter',function(){ var k=row.getAttribute('data-prev'); if(pimg&&IMG[k]) pimg.src=IMG[k]; prev&&prev.classList.add('on'); });
+      row.addEventListener('mouseleave',function(){ prev&&prev.classList.remove('on'); });
+    });
+    if(prev) document.addEventListener('mousemove',function(e){ if(!prev.classList.contains('on'))return; prev.style.left=e.clientX+'px'; prev.style.top=e.clientY+'px'; },{passive:true});
     if(!reduce && 'IntersectionObserver' in window){
       var io=new IntersectionObserver(function(es){es.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });},{threshold:.12});
       ref.querySelectorAll('.r-rv').forEach(function(el){ io.observe(el); });
@@ -1255,11 +1233,7 @@ p{margin:0}
     function closeCase(){ if(!caseEl)return; caseEl.classList.remove('open'); if(rcMedia && !reduce){ rcMedia.style.transition=caseTrans; rcMedia.style.transform=startTf; rcMedia.style.borderRadius='12px'; rcMedia.style.filter='blur(4px)'; } try{document.body.style.overflow='';}catch(e){} setTimeout(function(){ caseEl.hidden=true; }, 740); }
     if(rcClose) rcClose.addEventListener('click',closeCase);
     document.addEventListener('keydown',function(e){ if(e.key==='Escape' && caseEl && !caseEl.hidden) closeCase(); });
-    ref.querySelectorAll('.r-pcard').forEach(function(card){
-      var origin=card.querySelector('.r-pcimg')||card;
-      card.addEventListener('click',function(e){ e.preventDefault(); openCase(card.getAttribute('data-prev'), origin); });
-      card.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openCase(card.getAttribute('data-prev'), origin); } });
-    });
+    ref.querySelectorAll('.r-row').forEach(function(row){ row.addEventListener('click',function(e){ e.preventDefault(); openCase(row.getAttribute('data-prev'), row); }); });
   })();
 
   /* accent theming */
