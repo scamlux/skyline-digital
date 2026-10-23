@@ -27,6 +27,8 @@ export function StudioFx() {
           const el = en.target as HTMLElement;
           if (el.classList.contains("srow") && el.parentElement) {
             el.style.transitionDelay = `${Array.from(el.parentElement.children).indexOf(el) * 0.06}s`;
+            // Задержка нужна только для появления — иначе отступ при наведении отстаёт.
+            el.addEventListener("transitionend", () => (el.style.transitionDelay = ""), { once: true });
           }
           el.classList.add("in");
           io.unobserve(el);

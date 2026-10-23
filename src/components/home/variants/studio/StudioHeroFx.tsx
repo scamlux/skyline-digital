@@ -191,7 +191,7 @@ export function StudioCaroNav({ trackId, labels }: { trackId: string; labels: { 
     if (!track) return;
     const step = card ? card.getBoundingClientRect().width + 20 : 320;
     const smooth = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    track.scrollBy({ left: dir * step, behavior: smooth ? "smooth" : "auto" });
+    track.scrollBy({ left: dir * step, behavior: smooth ? "smooth" : "instant" });
   };
 
   return (

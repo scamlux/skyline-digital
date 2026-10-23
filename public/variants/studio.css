@@ -97,7 +97,7 @@
 [data-site="studio"] .calc p{margin:18px auto 0; color:#b9b9c0; font-size:16px; line-height:1.6; max-width:48ch}
 [data-site="studio"] .calc .btn-fill{margin-top:30px; background:#fff; color:var(--ink)} [data-site="studio"] .calc .btn-fill:hover{background:var(--acc-ink)}
 [data-site="studio"] .caro{position:relative; margin-top:8px}
-[data-site="studio"] .carotrack{display:flex; gap:20px; overflow-x:auto; scroll-snap-type:x mandatory; scroll-behavior:smooth; -webkit-overflow-scrolling:touch; scrollbar-width:none; padding:6px 2px 18px; margin:0 calc(-1 * max(24px,env(safe-area-inset-left,0px)))}
+[data-site="studio"] .carotrack{display:flex; gap:20px; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none; padding:6px 2px 18px; margin:0 calc(-1 * max(24px,env(safe-area-inset-left,0px)))}
 [data-site="studio"] .carotrack::-webkit-scrollbar{display:none}
 [data-site="studio"] .carotrack::before,[data-site="studio"] .carotrack::after{content:""; flex:0 0 max(24px,env(safe-area-inset-left,0px))}
 [data-site="studio"] .pcard{flex:0 0 auto; width:min(84vw,400px); scroll-snap-align:start; border-radius:20px; overflow:hidden; background:var(--card); border:1px solid var(--line); text-decoration:none; color:inherit; display:flex; flex-direction:column; transition:transform .5s cubic-bezier(.2,.7,.2,1), box-shadow .5s ease, border-color .3s ease; will-change:transform}
@@ -197,3 +197,7 @@
 [data-site="studio"] .foot .copybar .r-locales{display:flex; gap:12px}
 [data-site="studio"] .foot .copybar .r-locales a{display:inline; padding:0; font-size:12.5px; text-transform:uppercase; letter-spacing:.08em; color:#8a8a90}
 [data-site="studio"] .foot .copybar .r-locales a[aria-current="true"]{color:var(--acc-ink)}
+/* Снап карточек с учётом отступа: иначе первая прилипает к краю и трек стартует не с нуля. */
+[data-site="studio"] .carotrack{scroll-padding-inline:max(24px,env(safe-area-inset-left,0px))}
+/* Распорки по краям трека: отступ минус gap (20px) и паддинг трека (2px) — первая карточка ровно по краю контента. */
+[data-site="studio"] .carotrack::before,[data-site="studio"] .carotrack::after{flex-basis:calc(max(24px,env(safe-area-inset-left,0px)) - 22px)}

@@ -114,7 +114,7 @@ export function Preloader({ words, labels }: { words: string[]; labels: { skip: 
   return (
     <>
       <noscript>
-        <style>{`[data-site="ref"] .r-pre{display:none}`}</style>
+        <style>{`[data-site] .r-pre{display:none}`}</style>
       </noscript>
       <div
         ref={rootRef}
