@@ -5,12 +5,13 @@ import { CONTACTS, CONTACT_LINKS, telegramHandle } from "@/lib/contact";
 import { getBrandAccent } from "@/lib/site/active";
 import { BRAND_ACCENTS } from "@/lib/site/version";
 import { RefCursor } from "./ref/RefCursor";
-import { RefLocales } from "./ref/RefLocales";
+import { Locales } from "./shared/Locales";
 import { RefNav } from "./ref/RefNav";
-import { RefPreloader } from "./ref/RefPreloader";
+import { Preloader } from "./shared/Preloader";
 
 // Стили и шрифт варианта лежат в public/ и подключаются при рендере, а не импортом:
 // импортированный .css Turbopack добавляет во все маршруты, включая старый дизайн.
+const SHARED_CSS = "/variants/shared.css";
 const REF_CSS = "/variants/ref.css";
 const ONEST_PRELOAD = ["/fonts/onest/onest-latin.woff2", "/fonts/onest/onest-cyrillic.woff2"];
 
@@ -49,8 +50,9 @@ export async function RefChrome({ children }: { children: React.ReactNode }) {
   return (
     <div data-site="ref" style={{ "--acc": accent.acc, "--acc-ink": accent.ink } as React.CSSProperties}>
       {/* React 19 поднимает stylesheet с precedence в <head> и ждёт его загрузки до показа. */}
+      <link rel="stylesheet" href={SHARED_CSS} precedence="default" />
       <link rel="stylesheet" href={REF_CSS} precedence="default" />
-      <RefPreloader
+      <Preloader
         words={th.raw("preWords") as string[]}
         labels={{ skip: th("skip"), loading: th("loading") }}
       />
@@ -96,7 +98,7 @@ export async function RefChrome({ children }: { children: React.ReactNode }) {
           <span>
             © {year} Skyline Digital · {tf("location")}
           </span>
-          <RefLocales />
+          <Locales />
         </div>
       </footer>
     </div>
