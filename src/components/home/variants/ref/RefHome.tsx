@@ -6,55 +6,142 @@ import { getProjects } from "@/lib/portfolio";
 import { basePriceUsd } from "@/lib/pricing/rules";
 import { formatUsd } from "@/lib/utils";
 import type { HomeVariantProps } from "../index";
+import { RefCaseModal, type RefCase } from "./RefCaseModal";
+import { RefPhilosophy } from "./RefPhilosophy";
 
 // Тот же порядок, что в OldHome / services (там список тоже объявлен локально).
 const SERVICE_KEYS = ["website", "webApp", "mobileApp", "ai", "automation", "uiux"] as const;
 const PROCESS_KEYS = ["brief", "estimate", "design", "build", "launch"] as const;
+const STAT_KEYS = ["projects", "years", "langs"] as const;
+// Вордмарк эталона: заливка и контур через букву.
+const MARK = "SKYLINE".split("");
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
-/** «Сайты, приложения и *AI-решения*, …» → кусок в звёздочках подсвечивается акцентом. */
-function accentTitle(title: string) {
-  return title.split(/(\*[^*]+\*)/g).map((part, i) =>
-    part.startsWith("*") && part.endsWith("*") ? <em key={i}>{part.slice(1, -1)}</em> : part,
-  );
-}
-
 /**
- * Главная в варианте «Референс» (фаза 1, шаг 1): hero, услуги, проекты и
- * «Как мы работаем» — три горизонтальные секции, финальный CTA.
- * Preloader, курсор, полноэкранное меню, «Философия» и FLIP-кейс — следующий шаг.
+ * Главная в варианте «Референс» — порядок и эффекты эталона `#ver-ref`:
+ * hero-вордмарк, бегущая строка, «Философия», проекты (с depth-открытием кейса),
+ * услуги, «Как мы работаем» (роадмап + бизнес-процесс), цифры, финал.
  */
 export async function RefHome({ params }: HomeVariantProps) {
   await params;
-  const [t, ts, tp, tf, projects] = await Promise.all([
+  const [t, ts, tp, projects] = await Promise.all([
     getTranslations("home"),
     getTranslations("services"),
     getTranslations("projects"),
-    getTranslations("footer"),
     getProjects(),
   ]);
+
+  const serviceTitles = SERVICE_KEYS.map((k) => ts(`items.${k}.title`));
+  const cases: RefCase[] = projects.map((p) => ({
+    slug: p.slug,
+    title: p.title,
+    cat: `${tp(`categories.${p.category}`)} · ${p.year}`,
+    desc: p.description,
+    tags: p.technologies,
+    image: p.image,
+    url: p.url,
+  }));
+
+  const marquee = (copy: number) =>
+    serviceTitles.map((title, i) => (
+      <span key={`${copy}-${i}`}>
+        <span className={i % 2 ? "acc" : undefined}>{title}</span> <span className="sep">/</span>{" "}
+      </span>
+    ));
 
   return (
     <>
       <section className="r-hero">
-        <p className="r-label">Skyline Digital · {tf("location")}</p>
-        <h1 className="r-h1">{accentTitle(t("hero.title"))}</h1>
-        <p className="r-sub">{t("hero.subtitle")}</p>
-        <div className="r-cta">
-          <Link href="/calculator" className="r-btn">
-            {t("hero.ctaPrimary")} <span aria-hidden="true">→</span>
-          </Link>
-          <Link href="/projects" className="r-btn ghost">
-            {t("hero.ctaSecondary")}
-          </Link>
+        <div className="r-glow" aria-hidden="true" />
+        <div className="r-in">
+          <p className="r-eyebrow">{t("ref.eyebrow")}</p>
+          <h1 className="r-mark">
+            <span className="sr-only-ref">{t("hero.title").replaceAll("*", "")}</span>
+            <span aria-hidden="true">
+              {MARK.map((ch, i) => (
+                <span key={i} className={i % 2 ? "ch o" : "ch"}>
+                  {ch}
+                </span>
+              ))}
+            </span>
+          </h1>
+          <p className="r-sub">{t("hero.subtitle")}</p>
+          <div className="r-hcta">
+            <Link href="/calculator" className="r-cta">
+              {t("hero.ctaPrimary")} <span aria-hidden="true">→</span>
+            </Link>
+            <Link href="/projects" className="r-cta ghost">
+              {t("hero.ctaSecondary")}
+            </Link>
+          </div>
+        </div>
+        <div className="r-scroll" aria-hidden="true">
+          {t("ref.scroll")}
+          <span className="ln" />
         </div>
       </section>
+
+      <div className="r-marq" aria-hidden="true">
+        <div className="r-marq-t">
+          {marquee(0)}
+          {marquee(1)}
+        </div>
+      </div>
+
+      <RefPhilosophy big={t("ref.philosophyPill")} pill={t("ref.philosophyPill")}>
+        <p>{t.rich("ref.philosophy", { b: (chunks) => <b>{chunks}</b> })}</p>
+      </RefPhilosophy>
+
+      {/* ——— Проекты: клик открывает кейс поверх страницы, ссылка ведёт на деталку ——— */}
+      <HorizontalPin
+        id="r-work"
+        ariaLabel={t("projectsTitle")}
+        trackClassName="r-wtrack"
+        progressBar
+        head={
+          <div className="r-hhead">
+            <div>
+              <p className="r-label">
+                {t("eyebrows.projects")} — {pad(projects.length)}
+              </p>
+              <h2 className="r-htitle">{t("projectsTitle")}</h2>
+            </div>
+            <p className="r-hint">
+              {t("ref.scrollHint")} · <Link href="/projects">{t("allProjects")} →</Link>
+            </p>
+          </div>
+        }
+      >
+        {projects.map((p, i) => (
+          <Link key={p.slug} href={`/projects/${p.slug}`} className="r-pcard" data-case={p.slug}>
+            <div className="r-pcimg">
+              <Image
+                src={p.image}
+                alt={p.title}
+                fill
+                sizes="(max-width: 760px) 82vw, 420px"
+                loading={i < 2 ? "eager" : "lazy"}
+              />
+              <span className="r-pcopen" aria-hidden="true">
+                ↗
+              </span>
+            </div>
+            <div className="r-pcbd">
+              <span className="r-pcn">{p.title}</span>
+              <span className="r-pcc">
+                {tp(`categories.${p.category}`)} · {p.year}
+              </span>
+            </div>
+          </Link>
+        ))}
+      </HorizontalPin>
 
       {/* ——— Услуги ——— */}
       <HorizontalPin
         id="r-svc"
         ariaLabel={t("servicesTitle")}
+        progressBar
         head={
           <div className="r-hhead">
             <div>
@@ -72,56 +159,12 @@ export async function RefHome({ params }: HomeVariantProps) {
             <span className="pn">
               {pad(i + 1)} / {pad(SERVICE_KEYS.length)}
             </span>
-            <span className="pt">{ts(`items.${key}.title`)}</span>
+            <span className="pt">{serviceTitles[i]}</span>
             <p className="pd">{ts(`items.${key}.desc`)}</p>
             <span className="pp">
               <span>{t("ref.start")}</span>
               {t("from")} {formatUsd(basePriceUsd(key))}
             </span>
-          </Link>
-        ))}
-      </HorizontalPin>
-
-      {/* ——— Проекты ——— */}
-      <HorizontalPin
-        id="r-work"
-        ariaLabel={t("projectsTitle")}
-        progressBar
-        head={
-          <div className="r-hhead">
-            <div>
-              <p className="r-label">
-                {t("eyebrows.projects")} — {pad(projects.length)}
-              </p>
-              <h2 className="r-htitle">{t("projectsTitle")}</h2>
-            </div>
-            <p className="r-hint">
-              {t("ref.scrollHint")} · <Link href="/projects">{t("allProjects")} →</Link>
-            </p>
-          </div>
-        }
-      >
-        {projects.map((p, i) => (
-          <Link key={p.slug} href={`/projects/${p.slug}`} className="r-pcard">
-            <div className="r-pcimg">
-              <Image
-                src={p.image}
-                alt={p.title}
-                fill
-                sizes="(max-width: 900px) 78vw, 520px"
-                priority={false}
-                loading={i < 2 ? "eager" : "lazy"}
-              />
-              <span className="r-pcopen" aria-hidden="true">
-                ↗
-              </span>
-            </div>
-            <div className="r-pcbd">
-              <span className="r-pcn">{p.title}</span>
-              <span className="r-pcc">
-                {tp(`categories.${p.category}`)} · {p.year}
-              </span>
-            </div>
           </Link>
         ))}
       </HorizontalPin>
@@ -155,9 +198,7 @@ export async function RefHome({ params }: HomeVariantProps) {
               <span className="pn">
                 {t("ref.step")} {pad(i + 1)} / {pad(PROCESS_KEYS.length)}
               </span>
-              <span className="r-badge" style={{ marginTop: 14 }}>
-                {t(`process.${key}.badge`)}
-              </span>
+              <span className="r-badge">{t(`process.${key}.badge`)}</span>
               <h3 className="pt">{t(`process.${key}.title`)}</h3>
               <dl className="r-lane">
                 <div>
@@ -174,18 +215,38 @@ export async function RefHome({ params }: HomeVariantProps) {
         ))}
       </HorizontalPin>
 
-      <section className="r-sec r-final">
+      <section className="r-sec" aria-label={t("eyebrows.about")}>
+        <div className="r-stats">
+          {STAT_KEYS.map((key, i) => (
+            <div key={key}>
+              <div className="n">{i === 0 ? <b>{t(`stats.${key}.value`)}</b> : t(`stats.${key}.value`)}</div>
+              <div className="l">{t(`stats.${key}.label`)}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="r-final">
         <p className="r-label">{t("eyebrows.contact")}</p>
-        <h2 style={{ marginTop: 22 }}>{t("finalTitle")}</h2>
-        <div className="r-cta" style={{ marginTop: 0 }}>
-          <Link href="/contact" className="r-btn">
+        <h2>
+          {t("ref.finalA")}
+          <br />
+          <em>{t("ref.finalB")}</em>
+        </h2>
+        <div className="r-hcta">
+          <Link href="/contact" className="r-cta">
             {t("finalCta")} <span aria-hidden="true">→</span>
           </Link>
-          <Link href="/calculator" className="r-btn ghost">
+          <Link href="/calculator" className="r-cta ghost">
             {t("hero.ctaPrimary")}
           </Link>
         </div>
       </section>
+
+      <RefCaseModal
+        cases={cases}
+        labels={{ close: t("ref.close"), openSite: t("ref.openSite"), caseMore: t("ref.caseMore") }}
+      />
     </>
   );
 }

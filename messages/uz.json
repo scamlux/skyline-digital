@@ -117,7 +117,29 @@
       "start": "Boshlanish",
       "step": "Bosqich",
       "what": "Nima boʻladi",
-      "how": "Qanday tashkil etilgan"
+      "how": "Qanday tashkil etilgan",
+      "eyebrow": "Raqamli agentlik · Toshkent",
+      "scroll": "Pastga",
+      "philosophyPill": "Falsafa",
+      "philosophy": "Buyuk mahsulotlar <b>muhandislik aniqligi</b> va <b>dizayn sezgisi</b> tutashgan joyda tugʻiladi. Har bir piksel, har bir oʻzaro taʼsir, har bir kod satri — odamlarni <b>harakatga keltiradigan</b> narsani yaratish imkoniyati.",
+      "finalA": "Vazifangiz bormi?",
+      "finalB": "Muhokama qilamiz.",
+      "calc": "Hisoblash",
+      "close": "Yopish",
+      "skip": "Oʻtkazib yuborish",
+      "loading": "Yuklanmoqda",
+      "openSite": "Saytni ochish",
+      "caseMore": "Loyiha haqida batafsil",
+      "footNav": "Navigatsiya",
+      "home": "Bosh sahifa",
+      "preWords": [
+        "SAYTLAR",
+        "ILOVALAR",
+        "AI",
+        "AVTOMATLASHTIRISH",
+        "DIZAYN",
+        "ISHGA TUSHIRISH"
+      ]
     }
   },
   "services": {
