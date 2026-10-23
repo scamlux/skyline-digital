@@ -6,7 +6,9 @@ import { Reveal } from "@/components/ui/Reveal";
 import { basePriceUsd } from "@/lib/pricing/rules";
 import { formatUsd } from "@/lib/utils";
 import { localeUrl, languageAlternates } from "@/lib/seo";
-import { withOldShell } from "@/components/site/SiteShell";
+import { withVariants } from "@/components/site/withVariants";
+import { RefServices } from "@/components/services/variants/ref/RefServices";
+import { StudioServices } from "@/components/services/variants/studio/StudioServices";
 
 const SERVICE_KEYS = [
   "website",
@@ -140,4 +142,4 @@ async function ServicesPage({
   );
 }
 
-export default withOldShell(ServicesPage);
+export default withVariants({ old: ServicesPage, studio: StudioServices, ref: RefServices });

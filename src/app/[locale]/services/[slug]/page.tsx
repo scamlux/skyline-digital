@@ -11,7 +11,9 @@ import { localeUrl, languageAlternates } from "@/lib/seo";
 import type { ProjectType } from "@/lib/pricing/types";
 import { PreviewCard } from "@/components/projects/PreviewCard";
 import { CASE_CATEGORY } from "@/lib/case-category";
-import { withOldShell } from "@/components/site/SiteShell";
+import { withVariants } from "@/components/site/withVariants";
+import { RefService } from "@/components/services/variants/ref/RefService";
+import { StudioService } from "@/components/services/variants/studio/StudioService";
 
 export const revalidate = 300;
 
@@ -175,4 +177,4 @@ async function ServiceDetailPage({
   );
 }
 
-export default withOldShell(ServiceDetailPage);
+export default withVariants({ old: ServiceDetailPage, studio: StudioService, ref: RefService });

@@ -143,3 +143,18 @@
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* Фильтр списков (FilterBar): контейнер получает data-filter, лишние элементы прячутся. */
+[data-site] [data-filter="web"] > [data-cat]:not([data-cat="web"]),
+[data-site] [data-filter="mobile"] > [data-cat]:not([data-cat="mobile"]),
+[data-site] [data-filter="ai"] > [data-cat]:not([data-cat="ai"]),
+[data-site] [data-filter="automation"] > [data-cat]:not([data-cat="automation"]) {
+  display: none;
+}
+[data-site] .v-filter-empty:empty {
+  display: none;
+}
+[data-site] .v-filter-empty {
+  margin: 0 0 24px;
+  opacity: 0.7;
+}
