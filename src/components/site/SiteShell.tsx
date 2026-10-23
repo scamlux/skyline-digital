@@ -1,6 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import type { SiteVersion } from "@/lib/site/version";
 import { OldChrome } from "./chrome/OldChrome";
+import { RefChrome } from "./chrome/RefChrome";
 
 /**
  * Вариантный каркас публичной страницы (Header/Footer/preloader/курсор).
@@ -13,8 +14,13 @@ import { OldChrome } from "./chrome/OldChrome";
  * Studio и Референс появятся в фазе 1; пока любой вариант без своего каркаса
  * получает старый.
  */
-const CHROME: Partial<Record<SiteVersion, React.ComponentType<{ children: React.ReactNode }>>> = {
+// Каркасы новых вариантов не импортируют CSS: свои стили они подключают при
+// рендере (<link precedence>), поэтому страницы старого дизайна их не грузят.
+const CHROME: Partial<
+  Record<SiteVersion, (props: { children: React.ReactNode }) => React.ReactNode | Promise<React.ReactNode>>
+> = {
   old: OldChrome,
+  ref: RefChrome,
 };
 
 export function SiteShell({ variant, children }: { variant: SiteVersion; children: React.ReactNode }) {

@@ -31,12 +31,26 @@ async function readSetting(key: string): Promise<unknown> {
   return data?.value;
 }
 
+/**
+ * Локальное превью без записи в БД: `SITE_VERSION_OVERRIDE` / `BRAND_ACCENT_OVERRIDE`
+ * при `next build`/`next start`. На проде (VERCEL_ENV=production) игнорируются,
+ * поэтому случайно забытая переменная не переключит боевой сайт.
+ */
+function override(name: string): string | undefined {
+  if (process.env.VERCEL_ENV === "production") return undefined;
+  return process.env[name] || undefined;
+}
+
 export async function getActiveVersion(): Promise<SiteVersion> {
+  const forced = override("SITE_VERSION_OVERRIDE");
+  if (forced) return parseSiteVersion(forced);
   const value = await readSetting("site_version");
   return value === undefined ? DEFAULT_SITE_VERSION : parseSiteVersion(value);
 }
 
 export async function getBrandAccent(): Promise<BrandAccent> {
+  const forced = override("BRAND_ACCENT_OVERRIDE");
+  if (forced) return parseBrandAccent(forced);
   const value = await readSetting("brand_accent");
   return value === undefined ? DEFAULT_BRAND_ACCENT : parseBrandAccent(value);
 }
