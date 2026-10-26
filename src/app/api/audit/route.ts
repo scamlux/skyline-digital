@@ -6,9 +6,9 @@ import { scoreMeasurement } from "@/lib/audit/score";
 import { persistAudit, toApiResult } from "@/lib/audit/store";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase/server";
 
-// Puppeteer needs the Node runtime; a measurement is capped at 20s internally.
+// Puppeteer needs the Node runtime; the fast path measures within a 25 s budget.
 export const runtime = "nodejs";
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 /** Fast public audit — score + top-3 findings, no e-mail. */
 export async function POST(request: Request) {
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const measurement = await measureSite(parsed.data.url, { screenshot: false });
+  const measurement = await measureSite(parsed.data.url, { screenshot: false, budgetMs: 25_000 });
   const score = measurement.reachable ? scoreMeasurement(measurement) : null;
 
   if (isSupabaseConfigured()) {

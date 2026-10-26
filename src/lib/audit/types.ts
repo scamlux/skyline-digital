@@ -26,6 +26,27 @@ export interface SpeedMetrics {
   imageBytes: number;
   jsBytes: number;
   cssBytes: number;
+  /**
+   * engine ≥ 2: the `load` event did not fire within the soft budget. The page
+   * WAS measured (from DOMContentLoaded) — this is a "very slow" finding, not
+   * an unreachable site. Optional: rows stored by engine 1 lack it.
+   */
+  loadTimedOut?: boolean;
+  // ——— engine ≥ 2 (optional: engine 1 rows lack them) ———
+  /** Measured under the mobile throttling profile (CPU ×4, ~4G network). */
+  throttled?: boolean;
+  /** Cumulative Layout Shift (largest session window), unitless. */
+  cls?: number | null;
+  /** Approx. Total Blocking Time: Σ (long task − 50 ms), ms. */
+  tbt?: number | null;
+  /** <script> without async/defer and stylesheets in <head> that block render. */
+  renderBlocking?: number;
+  /** Text resources (HTML/JS/CSS > 1.4 KB) served without gzip/br/zstd. */
+  uncompressedText?: number;
+  /** Bytes of JPEG/PNG/GIF images (not WebP/AVIF/SVG). */
+  legacyImageBytes?: number;
+  /** Same-host static files (JS/CSS/images/fonts) without a cache lifetime. */
+  uncachedStatic?: number;
 }
 
 // ————————————————————— B. Mobile —————————————————————
@@ -71,6 +92,11 @@ export interface SeoMetrics {
   langAttribute: string | null;
   imagesWithoutAlt: number;
   hasStructuredData: boolean;
+  // ——— engine ≥ 2 ———
+  /** Page tells search engines not to index it (meta robots or X-Robots-Tag). */
+  noindex?: boolean;
+  /** Absolute canonical URL, if declared. */
+  canonical?: string | null;
 }
 
 // ————————————————————— E. Business signals —————————————————————
@@ -90,11 +116,24 @@ export interface BusinessSignals {
   hasAnalytics: boolean;
   detectedCms: DetectedCms;
   copyrightYear: number | null;
+  // ——— engine ≥ 2 ———
+  /** A call/messenger/form/order action is visible on the first mobile screen. */
+  ctaAboveFold?: boolean;
+  /** Link to a privacy policy / personal-data terms. */
+  hasPrivacyPolicy?: boolean;
 }
 
 // ————————————————————— Measurement —————————————————————
 
 export interface Measurement {
+  /**
+   * Measurement contract version (engine 1 rows predate the field). Compare
+   * stored audits only within one engine version — thresholds and wait
+   * strategy change what the numbers mean.
+   */
+  engineVersion?: string;
+  /** Requests the SSRF guard aborted (private IPs, odd ports/schemes). */
+  blockedRequests?: number;
   url: string; // normalised
   finalUrl: string; // after redirects
   host: string;
@@ -112,14 +151,15 @@ export interface Measurement {
 
 // ————————————————————— Score —————————————————————
 
-export type ScoreCategory = "speed" | "mobile" | "security" | "seo";
+/** `conversion` exists from score v2; v1 rows in the DB have only the other four. */
+export type ScoreCategory = "speed" | "conversion" | "mobile" | "security" | "seo";
 export type Severity = "critical" | "major" | "minor";
 export type Grade = "A" | "B" | "C" | "D" | "F";
 
 export interface CategoryScore {
   /** Category quality 0–100, independent of its weight. */
   score: number;
-  /** Weight in the total (speed 35, mobile 25, security 20, seo 20). */
+  /** Weight in the total (v2: speed 30, conversion 25, mobile 20, seo 15, security 10). */
   weight: number;
   /** Weighted contribution to the total: score/100 × weight. */
   points: number;
@@ -139,6 +179,8 @@ export interface Finding {
 }
 
 export interface AuditScore {
+  /** Scoring rules version — compare totals only within one version. */
+  version?: string;
   total: number; // 0–100
   categories: Record<ScoreCategory, CategoryScore>;
   findings: Finding[]; // sorted by impact desc
@@ -158,11 +200,15 @@ export interface AuditApiResult {
   finalUrl: string;
   error?: AuditErrorCode;
   score?: {
+    version?: string;
     total: number;
     grade: Grade;
-    categories: Record<ScoreCategory, CategoryScore>;
+    /** Partial: v1 rows have no `conversion`. */
+    categories: Partial<Record<ScoreCategory, CategoryScore>>;
     findings: Finding[];
   };
+  /** Shareable report token (report endpoint, when stored). */
+  token?: string;
   /** Data-URL PNG — report endpoint only. */
   screenshot?: string | null;
 }

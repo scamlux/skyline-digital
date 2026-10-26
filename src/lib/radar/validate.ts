@@ -33,6 +33,21 @@ const SOCIAL_HOSTS = [
   "twitter.com",
   "x.com",
   "linkedin.com",
+  // Aggregators / free builders: a listing or a third-party page, not a site the
+  // company owns — auditing it says nothing about the business.
+  "booking.com",
+  "agoda.com",
+  "tripadvisor.com",
+  "sites.google.com",
+  "taplink.cc",
+  "linktr.ee",
+  "2gis.uz",
+  "2gis.ru",
+  "yandex.uz",
+  "yandex.ru",
+  "google.com",
+  "goo.gl",
+  "wa.me",
 ];
 
 export function isSocialHost(host: string): boolean {
@@ -46,6 +61,16 @@ export function isSocialHost(host: string): boolean {
  */
 export function normalizeWebsite(raw: string | null | undefined): string | null {
   if (!raw) return null;
+  // Directories sometimes join several sites with ";", "," or spaces — keep the
+  // first real one ("unigeo.uz/;https://pisa.uz" broke the audit as one URL).
+  const parts = raw.split(/[;,\s]+/).filter(Boolean);
+  if (parts.length > 1) {
+    for (const p of parts) {
+      const n = normalizeWebsite(p);
+      if (n) return n;
+    }
+    return null;
+  }
   let s = raw.trim();
   if (!s) return null;
   if (!/^https?:\/\//i.test(s)) s = "https://" + s;
