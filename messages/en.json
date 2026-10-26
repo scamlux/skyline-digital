@@ -142,12 +142,10 @@
       ]
     },
     "studio": {
-      "heroTitle": "Websites, apps and AI that bring you <w></w>",
       "heroWords": [
-        "leads",
-        "sales",
-        "customers",
-        "growth"
+        "websites",
+        "apps",
+        "AI products"
       ],
       "workNote": "Web, mobile, AI and automation.",
       "servicesNote": "Starting price — the calculator gives the exact one.",
@@ -157,7 +155,10 @@
       "next": "Next",
       "more": "Details",
       "sections": "Sections",
-      "heroSub": "From websites to AI products — we design, build and launch."
+      "heroSub": "Full-cycle design, development and launch: an estimate in 2 minutes, a demo every week, and the code in your repository from day one.",
+      "heroTitleSr": "We build websites, apps and AI products for business growth",
+      "heroLine1": "We build",
+      "heroLine3": "for business growth"
     }
   },
   "services": {

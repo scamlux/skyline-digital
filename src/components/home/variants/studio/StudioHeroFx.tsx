@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Частицы в hero Studio (эталон: canvas `#fx`): светлые точки медленно всплывают
@@ -106,51 +106,32 @@ export function StudioParticles() {
 }
 
 /**
- * Сменяющееся слово в заголовке (эталон: `#rot`): раз в 2.4 с, ширина
- * зафиксирована по самому длинному слову, чтобы строка не прыгала.
- * В HTML — первое слово; reduced-motion — без смены.
+ * Сменяющееся слово в заголовке (эталон: `#rot`), раз в 2.6 с.
+ * Все слова лежат в одной ячейке грида друг на друге: ширина строки — по самому
+ * длинному слову с первого кадра, поэтому смена не сдвигает заголовок. Переход —
+ * перекрёстное затухание с лёгким подъёмом и размытием (CSS `.rot-w`).
+ * В HTML активно первое слово; reduced-motion — без смены. Для скринридеров
+ * заголовок целиком дан отдельной строкой, сам ротатор скрыт.
  */
 export function StudioRotator({ words }: { words: string[] }) {
-  const rotRef = useRef<HTMLSpanElement>(null);
-  const emRef = useRef<HTMLElement>(null);
+  const [active, setActive] = useState(0);
 
   useEffect(() => {
-    const rot = rotRef.current;
-    const em = emRef.current;
-    if (!rot || !em || words.length < 2) return;
-    const fit = () => {
-      const orig = em.textContent;
-      let max = 0;
-      for (const w of words) {
-        em.textContent = w;
-        max = Math.max(max, em.offsetWidth);
-      }
-      em.textContent = orig;
-      rot.style.minWidth = `${Math.ceil(max)}px`;
-    };
-    fit();
-    void document.fonts?.ready.then(fit);
-    window.addEventListener("resize", fit);
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      return () => window.removeEventListener("resize", fit);
-    }
-    let i = 0;
+    if (words.length < 2 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const timer = window.setInterval(() => {
-      i = (i + 1) % words.length;
-      rot.classList.remove("swap");
-      void rot.offsetWidth;
-      em.textContent = words[i];
-      rot.classList.add("swap");
-    }, 2400);
-    return () => {
-      window.clearInterval(timer);
-      window.removeEventListener("resize", fit);
-    };
+      // Во фоновой вкладке не крутим — при возврате нет «пачки» переходов.
+      if (!document.hidden) setActive((i) => (i + 1) % words.length);
+    }, 2600);
+    return () => window.clearInterval(timer);
   }, [words]);
 
   return (
-    <span ref={rotRef} className="rot" aria-live="off">
-      <em ref={emRef}>{words[0]}</em>
+    <span className="rot" aria-hidden="true">
+      {words.map((w, i) => (
+        <span key={w} className={i === active ? "rot-w on" : "rot-w"}>
+          {w}
+        </span>
+      ))}
     </span>
   );
 }

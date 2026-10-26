@@ -142,12 +142,10 @@
       ]
     },
     "studio": {
-      "heroTitle": "Sizga <w></w> olib keladigan saytlar, ilovalar va AI",
       "heroWords": [
-        "arizalar",
-        "sotuvlar",
-        "mijozlar",
-        "oʻsish"
+        "saytlar",
+        "ilovalar",
+        "AI-mahsulotlar"
       ],
       "workNote": "Veb, mobil, AI va avtomatlashtirish.",
       "servicesNote": "Boshlangʻich narx — aniq narxni kalkulyator hisoblaydi.",
@@ -157,7 +155,10 @@
       "next": "Keyingi",
       "more": "Batafsil",
       "sections": "Boʻlimlar",
-      "heroSub": "Saytdan AI-mahsulotgacha — loyihalaymiz, ishlab chiqamiz va ishga tushiramiz."
+      "heroSub": "Loyihalash, ishlab chiqish va ishga tushirish — toʻliq sikl: smeta 2 daqiqada, har hafta demo, kod birinchi kundan sizning repozitoriyingizda.",
+      "heroTitleSr": "Biznes oʻsishi uchun saytlar, ilovalar va AI-mahsulotlar yaratamiz",
+      "heroLine1": "Biznes oʻsishi uchun",
+      "heroLine3": "yaratamiz"
     }
   },
   "services": {

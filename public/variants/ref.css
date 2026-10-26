@@ -17,8 +17,10 @@
   --r-acc: var(--acc-ink);
   --r-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   --r-ease-io: cubic-bezier(0.76, 0, 0.24, 1);
-  --r-gutter: max(24px, env(safe-area-inset-left, 0px));
-  --r-gutter-r: max(24px, env(safe-area-inset-right, 0px));
+  /* Единый край контента для всех блоков (шапка, секции, ленты, цифры, финал, подвал):
+     на широких экранах — по сетке 1320px, на узких — 24px и safe-area. Симметрично слева и справа. */
+  --r-gutter: max(24px, env(safe-area-inset-left, 0px), calc((100vw - 1320px) / 2 + 24px));
+  --r-gutter-r: max(24px, env(safe-area-inset-right, 0px), calc((100vw - 1320px) / 2 + 24px));
 
   background: var(--r-bg);
   color: var(--r-txt);
@@ -570,9 +572,7 @@
   position: relative;
   z-index: 2;
   padding-block: clamp(70px, 10vw, 140px);
-  padding-inline: var(--r-gutter);
-  max-width: 1320px;
-  margin: 0 auto;
+  padding-inline: var(--r-gutter) var(--r-gutter-r);
 }
 [data-site="ref"] .r-label {
   font-size: 12px;
@@ -666,9 +666,6 @@
     scroll-snap-type: none;
     will-change: transform;
     padding-bottom: 4px;
-  }
-  [data-site="ref"] .r-hsec[data-pin="on"] .r-wtrack {
-    padding-right: 12vw;
   }
   /* Полоса прогресса под лентой (эталон: .r-hbar). */
   [data-site="ref"] .r-hsec[data-pin="on"] .r-hbar {
@@ -1654,4 +1651,8 @@
   padding: 12px 20px;
   font-size: clamp(15px, 1.6vw, 19px);
   font-weight: 600;
+}
+/* Появление проектов с двух сторон (RefSideReveal): трансформации ставит скрипт по скроллу. */
+[data-site="ref"] .r-pgrid[data-reveal="on"] > .r-pcard {
+  will-change: transform, opacity;
 }

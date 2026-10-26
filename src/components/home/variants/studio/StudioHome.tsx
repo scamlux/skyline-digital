@@ -50,7 +50,16 @@ export async function StudioHome({ params }: HomeVariantProps) {
         <div className="hero-veil" aria-hidden="true" />
         <div className="hero-content" id="s-hero-content">
           <span className="kick center">{tr("eyebrow")}</span>
-          <h1>{tst.rich("heroTitle", { w: () => <StudioRotator words={words} /> })}</h1>
+          <h1>
+            <span className="sr-only-v">{tst("heroTitleSr")}</span>
+            <span className="hl" aria-hidden="true">
+              {tst("heroLine1")}
+            </span>
+            <StudioRotator words={words} />
+            <span className="hl" aria-hidden="true">
+              {tst("heroLine3")}
+            </span>
+          </h1>
           <p className="hero-sub">{tst("heroSub")}</p>
           <div className="hero-cta">
             <Link className="btn-fill" href="/calculator">
