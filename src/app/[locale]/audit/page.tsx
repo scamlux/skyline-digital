@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { AuditRunner } from "@/components/audit/AuditRunner";
 import { localeUrl, languageAlternates } from "@/lib/seo";
-import { withOldShell } from "@/components/site/SiteShell";
+import { withVariants } from "@/components/site/withVariants";
+import { RefAudit } from "@/components/pages/variants/ref/RefAudit";
+import { StudioAudit } from "@/components/pages/variants/studio/StudioAudit";
 
 export async function generateMetadata({
   params,
@@ -50,4 +52,4 @@ async function AuditPage({
   );
 }
 
-export default withOldShell(AuditPage);
+export default withVariants({ old: AuditPage, studio: StudioAudit, ref: RefAudit });

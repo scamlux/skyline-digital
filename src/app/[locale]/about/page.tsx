@@ -4,18 +4,10 @@ import { Link } from "@/i18n/navigation";
 import { Section } from "@/components/ui/Section";
 import { Reveal } from "@/components/ui/Reveal";
 import { localeUrl, languageAlternates } from "@/lib/seo";
-import { withOldShell } from "@/components/site/SiteShell";
-
-const STACK = [
-  "Next.js",
-  "TypeScript",
-  "React Native",
-  "Tailwind CSS",
-  "Supabase",
-  "PostgreSQL",
-  "OpenAI",
-  "Node.js",
-];
+import { withVariants } from "@/components/site/withVariants";
+import { RefAbout } from "@/components/pages/variants/ref/RefAbout";
+import { StudioAbout } from "@/components/pages/variants/studio/StudioAbout";
+import { STACK } from "@/lib/stack";
 
 export async function generateMetadata({
   params,
@@ -109,4 +101,4 @@ async function AboutPage({
   );
 }
 
-export default withOldShell(AboutPage);
+export default withVariants({ old: AboutPage, studio: StudioAbout, ref: RefAbout });

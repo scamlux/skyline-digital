@@ -285,3 +285,29 @@
 [data-site="studio"] .s-faq details p{color:var(--ink2); font-size:15px; line-height:1.65; margin-top:10px; max-width:64ch}
 /* Карточке услуги нужны и переходы появления (.rv), и свои — рамка/тень при наведении. */
 [data-site="studio"][data-js] .s-svcard.rv{transition:opacity .7s cubic-bezier(.2,.7,.2,1), transform .5s cubic-bezier(.2,.7,.2,1), border-color .3s, box-shadow .4s}
+
+/* ===== Встроенные блоки старого дизайна (.v-embed, см. shared.css) ===== */
+[data-site="studio"] .v-embed{--e-bg:#17171b; --e-bg2:#101013; --e-txt:#fff; --e-dim:#a9a9b0; --e-line:#2a2a2e; --e-acc:var(--acc-ink); --e-on-acc:var(--ink); --e-surface:var(--card); --e-ink:var(--ink); --e-muted:var(--mut); --e-line-l:var(--line)}
+/* На светлой панели (форма заявки): кнопка bg-night — чернильная, акцент — основной. */
+[data-site="studio"] .v-embed.v-light{--e-bg:var(--ink); --e-txt:#fff; --e-dim:var(--mut); --e-acc:var(--acc); --e-on-acc:#fff}
+[data-site="studio"] .s-dark{background:#0b0b0e; color:#fff}
+[data-site="studio"] .s-dark .sec-head .r{color:#a9a9b0}
+[data-site="studio"] .s-split{display:grid; grid-template-columns:3fr 2fr; gap:clamp(28px,4vw,56px); align-items:start}
+@media(max-width:860px){ [data-site="studio"] .s-split{grid-template-columns:1fr} }
+[data-site="studio"] .s-aside{background:var(--card); border:1px solid var(--line); border-radius:22px; padding:28px}
+[data-site="studio"] .s-aside h2{font-size:22px; font-weight:700}
+[data-site="studio"] .s-aside ul{list-style:none; margin:16px 0 0; padding:0; display:grid; gap:4px}
+[data-site="studio"] .s-aside ul a{display:flex; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); text-decoration:none; font-weight:600; color:var(--ink); transition:color .2s}
+[data-site="studio"] .s-aside ul a:hover{color:var(--acc)}
+[data-site="studio"] .s-aside ul a span{color:var(--mut); font-weight:500; font-size:13px}
+[data-site="studio"] .s-aside p{color:var(--mut); font-size:14px; line-height:1.6; margin-top:18px}
+[data-site="studio"] .s-lead{display:grid; grid-template-columns:1fr 1fr; gap:clamp(22px,4vw,56px); font-size:clamp(17px,1.8vw,21px); line-height:1.6; color:var(--ink2)}
+@media(max-width:760px){ [data-site="studio"] .s-lead{grid-template-columns:1fr} }
+[data-site="studio"] .s-vals{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:48px}
+@media(max-width:860px){ [data-site="studio"] .s-vals{grid-template-columns:1fr} }
+[data-site="studio"] .s-vals article{background:var(--card); border:1px solid var(--line); border-radius:20px; padding:28px 24px}
+[data-site="studio"] .s-vals .num{font-size:13px; font-weight:700; color:var(--acc); letter-spacing:.1em}
+[data-site="studio"] .s-vals h2{font-size:22px; font-weight:700; margin-top:10px}
+[data-site="studio"] .s-vals p{color:var(--ink2); font-size:14.5px; line-height:1.6; margin-top:10px}
+[data-site="studio"] .s-stack{display:flex; flex-wrap:wrap; gap:10px}
+[data-site="studio"] .s-stack span{border:1px solid #2a2a2e; color:#dcdce2; border-radius:999px; padding:11px 18px; font-size:15px; font-weight:600}

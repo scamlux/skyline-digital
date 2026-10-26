@@ -158,3 +158,72 @@
   margin: 0 0 24px;
   opacity: 0.7;
 }
+
+/*
+ * .v-embed — перекраска существующих интерактивных блоков старого дизайна
+ * (форма заявки, аудит, калькулятор, смета) внутри вариантов. Логика компонентов
+ * не тронута; Tailwind-утилиты старой палитры (@theme inline → зашитые hex)
+ * переопределяются здесь на токены варианта:
+ *   --e-bg / --e-bg2   тёмная подложка и вложенные поверхности
+ *   --e-txt / --e-dim  текст и приглушённый текст на тёмном
+ *   --e-line           линии на тёмном
+ *   --e-acc / --e-on-acc  акцент и текст на акценте (кнопки «horizon-gradient»)
+ *   --e-surface / --e-ink / --e-muted / --e-line-l  то же для светлых поверхностей
+ */
+[data-site] .v-embed {
+  --font-unbounded: "Onest", system-ui, sans-serif;
+  --font-golos: "Onest", system-ui, sans-serif;
+  --font-jetbrains: "Onest", system-ui, sans-serif;
+  font-family: "Onest", system-ui, sans-serif;
+}
+[data-site] .v-embed .font-mono {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+[data-site] .v-embed .bg-night { background-color: var(--e-bg); }
+[data-site] .v-embed .bg-night-deep { background-color: var(--e-bg2); }
+[data-site] .v-embed .bg-night\/70 { background-color: color-mix(in srgb, var(--e-bg) 70%, transparent); }
+[data-site] .v-embed .bg-line-night { background-color: var(--e-line); }
+[data-site] .v-embed .bg-day { background-color: var(--e-surface); }
+[data-site] .v-embed .bg-day\/60 { background-color: color-mix(in srgb, var(--e-surface) 60%, transparent); }
+[data-site] .v-embed .bg-surface { background-color: var(--e-surface); }
+[data-site] .v-embed .text-day { color: var(--e-txt); }
+[data-site] .v-embed .text-mist { color: var(--e-dim); }
+[data-site] .v-embed .text-mist\/70 { color: color-mix(in srgb, var(--e-dim) 70%, transparent); }
+[data-site] .v-embed .text-mist\/60 { color: color-mix(in srgb, var(--e-dim) 60%, transparent); }
+[data-site] .v-embed .text-night { color: var(--e-on-acc); }
+[data-site] .v-embed .text-ink { color: var(--e-ink); }
+[data-site] .v-embed .text-muted { color: var(--e-muted); }
+[data-site] .v-embed .text-apricot,
+[data-site] .v-embed .text-afterglow { color: var(--e-acc); }
+[data-site] .v-embed .border-line-night { border-color: var(--e-line); }
+[data-site] .v-embed .border-line-night\/60 { border-color: color-mix(in srgb, var(--e-line) 60%, transparent); }
+[data-site] .v-embed .border-line { border-color: var(--e-line-l); }
+[data-site] .v-embed .border-line\/70 { border-color: color-mix(in srgb, var(--e-line-l) 70%, transparent); }
+[data-site] .v-embed .border-mist { border-color: var(--e-dim); }
+[data-site] .v-embed .border-night { border-color: var(--e-ink); }
+[data-site] .v-embed .border-apricot { border-color: var(--e-acc); }
+[data-site] .v-embed .hover\:border-mist:hover { border-color: var(--e-dim); }
+[data-site] .v-embed .hover\:border-apricot:hover,
+[data-site] .v-embed .focus\:border-apricot:focus,
+[data-site] .v-embed .focus-visible\:border-apricot:focus-visible { border-color: var(--e-acc); }
+[data-site] .v-embed .focus\:border-night:focus { border-color: var(--e-ink); }
+[data-site] .v-embed .hover\:text-day:hover { color: var(--e-txt); }
+[data-site] .v-embed .hover\:text-ink:hover { color: var(--e-ink); }
+[data-site] .v-embed .hover\:bg-day:hover { background-color: var(--e-surface); }
+[data-site] .v-embed .placeholder\:text-mist::placeholder { color: var(--e-dim); }
+[data-site] .v-embed .placeholder\:text-mist\/60::placeholder { color: color-mix(in srgb, var(--e-dim) 60%, transparent); }
+[data-site] .v-embed .horizon-gradient {
+  background-image: none;
+  background-color: var(--e-acc);
+  color: var(--e-on-acc);
+}
+[data-site] .v-embed .sun-disc {
+  background: var(--e-acc);
+  box-shadow: 0 0 22px color-mix(in srgb, var(--e-acc) 55%, transparent);
+}
+[data-site] .v-embed .stars-far { display: none; }
+/* Страница целиком из старой разметки (смета): отступ под фиксированную шапку варианта. */
+[data-site] .v-embed.v-page {
+  padding-top: 84px;
+}
