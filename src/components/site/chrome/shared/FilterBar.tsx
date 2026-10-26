@@ -4,8 +4,8 @@ import { useState } from "react";
 
 /**
  * Фильтр списка для вариантов Studio/Референс. Список рендерится на сервере
- * целиком, элементы помечены `data-cat`; фильтр только ставит `data-filter`
- * на контейнер `targetId`, а прячет лишнее CSS из shared.css. Без JS виден весь список.
+ * целиком, элементы помечены `data-cat`; фильтр ставит `data-filter` на контейнер
+ * `targetId` и `hidden` на несовпадающие элементы. Без JS виден весь список.
  * Пустая категория — сообщение `emptyText` (как в старом каталоге), оно же
  * объявляется скринридерам через live-регион.
  */
@@ -31,7 +31,14 @@ export function FilterBar({
     if (!list) return;
     if (v === "all") delete list.dataset.filter;
     else list.dataset.filter = v;
-    setEmpty(v !== "all" && !list.querySelector(`[data-cat="${CSS.escape(v)}"]`));
+    // Универсально для любых категорий: несовпадающим элементам — hidden.
+    let shown = 0;
+    list.querySelectorAll<HTMLElement>(":scope > [data-cat]").forEach((el) => {
+      const match = v === "all" || el.dataset.cat === v;
+      el.hidden = !match;
+      if (match) shown++;
+    });
+    setEmpty(shown === 0);
   };
 
   return (

@@ -317,3 +317,25 @@
 [data-site="studio"] .s-vals p{color:var(--ink2); font-size:14.5px; line-height:1.6; margin-top:10px}
 [data-site="studio"] .s-stack{display:flex; flex-wrap:wrap; gap:10px}
 [data-site="studio"] .s-stack span{border:1px solid #2a2a2e; color:#dcdce2; border-radius:999px; padding:11px 18px; font-size:15px; font-weight:600}
+
+/* ===== Главная: агентство и стек ===== */
+[data-site="studio"] .s-about{display:grid; grid-template-columns:1fr 1fr; gap:clamp(24px,4vw,64px); align-items:start}
+@media(max-width:760px){ [data-site="studio"] .s-about{grid-template-columns:1fr} }
+[data-site="studio"] .s-about .kick{color:var(--acc-ink)}
+[data-site="studio"] .s-about .kick::before{background:var(--acc-ink)}
+[data-site="studio"] .s-about h2{font-size:clamp(32px,5vw,54px); font-weight:700; letter-spacing:-.035em; margin-top:14px; color:#fff}
+[data-site="studio"] .s-about p{color:#b9b9c0; font-size:clamp(16px,1.6vw,18.5px); line-height:1.65; max-width:52ch}
+[data-site="studio"] .s-about .btn-fill{margin-top:28px; background:#fff; color:var(--ink)}
+[data-site="studio"] .s-about .btn-fill:hover{background:var(--acc-ink)}
+[data-site="studio"] .v-stack-tabs{display:flex; flex-wrap:wrap; gap:8px}
+[data-site="studio"] .v-stack-tabs button{border:1px solid var(--line); background:var(--card); color:var(--ink2); padding:9px 16px; border-radius:999px; font-size:13.5px; font-weight:600; transition:.2s}
+[data-site="studio"] .v-stack-tabs button:hover{border-color:var(--acc)}
+[data-site="studio"] .v-stack-tabs button[aria-pressed="true"]{background:var(--ink); border-color:var(--ink); color:#fff}
+[data-site="studio"] .v-stack-grid{list-style:none; margin:28px 0 0; padding:0; display:grid; grid-template-columns:repeat(6,1fr); gap:12px}
+@media(max-width:1000px){ [data-site="studio"] .v-stack-grid{grid-template-columns:repeat(4,1fr)} }
+@media(max-width:560px){ [data-site="studio"] .v-stack-grid{grid-template-columns:repeat(2,1fr)} }
+[data-site="studio"] .v-stack-grid li{display:flex; flex-direction:column; align-items:center; gap:12px; padding:24px 10px; background:var(--card); border:1px solid var(--line); border-radius:16px; font-size:14px; font-weight:600; color:var(--ink2); text-align:center; transition:transform .35s cubic-bezier(.2,.7,.2,1), border-color .3s, color .3s, box-shadow .35s}
+[data-site="studio"] .v-stack-grid li:hover{transform:translateY(-4px); border-color:var(--acc); color:var(--acc); box-shadow:0 18px 40px -26px rgba(0,0,0,.35)}
+[data-site="studio"] .v-stack-grid .ic{width:32px; height:32px; background:currentColor; -webkit-mask:var(--i) center/contain no-repeat; mask:var(--i) center/contain no-repeat}
+[data-site="studio"] .v-stack-more{display:block; margin:26px auto 0; border:1px solid var(--line); background:var(--card); color:var(--ink); padding:12px 24px; border-radius:999px; font-size:14px; font-weight:600}
+[data-site="studio"] .v-stack-more:hover{border-color:var(--acc); color:var(--acc)}

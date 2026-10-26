@@ -8,6 +8,7 @@ import { formatUsd } from "@/lib/utils";
 import type { HomeVariantProps } from "../index";
 import { RefCaseModal, type RefCase } from "./RefCaseModal";
 import { RefPhilosophy } from "./RefPhilosophy";
+import { StackGrid } from "@/components/site/chrome/shared/StackGrid";
 
 // Тот же порядок, что в OldHome / services (там список тоже объявлен локально).
 const SERVICE_KEYS = ["website", "webApp", "mobileApp", "ai", "automation", "uiux"] as const;
@@ -215,7 +216,20 @@ export async function RefHome({ params }: HomeVariantProps) {
         ))}
       </HorizontalPin>
 
-      <section className="r-sec" aria-label={t("eyebrows.about")}>
+      {/* ——— Агентство: кто мы + цифры ——— */}
+      <section className="r-sec r-about" aria-labelledby="r-about-title">
+        <p className="r-label">{t("eyebrows.about")}</p>
+        <div className="r-about-grid">
+          <h2 id="r-about-title" className="r-htitle">
+            {t("aboutTitle")}
+          </h2>
+          <div>
+            <p className="r-about-text">{t("aboutText")}</p>
+            <Link href="/about" className="r-cta ghost" style={{ marginTop: 26 }}>
+              {t("aboutLink")} <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+        </div>
         <div className="r-stats">
           {STAT_KEYS.map((key, i) => (
             <div key={key}>
@@ -223,6 +237,32 @@ export async function RefHome({ params }: HomeVariantProps) {
               <div className="l">{t(`stats.${key}.label`)}</div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* ——— Стек ——— */}
+      <section className="r-sec" aria-labelledby="r-stack-title">
+        <p className="r-label">{t("eyebrows.stack")}</p>
+        <div className="r-about-grid" style={{ marginBottom: 40 }}>
+          <h2 id="r-stack-title" className="r-htitle">
+            {t("stackTitle")}
+          </h2>
+          <p className="r-about-text">{t("stackText")}</p>
+        </div>
+        <StackGrid />
+      </section>
+
+      {/* ——— Калькулятор ——— */}
+      <section className="r-sec">
+        <div className="r-calc">
+          <p className="r-label">{t("eyebrows.calculator")}</p>
+          <h2 className="r-htitle">{t("calcTitle")}</h2>
+          <p className="r-about-text">{t("calcText")}</p>
+          <div className="r-hcta" style={{ justifyContent: "flex-start" }}>
+            <Link href="/calculator" className="r-cta">
+              {t("hero.ctaPrimary")} <span aria-hidden="true">→</span>
+            </Link>
+          </div>
         </div>
       </section>
 
