@@ -632,6 +632,8 @@
 }
 [data-site="ref"] .r-hint a {
   color: var(--r-acc);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 /* По умолчанию (мобилка, touch, reduced-motion, до гидрации) — нативный свайп со снапом. */
 [data-site="ref"] .r-htrack {
@@ -991,7 +993,7 @@
   gap: 26px 40px;
   margin-top: 36px;
 }
-[data-site="ref"] .r-foot h5 {
+[data-site="ref"] .r-foot .fh {
   font-size: 11px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
