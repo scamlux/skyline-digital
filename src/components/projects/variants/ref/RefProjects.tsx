@@ -5,7 +5,7 @@ import { projectCategories } from "@/data/projects";
 import { getProjects } from "@/lib/portfolio";
 import { FilterBar } from "@/components/site/chrome/shared/FilterBar";
 import { RefCaseModal, type RefCase } from "@/components/home/variants/ref/RefCaseModal";
-import { RefSideReveal } from "./RefSideReveal";
+import { SideReveal } from "@/components/site/chrome/shared/SideReveal";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
@@ -101,7 +101,7 @@ export async function RefProjects({ params }: { params: Promise<{ locale: string
         </div>
       </section>
 
-      <RefSideReveal targetId="r-pgrid" />
+      <SideReveal targetId="r-pgrid" />
       <RefCaseModal
         cases={cases}
         labels={{ close: tr("close"), openSite: tr("openSite"), caseMore: tr("caseMore") }}

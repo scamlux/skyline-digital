@@ -144,12 +144,9 @@
   white-space: nowrap;
 }
 
-/* Фильтр списков (FilterBar): контейнер получает data-filter, лишние элементы прячутся. */
-[data-site] [data-filter="web"] > [data-cat]:not([data-cat="web"]),
-[data-site] [data-filter="mobile"] > [data-cat]:not([data-cat="mobile"]),
-[data-site] [data-filter="ai"] > [data-cat]:not([data-cat="ai"]),
-[data-site] [data-filter="automation"] > [data-cat]:not([data-cat="automation"]) {
-  display: none;
+/* Фильтр списков (FilterBar): несовпадающие элементы получают hidden — перебиваем display карточек. */
+[data-site] [data-cat][hidden] {
+  display: none !important;
 }
 [data-site] .v-filter-empty:empty {
   display: none;

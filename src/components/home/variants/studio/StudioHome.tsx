@@ -6,6 +6,7 @@ import { basePriceUsd } from "@/lib/pricing/rules";
 import { formatUsd } from "@/lib/utils";
 import type { HomeVariantProps } from "../index";
 import { StudioCaroNav, StudioParticles, StudioRotator } from "./StudioHeroFx";
+import { StackGrid } from "@/components/site/chrome/shared/StackGrid";
 
 // Тот же порядок, что в OldHome / RefHome.
 const SERVICE_KEYS = ["website", "webApp", "mobileApp", "ai", "automation", "uiux"] as const;
@@ -198,6 +199,36 @@ export async function StudioHome({ params }: HomeVariantProps) {
               </Link>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="panel dark" id="about">
+        <div className="wrap inr">
+          <div className="s-about">
+            <div>
+              <span className="kick">{t("eyebrows.about")}</span>
+              <h2 className="rv">{t("aboutTitle")}</h2>
+            </div>
+            <div>
+              <p className="rv">{t("aboutText")}</p>
+              <Link className="btn-fill rv" href="/about">
+                {t("aboutLink")} <span className="ar" aria-hidden="true">→</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="panel" id="stack">
+        <div className="wrap inr">
+          <div className="sec-head">
+            <div className="l">
+              <span className="kick">{t("eyebrows.stack")}</span>
+              <h2>{t("stackTitle")}</h2>
+            </div>
+            <div className="r">{t("stackText")}</div>
+          </div>
+          <StackGrid />
         </div>
       </section>
 

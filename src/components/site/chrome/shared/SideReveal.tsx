@@ -5,13 +5,13 @@ import { useEffect } from "react";
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
 
 /**
- * Появление карточек сетки проектов с двух сторон, привязанное к скроллу:
+ * Появление карточек сетки проектов с двух сторон (Studio и Референс), привязанное к скроллу:
  * левая колонка выезжает слева, правая — справа (средние в 3-колоночной сетке —
  * снизу), в одну колонку стороны чередуются. Карточка «встаёт на место», когда её
  * верх поднимается на ~55% высоты окна; при обратном скролле движение обратное.
  * Без JS и при reduced-motion карточки просто стоят на местах.
  */
-export function RefSideReveal({ targetId }: { targetId: string }) {
+export function SideReveal({ targetId }: { targetId: string }) {
   useEffect(() => {
     const grid = document.getElementById(targetId);
     if (!grid || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;

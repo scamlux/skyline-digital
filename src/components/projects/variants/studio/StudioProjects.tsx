@@ -5,6 +5,7 @@ import { projectCategories } from "@/data/projects";
 import { getProjects } from "@/lib/portfolio";
 import { FilterBar } from "@/components/site/chrome/shared/FilterBar";
 import { StudioFinal } from "@/components/site/chrome/studio/StudioFinal";
+import { SideReveal } from "@/components/site/chrome/shared/SideReveal";
 
 /** Каталог проектов в варианте Studio: тёмная шапка-панель, фильтр, сетка карточек как на главной. */
 export async function StudioProjects({ params }: { params: Promise<{ locale: string }> }) {
@@ -71,6 +72,7 @@ export async function StudioProjects({ params }: { params: Promise<{ locale: str
         </div>
       </section>
 
+      <SideReveal targetId="s-pgrid" />
       <StudioFinal />
     </>
   );
