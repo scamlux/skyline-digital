@@ -13,8 +13,17 @@ import type { AuditApiResult, Finding, ScoreCategory } from "@/lib/audit/types";
 type Phase = "idle" | "measuring" | "done";
 type ReportPhase = "idle" | "sending";
 
-const CATEGORIES: ScoreCategory[] = ["speed", "mobile", "security", "seo"];
-const PROGRESS_KEYS = ["progress.loadingPage", "progress.measuringSpeed", "progress.checkingMobile"] as const;
+/** Display order; only categories present in the result are shown (v1 rows lack `conversion`). */
+const CATEGORY_ORDER: ScoreCategory[] = ["speed", "conversion", "mobile", "seo", "security"];
+const PROGRESS_KEYS = [
+  "progress.loadingPage",
+  "progress.measuringSpeed",
+  "progress.checkingMobile",
+  "progress.checkingConversion",
+] as const;
+
+const presentCategories = (r: AuditApiResult): ScoreCategory[] =>
+  CATEGORY_ORDER.filter((c) => r.score?.categories[c] != null);
 
 export function AuditRunner() {
   const t = useTranslations("audit");
@@ -26,10 +35,11 @@ export function AuditRunner() {
   const [result, setResult] = useState<AuditApiResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Cycle the progress steps while measuring (10–20s of real work).
+  // Cycle the progress steps while measuring (15–25 s of real work on a
+  // throttled mobile profile).
   useEffect(() => {
     if (phase !== "measuring") return;
-    const id = setInterval(() => setStep((s) => Math.min(s + 1, PROGRESS_KEYS.length - 1)), 5000);
+    const id = setInterval(() => setStep((s) => Math.min(s + 1, PROGRESS_KEYS.length - 1)), 6000);
     return () => clearInterval(id);
   }, [phase]);
 
@@ -129,21 +139,26 @@ export function AuditRunner() {
   );
 }
 
-/** Score + categories + findings + report block (night sky). */
-function ResultView({
+/** Score + categories + findings + report block (night sky). Reused by the share page. */
+export function ResultView({
   result,
   finding,
   t,
   locale,
   onReport,
+  shared = false,
 }: {
   result: AuditApiResult;
   finding: (f: Finding, key: "title" | "detail") => string;
   t: ReturnType<typeof useTranslations>;
   locale: string;
-  onReport: (r: AuditApiResult) => void;
+  onReport?: (r: AuditApiResult) => void;
+  /** Rendered on the share page: the report is complete, no lead form. */
+  shared?: boolean;
 }) {
   const score = result.score!;
+  const complete = shared || Boolean(result.screenshot);
+  const categories = presentCategories(result);
 
   const downloadReport = () => {
     const html = buildAuditReportHtml({
@@ -155,9 +170,9 @@ function ResultView({
       total: score.total,
       grade: score.grade,
       scoreLabel: t("result.scoreLabel"),
-      categories: CATEGORIES.map((c) => ({
+      categories: categories.map((c) => ({
         label: t(`categories.${c}`),
-        score: score.categories[c].score,
+        score: score.categories[c]?.score ?? 0,
       })),
       problemsLabel: t("result.topProblems"),
       noProblemsLabel: t("result.noProblems"),
@@ -191,11 +206,16 @@ function ResultView({
       </div>
 
       {/* Categories */}
-      <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        {CATEGORIES.map((cat) => (
+      <div
+        className={cn(
+          "mt-8 grid grid-cols-2 gap-4",
+          categories.length === 5 ? "sm:grid-cols-5" : "sm:grid-cols-4",
+        )}
+      >
+        {categories.map((cat) => (
           <div key={cat} className="rounded-xl border border-line-night bg-night-deep p-5 text-center">
             <p className="font-mono text-xs uppercase tracking-wide text-mist">{t(`categories.${cat}`)}</p>
-            <p className="font-display mt-2 text-2xl">{score.categories[cat].score}</p>
+            <p className="font-display mt-2 text-2xl">{score.categories[cat]?.score ?? "—"}</p>
           </div>
         ))}
       </div>
@@ -237,9 +257,10 @@ function ResultView({
       )}
 
       {/* Report form OR calculator CTA */}
-      {result.screenshot ? (
+      {complete ? (
         <div className="mt-10 border-t border-line-night pt-8 text-center">
-          <p className="text-mist">{t("report.sent")}</p>
+          {!shared && <p className="text-mist">{t("report.sent")}</p>}
+          {result.token && !shared && <ShareLink token={result.token} t={t} />}
           <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
             <button
               type="button"
@@ -249,7 +270,7 @@ function ResultView({
               {t("report.download")}
             </button>
             <Link
-              href="/calculator"
+              href={fixHref(score.findings)}
               className="horizon-gradient inline-block rounded-full px-7 py-3.5 font-medium text-night transition-opacity hover:opacity-90"
             >
               {t("report.calculatorCta")}
@@ -257,8 +278,46 @@ function ResultView({
           </div>
         </div>
       ) : (
-        <ReportForm url={result.finalUrl} t={t} locale={locale} onReport={onReport} />
+        <ReportForm url={result.finalUrl} t={t} locale={locale} onReport={onReport ?? (() => {})} />
       )}
+    </div>
+  );
+}
+
+/**
+ * Audit → estimate: open the calculator on the "website" type. The findings
+ * decide nothing about price (the engine does, §7) — they only pick the type.
+ */
+function fixHref(findings: Finding[]): string {
+  const needsRebuild = findings.some((f) =>
+    ["load-timeout", "no-viewport", "no-contact-action", "noindex"].includes(f.id),
+  );
+  return needsRebuild ? "/calculator?type=website" : "/calculator";
+}
+
+/** Copyable link to the stored report (noindex page). */
+function ShareLink({ token, t }: { token: string; t: ReturnType<typeof useTranslations> }) {
+  const [copied, setCopied] = useState(false);
+  const locale = useLocale();
+  const href = typeof window !== "undefined" ? `${window.location.origin}/${locale}/audit/r/${token}` : "";
+  return (
+    <div className="mx-auto mt-5 flex max-w-xl items-center gap-2 rounded-full border border-line-night bg-night-deep py-1.5 pl-5 pr-1.5">
+      <span className="truncate font-mono text-xs text-mist">{href}</span>
+      <button
+        type="button"
+        onClick={async () => {
+          try {
+            await navigator.clipboard.writeText(href);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+          } catch {
+            /* clipboard blocked — the link is visible to copy by hand */
+          }
+        }}
+        className="shrink-0 rounded-full border border-line-night px-4 py-2 font-mono text-xs uppercase tracking-wide text-day transition-colors hover:border-apricot"
+      >
+        {copied ? t("report.copied") : t("report.copyLink")}
+      </button>
     </div>
   );
 }
