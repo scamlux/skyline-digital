@@ -213,8 +213,11 @@ export function ResultView({
         )}
       >
         {categories.map((cat) => (
-          <div key={cat} className="rounded-xl border border-line-night bg-night-deep p-5 text-center">
-            <p className="font-mono text-xs uppercase tracking-wide text-mist">{t(`categories.${cat}`)}</p>
+          <div key={cat} className="min-w-0 rounded-xl border border-line-night bg-night-deep px-2 py-5 text-center">
+            {/* Long labels ("Безопасность") must not overflow a 5-column card. */}
+            <p className="break-words font-mono text-[10px] uppercase tracking-normal text-mist sm:text-[11px]">
+              {t(`categories.${cat}`)}
+            </p>
             <p className="font-display mt-2 text-2xl">{score.categories[cat]?.score ?? "—"}</p>
           </div>
         ))}

@@ -108,6 +108,11 @@ async function main() {
       if (!site) {
         tally.skipped++;
         console.log(`skip  ${c.name} — not a company site: ${c.website}`);
+        // Stamp it, so a page we can't audit (Taplink, Booking…) doesn't head
+        // every following batch as "never audited".
+        if (!args.dryRun) {
+          await db.from("radar_companies").update({ last_audit_at: new Date().toISOString() }).eq("id", c.id);
+        }
         continue;
       }
       try {
