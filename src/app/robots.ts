@@ -6,8 +6,8 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      // Personal estimate pages must not be indexed.
-      disallow: ["/api/", "/estimate/", "/*/estimate/"],
+      // Personal estimate and shared audit-report pages must not be indexed.
+      disallow: ["/api/", "/estimate/", "/*/estimate/", "/audit/r/", "/*/audit/r/"],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
     host: SITE_URL,

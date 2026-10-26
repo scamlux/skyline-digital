@@ -268,6 +268,45 @@ export async function guardRedirectChain(
   throw new GuardError("BLOCKED_ADDRESS", "too many redirects");
 }
 
+/**
+ * Guard for EVERY request the headless browser makes — main navigation, each
+ * redirect hop, and every subresource. Plugged into Puppeteer request
+ * interception, it replaces the old node-side redirect pre-fetch: no extra
+ * round-trip to the target (the pre-fetch cost 5–20 s and was refused by
+ * bot-protected sites), and subresources are now covered too.
+ *
+ * Results are cached per `host:port` for the lifetime of one guard (one audit).
+ * Failures are not cached, so a transient DNS error can be retried.
+ *
+ * `allowOrigins` is a TEST SEAM ONLY: exact origins (e.g. the loopback fixture
+ * `http://127.0.0.1:53211`) that bypass the rules. Production never sets it.
+ */
+export type RequestGuard = (url: string) => Promise<void>;
+
+export function createRequestGuard(
+  opts: { resolver?: Resolver; allowOrigins?: string[] } = {},
+): RequestGuard {
+  const cache = new Map<string, Promise<void>>();
+  const allow = new Set(opts.allowOrigins ?? []);
+  return (url: string) => {
+    let u: URL;
+    try {
+      u = new URL(url);
+    } catch {
+      return Promise.reject(new GuardError("INVALID_URL", url));
+    }
+    if (allow.has(u.origin)) return Promise.resolve();
+    const key = `${u.protocol}//${u.host}`;
+    let pending = cache.get(key);
+    if (!pending) {
+      pending = guardUrl(url, { resolver: opts.resolver }).then(() => undefined);
+      cache.set(key, pending);
+      pending.catch(() => cache.delete(key));
+    }
+    return pending;
+  };
+}
+
 /** Honest UA with a contact, reused by the redirect probe and the radar. */
 export const AUDIT_USER_AGENT =
   "SkylineAuditBot/1.0 (+https://skyline-digital.uz/audit)";

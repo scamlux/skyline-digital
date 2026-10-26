@@ -103,6 +103,12 @@ export interface AuditRow {
   lead_id: string | null;
   source: "public" | "radar" | null;
   created_at: string;
+  // ——— migration 0015 (null on older rows) ———
+  engine_version: string | null;
+  score_version: string | null;
+  share_token: string | null;
+  screenshot: string | null;
+  batch_id: string | null;
 }
 
 /** A company row for the radar (phase B). See migration 0005. */
@@ -119,6 +125,10 @@ export interface RadarCompanyRow {
   has_site: boolean;
   class: "S" | "A" | "B" | "C" | null;
   last_audit_id: string | null;
+  /** migration 0015 — set by the radar audit batch. */
+  last_audit_at?: string | null;
+  audit_score?: number | null;
+  audit_grade?: string | null;
   outreach_status: "NEW" | "QUEUED" | "SENT" | "REPLIED" | "WON" | "SKIP";
   outreach_at: string | null;
   notes: string | null;

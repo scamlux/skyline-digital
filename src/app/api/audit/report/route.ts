@@ -9,7 +9,8 @@ import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase/server";
 import { createLead, notifyNewLead } from "@/lib/leads";
 
 export const runtime = "nodejs";
-export const maxDuration = 30;
+// Full report: 45 s measurement budget + screenshot + lead pipeline.
+export const maxDuration = 60;
 
 /** Full report: all findings + screenshot, and it captures a lead. */
 export async function POST(request: Request) {
@@ -38,13 +39,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Captcha failed" }, { status: 403 });
   }
 
-  const measurement = await measureSite(d.url, { screenshot: true });
+  const measurement = await measureSite(d.url, { screenshot: true, budgetMs: 45_000 });
   const score = measurement.reachable ? scoreMeasurement(measurement) : null;
 
-  // Reachable audits create a lead + Telegram notification + stored history.
+  // Reachable audits create a lead + Telegram notification + stored history,
+  // and get a shareable report link.
+  let token: string | null = null;
   if (measurement.reachable && score && isSupabaseConfigured()) {
     const top = score.findings[0]?.id ?? null;
     const supabase = getSupabaseAdmin();
+    let leadId: string | null = null;
     try {
       const lead = await createLead(supabase, {
         client_name: d.name || undefined,
@@ -60,17 +64,20 @@ export async function POST(request: Request) {
         landing_page: d.landing_page,
         referrer: d.referrer,
       });
+      leadId = lead.id;
       await notifyNewLead(supabase, lead);
-      await persistAudit(supabase, measurement, score, {
-        source: "public",
-        email: d.email,
-        leadId: lead.id,
-      });
     } catch (err) {
       // Lead/notification failure must not lose the user's report.
       console.error("[audit/report] lead pipeline failed:", err instanceof Error ? err.message : err);
     }
+    const saved = await persistAudit(supabase, measurement, score, {
+      source: "public",
+      email: d.email,
+      leadId,
+      share: true,
+    });
+    token = saved?.shareToken ?? null;
   }
 
-  return NextResponse.json(toApiResult(measurement, score, "report"));
+  return NextResponse.json(toApiResult(measurement, score, "report", token));
 }

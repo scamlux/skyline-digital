@@ -489,17 +489,19 @@
   "audit": {
     "eyebrow": "Bepul audit",
     "title": "Saytingizni 20 soniyada tekshiring",
-    "subtitle": "URL manzilni kiriting — tezlik, mobil versiya, xavfsizlik va SEO bahosini aniq raqamlar bilan va nimani tuzatishni ko'rsatamiz.",
+    "subtitle": "URL manzilni kiriting — telefondagi tezlik, ariza qoldirish qulayligi, mobil versiya, SEO va xavfsizlikni tekshiramiz. Aniq raqamlar va nimani tuzatish kerakligi bilan.",
     "urlPlaceholder": "example.uz",
     "checkButton": "Tekshirish",
     "tooManyRequests": "Juda ko'p tekshiruv. Bir soatdan keyin urinib ko'ring.",
     "progress": {
       "loadingPage": "Sahifa yuklanmoqda…",
       "measuringSpeed": "Tezlik o'lchanmoqda…",
-      "checkingMobile": "Mobil versiya tekshirilmoqda…"
+      "checkingMobile": "Mobil versiya tekshirilmoqda…",
+      "checkingConversion": "Ariza qoldirish qulayligini tekshirmoqdamiz…"
     },
     "categories": {
       "speed": "Tezlik",
+      "conversion": "Arizalar",
       "mobile": "Mobillik",
       "security": "Xavfsizlik",
       "seo": "SEO"
@@ -538,9 +540,21 @@
       "download": "Hisobotni yuklab olish",
       "savePdf": "PDF sifatida saqlash",
       "downloadTagline": "Loyihangiz uchun ham shunday natija? Biz to‘liq quramiz.",
-      "phoneRequired": "Telefonni +998 formatida kiriting."
+      "phoneRequired": "Telefonni +998 formatida kiriting.",
+      "copyLink": "Nusxalash",
+      "copied": "Nusxalandi",
+      "shareTitle": "Sayt auditi hisoboti",
+      "shareExpired": "Hisobot topilmadi yoki havola eskirgan.",
+      "shareRerun": "Saytni qayta tekshirish",
+      "measuredAt": "Tekshirildi",
+      "history": "Tekshiruvlar tarixi",
+      "previous": "Avval"
     },
     "findings": {
+      "load-timeout": {
+        "title": "Sayt oxirigacha yuklanmaydi",
+        "detail": "Tekshiruv vaqtida sahifa toʻliq yuklanmadi: telefondagi mijoz boʻsh bloklarni koʻradi va katta ehtimol bilan chiqib ketadi. Odatda ogʻir tashqi vidjetlar, video yoki optimallashtirilmagan rasmlar sabab boʻladi."
+      },
       "lcp-slow": {
         "title": "Asosiy kontent sekin yuklanadi",
         "detail": "Asosiy kontent {lcp} ms da paydo bo'ladi. Maqsad — 2500 ms gacha: rasmlarni siqing, og'ir skriptlarni oling."
@@ -624,6 +638,62 @@
       "no-structured-data": {
         "title": "Tuzilgan ma'lumot yo'q",
         "detail": "JSON-LD belgilash yo'q — qidiruvdagi kengaytirilgan snippetlarni yo'qotasiz."
+      },
+      "main-thread-blocked": {
+        "title": "Sayt bosganda qotib qoladi",
+        "detail": "Skriptlar sahifani {tbt} ms bloklaydi: telefonda tugmalar kechikib ishlaydi. Maqsad — 200 ms gacha."
+      },
+      "layout-shift": {
+        "title": "Yuklanishda kontent sakraydi",
+        "detail": "Yuklanish vaqtida elementlar siljiydi (CLS {cls}): mijoz tugmani bosolmay qoladi. Maqsad — 0,1 gacha."
+      },
+      "legacy-images": {
+        "title": "Rasmlar eski formatda",
+        "detail": "{mb} MB JPEG/PNG rasmlar. WebP/AVIF formatida ular 2–3 baravar yengil boʻlardi."
+      },
+      "no-compression": {
+        "title": "Fayllar siqilmasdan beriladi",
+        "detail": "{count} ta matnli fayl gzip/brotli siz — server sozlamasi bilan tuzatiladi."
+      },
+      "render-blocking": {
+        "title": "Skriptlar birinchi ekranni kechiktiradi",
+        "detail": "{count} ta skript va uslub chizishni bloklaydi: ular yuklanmaguncha sahifa boʻsh."
+      },
+      "no-caching": {
+        "title": "Brauzer hammasini har safar qayta yuklaydi",
+        "detail": "{count} ta fayl keshlanmaydi: qayta tashrif birinchisidek sekin."
+      },
+      "no-contact-action": {
+        "title": "Ariza qoldirish imkoni yoʻq",
+        "detail": "Sahifada forma ham, qoʻngʻiroq tugmasi ham, messenjer havolasi ham yoʻq. Sotib olishga tayyor mijoz raqobatchiga ketadi."
+      },
+      "no-phone-link": {
+        "title": "Raqamni bir bosishda terib boʻlmaydi",
+        "detail": "tel: havolasi yoʻq. Telefonda mijoz raqamni qoʻlda nusxalashi kerak — qoʻngʻiroqlarning bir qismi yoʻqoladi."
+      },
+      "no-messenger": {
+        "title": "Messenjer orqali aloqa yoʻq",
+        "detail": "Telegram yoki WhatsApp havolasi yoʻq — Oʻzbekistonda odamlar qoʻngʻiroqdan koʻra koʻproq yozishadi."
+      },
+      "no-cta-above-fold": {
+        "title": "Aloqa tugmasi darhol koʻrinmaydi",
+        "detail": "Telefonning birinchi ekranida «qoʻngʻiroq qilish», «yozilish» yoki «buyurtma» tugmasi yoʻq — uni topish uchun pastga tushish kerak."
+      },
+      "no-analytics": {
+        "title": "Tashrif va arizalar hisoblanmaydi",
+        "detail": "Yandex Metrika yoki Google Analytics yoʻq: mijozlar qayerdan kelishi va reklama oʻzini oqlashi nomaʼlum."
+      },
+      "stale-copyright": {
+        "title": "Sayt tashlab qoʻyilgandek koʻrinadi",
+        "detail": "Pastki qismda {year}-yil koʻrsatilgan: mijoz kompaniya ishlamayapti deb oʻylashi mumkin."
+      },
+      "no-privacy-policy": {
+        "title": "Maxfiylik siyosati yoʻq",
+        "detail": "Forma kontaktlarni yigʻadi, lekin shaxsiy maʼlumotlar siyosatiga havola yoʻq."
+      },
+      "noindex": {
+        "title": "Sayt qidiruv tizimlaridan yashirilgan",
+        "detail": "Sahifa Google va Yandexdan uni indekslamaslikni soʻraydi (noindex). Odatda bu ishlab chiqishdan qolgan sozlama — sayt qidiruvda chiqmaydi."
       }
     }
   }

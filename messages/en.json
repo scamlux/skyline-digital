@@ -489,17 +489,19 @@
   "audit": {
     "eyebrow": "Free audit",
     "title": "Check your website in 20 seconds",
-    "subtitle": "Paste a URL — we'll score speed, mobile, security and SEO with concrete numbers and what to fix.",
+    "subtitle": "Paste a URL — we check phone speed, how easy it is to get in touch, mobile layout, SEO and security. With concrete numbers and what to fix.",
     "urlPlaceholder": "example.com",
     "checkButton": "Check",
     "tooManyRequests": "Too many checks. Try again in an hour.",
     "progress": {
       "loadingPage": "Loading the page…",
       "measuringSpeed": "Measuring speed…",
-      "checkingMobile": "Checking the mobile version…"
+      "checkingMobile": "Checking the mobile version…",
+      "checkingConversion": "Checking how easy it is to get in touch…"
     },
     "categories": {
       "speed": "Speed",
+      "conversion": "Leads",
       "mobile": "Mobile",
       "security": "Security",
       "seo": "SEO"
@@ -538,9 +540,21 @@
       "download": "Download report",
       "savePdf": "Save as PDF",
       "downloadTagline": "Want the same result for your project? We build it end-to-end.",
-      "phoneRequired": "Enter your phone in +998 format."
+      "phoneRequired": "Enter your phone in +998 format.",
+      "copyLink": "Copy",
+      "copied": "Copied",
+      "shareTitle": "Website audit report",
+      "shareExpired": "Report not found or the link has expired.",
+      "shareRerun": "Check the site again",
+      "measuredAt": "Checked",
+      "history": "Check history",
+      "previous": "Before"
     },
     "findings": {
+      "load-timeout": {
+        "title": "The site never finishes loading",
+        "detail": "The page did not fully load within the check window: a visitor on a phone sees empty blocks and likely leaves. Heavy third-party widgets, videos or unoptimised images are the usual cause."
+      },
       "lcp-slow": {
         "title": "Slow main content load",
         "detail": "Main content appears in {lcp} ms. Aim for under 2500 ms: compress images, drop heavy scripts."
@@ -624,6 +638,62 @@
       "no-structured-data": {
         "title": "No structured data",
         "detail": "No JSON-LD markup — you're missing rich snippets in search."
+      },
+      "main-thread-blocked": {
+        "title": "The site freezes on tap",
+        "detail": "Scripts block the page for {tbt} ms: buttons respond late on a phone. Target — under 200 ms."
+      },
+      "layout-shift": {
+        "title": "Content jumps while loading",
+        "detail": "Elements shift during loading (CLS {cls}): visitors tap the wrong thing. Target — under 0.1."
+      },
+      "legacy-images": {
+        "title": "Images in old formats",
+        "detail": "{mb} MB of JPEG/PNG images. As WebP/AVIF they would weigh 2–3× less."
+      },
+      "no-compression": {
+        "title": "Files are served uncompressed",
+        "detail": "{count} text files without gzip/brotli — a single server setting fixes it."
+      },
+      "render-blocking": {
+        "title": "Scripts delay the first screen",
+        "detail": "{count} scripts and styles block rendering: the page stays blank until they load."
+      },
+      "no-caching": {
+        "title": "The browser re-downloads everything",
+        "detail": "{count} files without caching: a repeat visit is as slow as the first."
+      },
+      "no-contact-action": {
+        "title": "No way to get in touch",
+        "detail": "No form, no call button, no messenger link. A visitor ready to buy goes to a competitor."
+      },
+      "no-phone-link": {
+        "title": "The number can't be dialled with one tap",
+        "detail": "No tel: link. On a phone the visitor must copy the number by hand — some calls are lost."
+      },
+      "no-messenger": {
+        "title": "No messenger contact",
+        "detail": "No Telegram or WhatsApp link — in Uzbekistan people message more often than they call."
+      },
+      "no-cta-above-fold": {
+        "title": "The contact button is not visible at once",
+        "detail": "The first phone screen has no “call”, “book” or “order” button — visitors must scroll to find it."
+      },
+      "no-analytics": {
+        "title": "Visitors and leads are not counted",
+        "detail": "No Yandex Metrica or Google Analytics: you can't tell where clients come from or whether ads pay off."
+      },
+      "stale-copyright": {
+        "title": "The site looks abandoned",
+        "detail": "The footer says {year}: a visitor may think the business is closed."
+      },
+      "no-privacy-policy": {
+        "title": "No privacy policy",
+        "detail": "The form collects contacts, but there is no link to a personal-data policy."
+      },
+      "noindex": {
+        "title": "The site is hidden from search engines",
+        "detail": "The page asks Google and Yandex not to index it (noindex). Usually a leftover from development — the site won't appear in search."
       }
     }
   }

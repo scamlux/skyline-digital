@@ -33,6 +33,15 @@ describe("normalizeWebsite", () => {
     expect(normalizeWebsite("localhost")).toBeNull();
     expect(normalizeWebsite("")).toBeNull();
   });
+  it("keeps the first real site from a joined list", () => {
+    expect(normalizeWebsite("unigeo.uz/;https://pisa.uz")).toBe("https://unigeo.uz");
+    expect(normalizeWebsite("instagram.com/x, shop.uz")).toBe("https://shop.uz");
+  });
+  it("rejects aggregator / builder pages as a company site", () => {
+    expect(normalizeWebsite("https://booking.com/hotel/uz/x.html")).toBeNull();
+    expect(normalizeWebsite("https://sites.google.com/view/imron-hotel/home")).toBeNull();
+    expect(normalizeWebsite("taplink.cc/salon")).toBeNull();
+  });
   it("isSocialHost detects socials", () => {
     expect(isSocialHost("www.instagram.com")).toBe(true);
     expect(isSocialHost("t.me")).toBe(true);
