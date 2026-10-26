@@ -58,7 +58,9 @@ const RESERVE_MS = 4_000;
 const SETTLE_MS = 600;
 const DNS_RETRY_DELAY_MS = 1_000;
 /** Mobile profile (ADR 0009): CPU slowdown and a "fast 4G"-like network. */
-const CPU_SLOWDOWN = 4;
+// Overridable per environment: a serverless vCPU is already slower than the
+// laptop the thresholds were calibrated on (ADR 0009).
+const CPU_SLOWDOWN = Math.max(1, Number(process.env.AUDIT_CPU_SLOWDOWN) || 4);
 const MOBILE_4G = {
   download: (9 * 1024 * 1024) / 8, // ~9 Mbit/s in bytes/s
   upload: (2 * 1024 * 1024) / 8,
@@ -343,9 +345,10 @@ async function runMeasurement(
 
   let screenshotMobile: string | null = null;
   if (opts.screenshot !== false) {
-    const shot = await page.screenshot({ type: "png" });
+    // JPEG q70: 5–10× smaller than PNG — it is stored per audit (free-tier DB).
+    const shot = await page.screenshot({ type: "jpeg", quality: 70 });
     const b64 = typeof shot === "string" ? shot : Buffer.from(shot).toString("base64");
-    screenshotMobile = `data:image/png;base64,${b64}`;
+    screenshotMobile = `data:image/jpeg;base64,${b64}`;
   }
 
   const [httpRedirectsToHttps, { robotsTxtFound, sitemapFound }] = await probes;

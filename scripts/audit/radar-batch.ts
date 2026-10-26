@@ -11,6 +11,8 @@
  *     --industry <name>   only this industry
  *     --city <name>       only this city
  *     --stale-days <n>    re-audit only if the last audit is older (default 30)
+ *     --screenshots       also store the mobile screenshot (~100 KB each;
+ *                         off by default — the Supabase free tier is 500 MB)
  *     --dry-run           measure + score, print, write nothing
  *
  * LOCAL ONLY (needs Chrome; never on Vercel). Requires migration 0015.
@@ -29,14 +31,19 @@ interface Args {
   city?: string;
   staleDays: number;
   dryRun: boolean;
+  screenshots: boolean;
 }
 
 function parseArgs(argv: string[]): Args {
-  const a: Args = { limit: 50, conc: 2, staleDays: 30, dryRun: false };
+  const a: Args = { limit: 50, conc: 2, staleDays: 30, dryRun: false, screenshots: false };
   for (let i = 0; i < argv.length; i++) {
     const flag = argv[i];
     if (flag === "--dry-run") {
       a.dryRun = true;
+      continue;
+    }
+    if (flag === "--screenshots") {
+      a.screenshots = true;
       continue;
     }
     const v = argv[i + 1];
@@ -104,7 +111,7 @@ async function main() {
         continue;
       }
       try {
-        const m = await measureSite(site, { screenshot: true, budgetMs: 45_000 });
+        const m = await measureSite(site, { screenshot: args.screenshots, budgetMs: 45_000 });
         const s = m.reachable ? scoreMeasurement(m) : null;
         const label = s ? `${s.grade} ${s.total}` : `✗ ${m.error}`;
         console.log(`${s ? "ok   " : "down "} ${c.name} · ${m.host} · ${label}`);
