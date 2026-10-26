@@ -42,6 +42,10 @@ export function HorizontalPin({
 
     const mq = window.matchMedia(PIN_QUERY);
     let dist = 0;
+    // Пауза в начале (секция «встаёт» до сдвига) и удержание в конце: пока последняя
+    // карточка не доехала и не постояла на месте, страница дальше вниз не уходит.
+    let holdStart = 0;
+    let holdEnd = 0;
     let raf = 0;
     const steps = () => Array.from(track.querySelectorAll<HTMLElement>("[data-step]"));
 
@@ -54,7 +58,7 @@ export function HorizontalPin({
       raf = 0;
       if (sec.dataset.pin === "on") {
         const top = sec.getBoundingClientRect().top;
-        const p = dist > 0 ? Math.min(1, Math.max(0, -top / dist)) : 0;
+        const p = dist > 0 ? Math.min(1, Math.max(0, (-top - holdStart) / dist)) : 0;
         track.style.transform = `translate3d(${-p * dist}px,0,0)`;
         sec.style.setProperty("--p", p.toFixed(4));
         markSteps(p);
@@ -73,9 +77,16 @@ export function HorizontalPin({
       if (mq.matches) {
         sec.dataset.pin = "on";
         track.style.transform = "";
-        // Сколько трек выходит за видимую ширину (паддинги трека учтены в scrollWidth).
-        dist = Math.max(0, track.scrollWidth - track.clientWidth);
-        sec.style.height = `${window.innerHeight + dist}px`;
+        // Сколько трек выходит за видимую ширину. scrollWidth не учитывает правый паддинг
+        // (последняя карточка упиралась бы в край экрана), поэтому считаем от последней
+        // карточки + такой же отступ, как слева, — лента симметрична.
+        const last = track.lastElementChild as HTMLElement | null;
+        const pad = parseFloat(getComputedStyle(track).paddingLeft) || 0;
+        const tr = track.getBoundingClientRect();
+        dist = last ? Math.max(0, last.getBoundingClientRect().right - tr.left + pad - track.clientWidth) : 0;
+        holdStart = Math.round(window.innerHeight * 0.12);
+        holdEnd = Math.round(window.innerHeight * 0.35);
+        sec.style.height = `${window.innerHeight + holdStart + dist + holdEnd}px`;
       } else {
         sec.dataset.pin = "off";
         sec.style.height = "";
@@ -90,9 +101,10 @@ export function HorizontalPin({
       if (sec.dataset.pin !== "on") return;
       const card = (e.target as HTMLElement).closest<HTMLElement>(".r-htrack > *");
       if (!card) return;
-      const target = Math.min(dist, Math.max(0, card.offsetLeft - track.offsetLeft - 24));
+      const pad = parseFloat(getComputedStyle(track).paddingLeft) || 0;
+      const target = Math.min(dist, Math.max(0, card.offsetLeft - track.offsetLeft - pad));
       const secTop = sec.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({ top: secTop + target, behavior: "auto" });
+      window.scrollTo({ top: secTop + holdStart + target, behavior: "auto" });
     };
 
     const ro = new ResizeObserver(layout);
