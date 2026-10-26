@@ -74,11 +74,11 @@ export async function RefChrome({ children }: { children: React.ReactNode }) {
         </div>
         <div className="cols">
           <div style={{ maxWidth: "40ch" }}>
-            <h5>Skyline Digital</h5>
+            <p className="fh">Skyline Digital</p>
             <p style={{ color: "var(--r-dim)", fontSize: 14, lineHeight: 1.6, margin: 0 }}>{tf("tagline")}</p>
           </div>
           <div>
-            <h5>{th("footNav")}</h5>
+            <p className="fh">{th("footNav")}</p>
             {items.map((n) => (
               <Link key={n.href} href={n.href}>
                 {n.label}
@@ -86,7 +86,7 @@ export async function RefChrome({ children }: { children: React.ReactNode }) {
             ))}
           </div>
           <div>
-            <h5>{tf("contact")}</h5>
+            <p className="fh">{tf("contact")}</p>
             {CONTACT_ITEMS.map((c) => (
               <a key={c.href} href={c.href} {...(c.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
                 {c.label}

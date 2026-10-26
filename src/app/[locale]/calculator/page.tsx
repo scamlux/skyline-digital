@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Wizard } from "@/components/calculator/Wizard";
 import { localeUrl, languageAlternates } from "@/lib/seo";
-import { withOldShell } from "@/components/site/SiteShell";
+import { withVariants } from "@/components/site/withVariants";
+import { RefCalculator } from "@/components/pages/variants/ref/RefCalc";
+import { StudioCalculator } from "@/components/pages/variants/studio/StudioCalc";
 
 export async function generateMetadata({
   params,
@@ -59,4 +61,4 @@ async function CalculatorPage({
   );
 }
 
-export default withOldShell(CalculatorPage);
+export default withVariants({ old: CalculatorPage, studio: StudioCalculator, ref: RefCalculator });

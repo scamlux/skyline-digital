@@ -632,6 +632,8 @@
 }
 [data-site="ref"] .r-hint a {
   color: var(--r-acc);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 /* По умолчанию (мобилка, touch, reduced-motion, до гидрации) — нативный свайп со снапом. */
 [data-site="ref"] .r-htrack {
@@ -991,7 +993,7 @@
   gap: 26px 40px;
   margin-top: 36px;
 }
-[data-site="ref"] .r-foot h5 {
+[data-site="ref"] .r-foot .fh {
   font-size: 11px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -1524,4 +1526,132 @@
 /* При фильтре скрытые карточки сбивают «шахматку» — отключаем сдвиг. */
 [data-site="ref"] .r-pgrid[data-filter] .r-pcard:nth-child(even) {
   margin-top: 0;
+}
+
+/* ===================== встроенные блоки старого дизайна (.v-embed, shared.css) ===================== */
+[data-site="ref"] .v-embed {
+  --e-bg: #121215;
+  --e-bg2: #0e0e11;
+  --e-txt: var(--r-txt);
+  --e-dim: var(--r-dim);
+  --e-line: var(--r-line);
+  --e-acc: var(--r-acc);
+  --e-on-acc: #0a0a0b;
+  --e-surface: rgba(255, 255, 255, 0.035);
+  --e-ink: var(--r-txt);
+  --e-muted: var(--r-dim);
+  --e-line-l: var(--r-line);
+  position: relative;
+  z-index: 2;
+}
+/* Форма заявки: её кнопка — bg-night/text-day, на тёмном фоне делаем её акцентной. */
+[data-site="ref"] .v-embed.v-form {
+  --e-bg: var(--r-acc);
+  --e-txt: #0a0a0b;
+}
+[data-site="ref"] .r-split {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: clamp(32px, 5vw, 72px);
+  align-items: start;
+}
+@media (max-width: 860px) {
+  [data-site="ref"] .r-split {
+    grid-template-columns: 1fr;
+  }
+}
+[data-site="ref"] .r-direct {
+  border-top: 1px solid var(--r-line);
+}
+[data-site="ref"] .r-direct a {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--r-line);
+  font-size: clamp(17px, 1.8vw, 21px);
+  font-weight: 600;
+  transition: color 0.25s, padding 0.4s var(--r-ease);
+}
+[data-site="ref"] .r-direct a:hover {
+  color: var(--r-acc);
+  padding-left: 10px;
+}
+[data-site="ref"] .r-direct a span {
+  color: var(--r-dim);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  align-self: center;
+}
+[data-site="ref"] .r-note {
+  color: var(--r-dim);
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 22px 0 0;
+}
+[data-site="ref"] .r-vals {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--r-line);
+}
+[data-site="ref"] .r-vals article {
+  padding: 30px 28px 30px 0;
+}
+[data-site="ref"] .r-vals article + article {
+  padding-left: 28px;
+  border-left: 1px solid var(--r-line);
+}
+[data-site="ref"] .r-vals h2 {
+  font-size: clamp(22px, 2.4vw, 30px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 12px 0 0;
+}
+[data-site="ref"] .r-vals p {
+  color: var(--r-dim);
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 12px 0 0;
+}
+@media (max-width: 860px) {
+  [data-site="ref"] .r-vals {
+    grid-template-columns: 1fr;
+  }
+  [data-site="ref"] .r-vals article + article {
+    padding-left: 0;
+    border-left: 0;
+    border-top: 1px solid var(--r-line);
+  }
+}
+[data-site="ref"] .r-lead {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(24px, 4vw, 64px);
+  font-size: clamp(18px, 2vw, 24px);
+  line-height: 1.5;
+}
+[data-site="ref"] .r-lead p {
+  margin: 0;
+}
+[data-site="ref"] .r-lead p + p {
+  color: var(--r-dim);
+}
+@media (max-width: 760px) {
+  [data-site="ref"] .r-lead {
+    grid-template-columns: 1fr;
+  }
+}
+[data-site="ref"] .r-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+[data-site="ref"] .r-stack span {
+  border: 1px solid var(--r-line);
+  border-radius: 999px;
+  padding: 12px 20px;
+  font-size: clamp(15px, 1.6vw, 19px);
+  font-weight: 600;
 }

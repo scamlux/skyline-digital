@@ -64,7 +64,7 @@ export async function StudioChrome({ children }: { children: React.ReactNode }) 
               <p className="tg">{tf("tagline")}</p>
             </div>
             <div>
-              <h5>{ts("sections")}</h5>
+              <p className="fh">{ts("sections")}</p>
               {items.map((n) => (
                 <Link key={n.href} href={n.href}>
                   {n.label}
@@ -72,7 +72,7 @@ export async function StudioChrome({ children }: { children: React.ReactNode }) 
               ))}
             </div>
             <div>
-              <h5>{tf("contact")}</h5>
+              <p className="fh">{tf("contact")}</p>
               <a href={CONTACT_LINKS.email}>{CONTACTS.email}</a>
               <a href={CONTACT_LINKS.phone}>{CONTACTS.phoneDisplay}</a>
               <a href={CONTACT_LINKS.telegram} target="_blank" rel="noopener noreferrer">

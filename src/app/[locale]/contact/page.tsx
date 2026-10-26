@@ -4,7 +4,9 @@ import { Link } from "@/i18n/navigation";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { localeUrl, languageAlternates } from "@/lib/seo";
 import { CONTACTS, CONTACT_LINKS, telegramHandle } from "@/lib/contact";
-import { withOldShell } from "@/components/site/SiteShell";
+import { withVariants } from "@/components/site/withVariants";
+import { RefContact } from "@/components/pages/variants/ref/RefContact";
+import { StudioContact } from "@/components/pages/variants/studio/StudioContact";
 
 export async function generateMetadata({
   params,
@@ -102,4 +104,4 @@ async function ContactPage({
   );
 }
 
-export default withOldShell(ContactPage);
+export default withVariants({ old: ContactPage, studio: StudioContact, ref: RefContact });
