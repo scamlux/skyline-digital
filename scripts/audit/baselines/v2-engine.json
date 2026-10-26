@@ -1,0 +1,71 @@
+{
+  "label": "v2-engine",
+  "date": "2026-10-26T07:19:58.688Z",
+  "engineVersion": "2.0.0",
+  "sample": {
+    "n": 150,
+    "seed": 42,
+    "conc": 2,
+    "pool": "radar web_status=ok"
+  },
+  "coveragePct": 94,
+  "errors": {
+    "HTTP_ERROR": 5,
+    "DNS_FAILED": 3,
+    "BROWSER_FAILED": 1
+  },
+  "grades": {
+    "C": 66,
+    "B": 54,
+    "A": 14,
+    "D": 7
+  },
+  "score": {
+    "p10": 63,
+    "p25": 66,
+    "median": 73,
+    "p75": 83,
+    "p90": 89
+  },
+  "categoryMedian": {
+    "speed": 63,
+    "mobile": 85,
+    "security": 85,
+    "seo": 70
+  },
+  "findingPct": {
+    "missing-security-headers": 88.7,
+    "images-without-alt": 70.9,
+    "tap-targets-small": 66.7,
+    "bad-meta-description": 61.7,
+    "ttfb-slow": 60.3,
+    "lcp-slow": 56.7,
+    "no-structured-data": 54.6,
+    "h1-count": 44,
+    "no-open-graph": 44,
+    "too-many-requests": 44,
+    "page-heavy": 41.1,
+    "load-timeout": 31.2,
+    "bad-title": 23.4,
+    "no-http-redirect": 15.6,
+    "no-robots": 12.8,
+    "no-lang": 12.8,
+    "font-too-small": 5,
+    "no-viewport": 2.8
+  },
+  "signalPct": {
+    "contactForm": 34.8,
+    "phoneLink": 70.9,
+    "messenger": 66,
+    "analytics": 53.2
+  },
+  "lcpMs": {
+    "median": 3068,
+    "p75": 4860
+  },
+  "msPerAudit": {
+    "median": 6451,
+    "p90": 16800
+  },
+  "wallSeconds": 637
+}
