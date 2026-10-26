@@ -488,7 +488,7 @@
   "audit": {
     "eyebrow": "Bepul audit",
     "title": "Saytingizni 20 soniyada tekshiring",
-    "subtitle": "URL manzilni kiriting — tezlik, mobil versiya, xavfsizlik va SEO bahosini aniq raqamlar bilan va nimani tuzatishni ko'rsatamiz.",
+    "subtitle": "URL manzilni kiriting — telefondagi tezlik, ariza qoldirish qulayligi, mobil versiya, SEO va xavfsizlikni tekshiramiz. Aniq raqamlar va nimani tuzatish kerakligi bilan.",
     "urlPlaceholder": "example.uz",
     "checkButton": "Tekshirish",
     "tooManyRequests": "Juda ko'p tekshiruv. Bir soatdan keyin urinib ko'ring.",

@@ -488,7 +488,7 @@
   "audit": {
     "eyebrow": "Free audit",
     "title": "Check your website in 20 seconds",
-    "subtitle": "Paste a URL — we'll score speed, mobile, security and SEO with concrete numbers and what to fix.",
+    "subtitle": "Paste a URL — we check phone speed, how easy it is to get in touch, mobile layout, SEO and security. With concrete numbers and what to fix.",
     "urlPlaceholder": "example.com",
     "checkButton": "Check",
     "tooManyRequests": "Too many checks. Try again in an hour.",

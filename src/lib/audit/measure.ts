@@ -660,7 +660,10 @@ const EXTRACT_DOM = `() => {
   // A messenger LINK the visitor can tap — not the word "telegram" in some text.
   const messengerSel = 'a[href*="t.me/"], a[href*="telegram.me/"], a[href^="tg:"], a[href*="wa.me/"], a[href*="api.whatsapp.com"], a[href^="whatsapp:"], a[href^="viber:"]';
   const hasMessengerLink = !!document.querySelector(messengerSel);
-  const hasAnalytics = /gtag\\(|google-analytics|googletagmanager|mc\\.yandex\\.ru|metrika|fbq\\(|connect\\.facebook\\.net/i.test(html);
+  // Any analytics or pixel — incl. privacy-first ones (Vercel, Plausible, Umami,
+  // Matomo) that were reported as "no analytics" before.
+  const hasAnalytics = /gtag\\(|google-analytics|googletagmanager|mc\\.yandex\\.ru|metrika|fbq\\(|connect\\.facebook\\.net|_vercel\\/insights|va\\.vercel-scripts|vercel\\/analytics|plausible\\.io|umami|matomo|clarity\\.ms|hotjar/i.test(html)
+    || performance.getEntriesByType('resource').some((r) => /\\/_vercel\\/insights|google-analytics|googletagmanager|mc\\.yandex|plausible|umami|matomo|clarity\\.ms/i.test(r.name));
 
   // Is a way to act visible WITHOUT scrolling on the phone screen?
   const ctaWords = /запис|заказ|позвон|звон|оставить заявку|заявк|купить|корзин|забронир|связат|book|order|call|contact|buy|yozil|buyurtma|qo.ng.iroq|bog.lan|aloqa/i;
