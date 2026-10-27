@@ -47,6 +47,9 @@ const take = (set: Set<string>) => [...set].slice(0, MAX_PER_LIST);
 
 /** Instagram paths that are not a profile. */
 const IG_NON_PROFILE = new Set(["p", "reel", "reels", "explore", "stories", "accounts", "tv", "about", "legal", "direct"]);
+/** Platform handle rules — anything else is a broken or tracking link. */
+const IG_HANDLE = /^[A-Za-z0-9._]{1,30}$/;
+const TG_HANDLE = /^[A-Za-z0-9_]{4,32}$/;
 const TG_NON_PROFILE = new Set(["share", "joinchat", "addstickers", "proxy", "iv", "s"]);
 
 function host(u: URL): string {
@@ -56,7 +59,14 @@ function host(u: URL): string {
 /** First path segment, without "@". */
 function firstSegment(u: URL): string | null {
   const seg = u.pathname.split("/").filter(Boolean)[0];
-  return seg ? decodeURIComponent(seg).replace(/^@/, "") : null;
+  if (!seg) return null;
+  let decoded = seg;
+  try {
+    decoded = decodeURIComponent(seg);
+  } catch {
+    /* malformed %-escape on a real page — keep the raw segment */
+  }
+  return decoded.replace(/^@/, "");
 }
 
 /** Uzbek numbers in text: +998 XX XXX XX XX in common spellings. */
@@ -87,7 +97,13 @@ export function extractPresence(input: PresenceInput): Presence {
     if (!s) continue;
     const lower = s.toLowerCase();
     if (lower.startsWith("mailto:")) {
-      for (const e of extractEmails(decodeURIComponent(s.slice(7).split("?")[0]))) sets.emails.add(e);
+      let addr = s.slice(7).split("?")[0];
+      try {
+        addr = decodeURIComponent(addr);
+      } catch {
+        /* keep raw */
+      }
+      for (const e of extractEmails(addr)) sets.emails.add(e);
       continue;
     }
     if (lower.startsWith("tel:")) {
@@ -109,9 +125,9 @@ export function extractPresence(input: PresenceInput): Presence {
     const h = host(u);
     const seg = firstSegment(u);
 
-    if (h === "instagram.com" && seg && !IG_NON_PROFILE.has(seg.toLowerCase())) {
+    if (h === "instagram.com" && seg && IG_HANDLE.test(seg) && !IG_NON_PROFILE.has(seg.toLowerCase())) {
       sets.instagram.add(seg.toLowerCase());
-    } else if ((h === "t.me" || h === "telegram.me") && seg && !TG_NON_PROFILE.has(seg.toLowerCase())) {
+    } else if ((h === "t.me" || h === "telegram.me") && seg && TG_HANDLE.test(seg) && !TG_NON_PROFILE.has(seg.toLowerCase())) {
       sets.telegram.add(seg);
     } else if (h === "wa.me" && seg) {
       const p = normalizeUzPhone(seg) ?? (/^\d{10,15}$/.test(seg) ? `+${seg}` : null);

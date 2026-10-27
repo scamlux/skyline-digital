@@ -215,9 +215,23 @@ export async function measureSite(rawUrl: string, opts: MeasureOptions = {}): Pr
     if (err instanceof GuardError) return unreachable(normalized, err.code);
     const name = err instanceof Error ? err.name : "";
     if (name === "TimeoutError") return unreachable(normalized, "TIMEOUT");
+    if (process.env.AUDIT_DEBUG) console.error(`[audit] BROWSER_FAILED ${normalized}:`, err);
     return unreachable(normalized, "BROWSER_FAILED");
   } finally {
     await browser.close().catch(() => {});
+  }
+}
+
+/**
+ * An informational tool must never break the measurement it decorates: any
+ * throw becomes "tool result absent", logged when AUDIT_DEBUG is set.
+ */
+function safeTool<T>(fn: () => T): T | undefined {
+  try {
+    return fn();
+  } catch (err) {
+    if (process.env.AUDIT_DEBUG) console.error("[audit] tool failed:", err);
+    return undefined;
   }
 }
 
@@ -417,7 +431,7 @@ async function runMeasurement(
 
   const measurement: Measurement = {
     tools: {
-      presence: extractPresence(dom.presenceRaw),
+      presence: safeTool(() => extractPresence(dom.presenceRaw)),
       ...(full ? { links: full[0], mail: full[1] } : {}),
     },
     engineVersion: ENGINE_VERSION,

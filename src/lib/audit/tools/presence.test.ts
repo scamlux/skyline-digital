@@ -40,6 +40,7 @@ describe("extractPresence", () => {
 
   it("caps every list so the stored row stays small", () => {
     const urls = Array.from({ length: 20 }, (_, i) => `https://t.me/channel_${i}`);
+    // handles are ≥ 4 chars, these are fine
     expect(extractPresence({ urls, text: "", langs: [] }).telegram).toHaveLength(5);
   });
 
@@ -54,5 +55,18 @@ describe("normalizeUzPhone", () => {
     expect(normalizeUzPhone("+998 (90) 123-45-67")).toBe("+998901234567");
     expect(normalizeUzPhone("901234567")).toBe("+998901234567");
     expect(normalizeUzPhone("12345")).toBeNull();
+  });
+});
+
+describe("extractPresence — hostile input", () => {
+  it("survives malformed %-escapes in links (a real site broke the whole audit)", () => {
+    const p = extractPresence({
+      urls: ["https://instagram.com/%E0%A4%A", "mailto:%zz@x.uz", "https://t.me/%"],
+      text: "",
+      langs: [],
+    });
+    // Not valid handles — dropped instead of stored as garbage.
+    expect(p.instagram).toEqual([]);
+    expect(p.telegram).toEqual([]);
   });
 });
