@@ -6,6 +6,8 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { TurnstileWidget, turnstileEnabled, resetTurnstile } from "@/components/security/TurnstileWidget";
 import { buildAuditReportHtml } from "@/lib/audit/report-html";
+import { reportData } from "@/lib/audit/report-data";
+import { buildToolSections, type Tone } from "@/lib/audit/tool-sections";
 import { CONTACTS } from "@/lib/contact";
 import { PhoneInputUz } from "@/components/ui/PhoneInputUz";
 import type { AuditApiResult, Finding, ScoreCategory } from "@/lib/audit/types";
@@ -161,33 +163,13 @@ export function ResultView({
   const categories = presentCategories(result);
 
   const downloadReport = () => {
-    const html = buildAuditReportHtml({
-      host: result.host,
-      url: result.finalUrl,
-      date: new Date().toLocaleDateString(
-        locale === "uz" ? "uz-UZ" : locale === "en" ? "en-US" : "ru-RU",
-      ),
-      total: score.total,
-      grade: score.grade,
-      scoreLabel: t("result.scoreLabel"),
-      categories: categories.map((c) => ({
-        label: t(`categories.${c}`),
-        score: score.categories[c]?.score ?? 0,
-      })),
-      problemsLabel: t("result.topProblems"),
-      noProblemsLabel: t("result.noProblems"),
-      findings: score.findings.map((f) => ({
-        title: finding(f, "title"),
-        severity: f.severity,
-        severityLabel: t(`severity.${f.severity}`),
-        detail: finding(f, "detail"),
-      })),
-      screenshot: result.screenshot ?? undefined,
-      mobileLabel: t("result.mobileView"),
-      tagline: t("report.downloadTagline"),
-      savePdfLabel: t("report.savePdf"),
-      contactLine: `Skyline Digital · skyline-digital.uz · ${CONTACTS.phoneDisplay} · ${CONTACTS.email}`,
-    });
+    const html = buildAuditReportHtml(
+      reportData(result, t as unknown as Parameters<typeof reportData>[1], {
+        locale,
+        date: new Date().toLocaleDateString(locale === "uz" ? "uz-UZ" : locale === "en" ? "en-US" : "ru-RU"),
+        contactLine: `Skyline Digital · skyline-digital.uz · ${CONTACTS.phoneDisplay} · ${CONTACTS.email}`,
+      }),
+    );
     const href = URL.createObjectURL(new Blob([html], { type: "text/html;charset=utf-8" }));
     const a = document.createElement("a");
     a.href = href;
@@ -259,6 +241,9 @@ export function ResultView({
         </div>
       )}
 
+      {/* Informational tools: contacts, e-mail, links (never change the score). */}
+      <ToolSections result={result} t={t} />
+
       {/* Report form OR calculator CTA */}
       {complete ? (
         <div className="mt-10 border-t border-line-night pt-8 text-center">
@@ -272,6 +257,14 @@ export function ResultView({
             >
               {t("report.download")}
             </button>
+            {result.token && (
+              <a
+                href={`/api/audit/pdf/${result.token}?locale=${locale}`}
+                className="rounded-full border border-line-night px-7 py-3.5 font-medium text-day transition-colors hover:border-apricot"
+              >
+                {t("report.downloadPdf")}
+              </a>
+            )}
             <Link
               href={fixHref(score.findings)}
               className="horizon-gradient inline-block rounded-full px-7 py-3.5 font-medium text-night transition-opacity hover:opacity-90"
@@ -283,6 +276,40 @@ export function ResultView({
       ) : (
         <ReportForm url={result.finalUrl} t={t} locale={locale} onReport={onReport ?? (() => {})} />
       )}
+    </div>
+  );
+}
+
+const TONE_CLASS: Record<Tone, string> = { ok: "text-day", warn: "text-apricot", bad: "text-afterglow" };
+
+/** Contacts / e-mail / links sections, plus the industry benchmark line. */
+function ToolSections({ result, t }: { result: AuditApiResult; t: ReturnType<typeof useTranslations> }) {
+  const sections = buildToolSections(result.tools, t as unknown as Parameters<typeof buildToolSections>[1]);
+  if (!sections.length && !result.benchmark) return null;
+  return (
+    <div className="mt-10 space-y-6">
+      {result.benchmark && (
+        <p className="rounded-xl border border-line-night bg-night-deep px-5 py-4 text-sm text-day">
+          {t("tools.benchmark", {
+            pct: result.benchmark.betterThanPct,
+            industry: result.benchmark.industry,
+            n: result.benchmark.n,
+          })}
+        </p>
+      )}
+      {sections.map((sec) => (
+        <section key={sec.id}>
+          <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-apricot">{sec.title}</h3>
+          <dl className="mt-3 divide-y divide-line-night rounded-xl border border-line-night bg-night-deep">
+            {sec.rows.map((r, i) => (
+              <div key={`${r.label}-${i}`} className="grid gap-1 px-5 py-3 text-sm sm:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] sm:gap-4">
+                <dt className="break-words text-mist">{r.label}</dt>
+                <dd className={cn("break-words font-medium", r.tone ? TONE_CLASS[r.tone] : "text-day")}>{r.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      ))}
     </div>
   );
 }

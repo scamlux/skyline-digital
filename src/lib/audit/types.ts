@@ -5,6 +5,12 @@
  * scorer, the /audit API, and the radar. No duplication of the metric contract.
  */
 
+import type { Presence } from "./tools/presence";
+import type { LinkCheck } from "./tools/links";
+import type { MailCheck } from "./tools/mail";
+
+export type { Presence, LinkCheck, MailCheck };
+
 export type AuditErrorCode =
   | "INVALID_URL"
   | "BLOCKED_ADDRESS"
@@ -147,6 +153,21 @@ export interface Measurement {
   security: SecurityMetrics;
   seo: SeoMetrics;
   business: BusinessSignals;
+  /**
+   * engine ≥ 2.1 — informational tools (ADR 0010). They never change the
+   * score, so totals stay comparable within scoreVersion 2.x. Each is
+   * optional: older rows and the fast path may lack them.
+   */
+  tools?: AuditTools;
+}
+
+// ————————————————————— Tools (engine 2.1) —————————————————————
+
+export interface AuditTools {
+  presence?: Presence;
+  /** Report / batch mode only. */
+  links?: LinkCheck;
+  mail?: MailCheck;
 }
 
 // ————————————————————— Score —————————————————————
@@ -209,6 +230,10 @@ export interface AuditApiResult {
   };
   /** Shareable report token (report endpoint, when stored). */
   token?: string;
+  /** Informational tools (presence on fast + report, links/mail on report). */
+  tools?: AuditTools;
+  /** Industry benchmark, when enough comparable audits exist (n ≥ 20). */
+  benchmark?: { industry: string; betterThanPct: number; n: number };
   /** Data-URL PNG — report endpoint only. */
   screenshot?: string | null;
 }

@@ -10,6 +10,9 @@ import {
   type RequestGuard,
   type Resolver,
 } from "./guard";
+import { extractPresence, type PresenceInput } from "./tools/presence";
+import { checkLinks } from "./tools/links";
+import { checkMail } from "./tools/mail";
 import type {
   AuditErrorCode,
   BusinessSignals,
@@ -38,7 +41,7 @@ import type {
  * with an {@link AuditErrorCode}. Throws only on real programming errors.
  */
 
-export const ENGINE_VERSION = "2.0.0";
+export const ENGINE_VERSION = "2.1.0";
 
 const MOBILE_VIEWPORT = { width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true } as const;
 const MOBILE_UA =
@@ -74,6 +77,14 @@ export interface MeasureOptions {
   budgetMs?: number;
   /** Mobile CPU/network throttling (default on). Off only in unit tests. */
   throttle?: boolean;
+  /**
+   * Which informational tools to run (ADR 0010). "basic" (default) extracts
+   * contacts/presence from the page at no extra cost; "full" also checks
+   * same-host links and the domain's e-mail DNS — report and batch only.
+   */
+  tools?: "basic" | "full";
+  /** @internal Test seam: fetch used by the link checker. */
+  fetchImpl?: typeof fetch;
   /** @internal Test seam: DNS resolver override. */
   resolver?: Resolver;
   /**
@@ -87,6 +98,8 @@ export interface MeasureOptions {
 /** Metrics extracted inside the page (DOM, timings, LCP). */
 interface DomMetrics {
   navTiming: { ttfb: number | null; domContentLoaded: number | null; load: number | null };
+  presenceRaw: PresenceInput;
+  sameHostLinks: string[];
   lcp: number | null;
   cls: number;
   tbt: number;
@@ -351,7 +364,20 @@ async function runMeasurement(
     screenshotMobile = `data:image/jpeg;base64,${b64}`;
   }
 
-  const [httpRedirectsToHttps, { robotsTxtFound, sitemapFound }] = await probes;
+  // Full tools run alongside the probes; links are capped, guarded, and the
+  // whole step is bounded by what's left of the budget.
+  const fullTools =
+    opts.tools === "full"
+      ? Promise.race([
+          Promise.all([
+            checkLinks(dom.sameHostLinks.filter((l) => l !== actualFinal), guard, { fetchImpl: opts.fetchImpl }),
+            checkMail(new URL(actualFinal).hostname),
+          ]),
+          sleep(Math.max(1_000, left() - 1_500)).then(() => null),
+        ])
+      : Promise.resolve(null);
+
+  const [[httpRedirectsToHttps, { robotsTxtFound, sitemapFound }], full] = await Promise.all([probes, fullTools]);
 
   const speed: SpeedMetrics = {
     ttfb: dom.navTiming.ttfb,
@@ -390,6 +416,10 @@ async function runMeasurement(
   };
 
   const measurement: Measurement = {
+    tools: {
+      presence: extractPresence(dom.presenceRaw),
+      ...(full ? { links: full[0], mail: full[1] } : {}),
+    },
     engineVersion: ENGINE_VERSION,
     blockedRequests: intercept.blocked,
     url: normalized,
@@ -687,6 +717,25 @@ const EXTRACT_DOM = `() => {
     return /privacy|конфиденциальн|персональн|policy|maxfiylik|shaxsiy ma/.test(t);
   });
 
+  // Raw material for the contacts/presence tool (parsed in node, capped).
+  const presenceUrls = Array.from(new Set([
+    ...Array.from(document.querySelectorAll('a[href]')).map((a) => a.href || a.getAttribute('href') || ''),
+    ...Array.from(document.querySelectorAll('iframe[src], script[src], form[action]')).map((el) => el.src || el.action || ''),
+  ])).filter(Boolean).slice(0, 600);
+  const presenceText = ((document.body && document.body.innerText) || '').slice(0, 60000);
+  const presenceLangs = [
+    ...Array.from(document.querySelectorAll('link[rel="alternate"][hreflang]')).map((l) => l.getAttribute('hreflang') || ''),
+    ...Array.from(document.querySelectorAll('a[hreflang]')).map((a) => a.getAttribute('hreflang') || ''),
+    document.documentElement.getAttribute('lang') || '',
+  ];
+  // Same-host links for the broken-links tool (report mode only).
+  const sameHostLinks = Array.from(new Set(
+    Array.from(document.querySelectorAll('a[href]'))
+      .map((a) => a.href)
+      .filter((h) => { try { const u = new URL(h); return u.hostname === location.hostname && /^https?:$/.test(u.protocol); } catch (e) { return false; } })
+      .map((h) => h.split('#')[0]),
+  )).slice(0, 200);
+
   const robotsMeta = Array.from(document.querySelectorAll('meta[name="robots"], meta[name="googlebot"]'))
     .map((m) => (m.getAttribute('content') || '').toLowerCase()).join(',');
   const noindexMeta = /noindex|none/.test(robotsMeta);
@@ -716,6 +765,8 @@ const EXTRACT_DOM = `() => {
 
   return {
     navTiming,
+    presenceRaw: { urls: presenceUrls, text: presenceText, langs: presenceLangs },
+    sameHostLinks,
     lcp: window.__lcp,
     cls: Math.round((window.__cls || 0) * 1000) / 1000,
     tbt: Math.round(window.__tbt || 0),

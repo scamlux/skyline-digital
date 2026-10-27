@@ -22,6 +22,12 @@ export interface AuditReportData {
   tagline: string;
   savePdfLabel: string;
   contactLine: string;
+  /** Informational tool sections (contacts, e-mail, links) — already translated. */
+  sections?: { title: string; rows: { label: string; value: string; tone?: "ok" | "warn" | "bad" }[] }[];
+  /** Hide the print button (server-rendered PDF). */
+  forPdf?: boolean;
+  /** Document language. */
+  lang?: string;
 }
 
 const esc = (s: string): string =>
@@ -65,8 +71,25 @@ export function buildAuditReportHtml(d: AuditReportData): string {
        </div>`
     : "";
 
+  const toneColor = { ok: "#178E8E", warn: "#E07B1A", bad: "#C8392B" } as const;
+  const sections = (d.sections ?? [])
+    .filter((sec) => sec.rows.length > 0)
+    .map(
+      (sec) => `
+    <div class="card">
+      <h2>${esc(sec.title)}</h2>
+      <table class="kv">${sec.rows
+        .map(
+          (r) =>
+            `<tr><td class="k">${esc(r.label)}</td><td class="v"${r.tone ? ` style="color:${toneColor[r.tone]}"` : ""}>${esc(r.value)}</td></tr>`,
+        )
+        .join("")}</table>
+    </div>`,
+    )
+    .join("");
+
   return `<!doctype html>
-<html lang="ru">
+<html lang="${esc(d.lang ?? "ru")}">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -91,9 +114,13 @@ export function buildAuditReportHtml(d: AuditReportData): string {
   .score-big { font-size: 60px; font-weight: 800; line-height: 1; }
   .grade { font-size: 30px; font-weight: 700; color: #E07B1A; }
   .score-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #6B7480; }
-  .cats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 22px; }
+  .cats { display: grid; grid-template-columns: repeat(${Math.min(5, Math.max(1, d.categories.length))}, 1fr); gap: 10px; margin-top: 22px; }
+  .kv { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 14px; }
+  .kv td { padding: 8px 0; border-top: 1px solid #EEF1F5; vertical-align: top; }
+  .kv .k { color: #6B7480; width: 42%; padding-right: 12px; }
+  .kv .v { color: #1A2238; font-weight: 600; word-break: break-word; }
   .cat { border: 1px solid #E3E7EC; border-radius: 12px; padding: 16px 10px; text-align: center; }
-  .cat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #6B7480; }
+  .cat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7480; overflow-wrap: anywhere; }
   .cat-score { font-size: 26px; font-weight: 700; margin-top: 6px; }
   h2 { font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: #F0913A; margin: 4px 0 0; }
   ul { list-style: none; margin: 14px 0 0; padding: 0; }
@@ -119,7 +146,7 @@ export function buildAuditReportHtml(d: AuditReportData): string {
   <div class="page">
     <div class="top">
       <div class="brand">skyline<span class="dot">.</span>digital</div>
-      <button class="save" onclick="window.print()">${esc(d.savePdfLabel)}</button>
+      ${d.forPdf ? "" : `<button class="save" onclick="window.print()">${esc(d.savePdfLabel)}</button>`}
     </div>
     <div class="head">
       <div class="eyebrow">Аудит сайта</div>
@@ -144,6 +171,7 @@ export function buildAuditReportHtml(d: AuditReportData): string {
       <ul>${findings}</ul>
       ${shot}
     </div>
+${sections}
 
     <footer>
       <div class="tag">${esc(d.tagline)}</div>

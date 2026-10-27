@@ -548,7 +548,8 @@
       "shareRerun": "Check the site again",
       "measuredAt": "Checked",
       "history": "Check history",
-      "previous": "Before"
+      "previous": "Before",
+      "downloadPdf": "Download PDF"
     },
     "findings": {
       "load-timeout": {
@@ -695,6 +696,32 @@
         "title": "The site is hidden from search engines",
         "detail": "The page asks Google and Yandex not to index it (noindex). Usually a leftover from development — the site won't appear in search."
       }
+    },
+    "tools": {
+      "presenceTitle": "Where to find you and how to get in touch",
+      "none": "not found",
+      "email": "E-mail",
+      "phone": "Phone",
+      "maps": "Map",
+      "mapsMissing": "no map link — harder to find you",
+      "payments": "Online payment",
+      "paymentsMissing": "not found",
+      "languages": "Site languages",
+      "otherSocials": "Other socials",
+      "mailTitle": "E-mail of {domain}",
+      "mx": "Mail server (MX)",
+      "yes": "yes",
+      "no": "no",
+      "verdict": "Verdict",
+      "mailOk": "mail is protected from spoofing and lands in spam less often",
+      "mailRisk": "mail may land in spam, and anyone can send forged mail from the domain",
+      "mailNone": "the domain has no mail",
+      "linksTitle": "Links on the site",
+      "linksChecked": "Links checked",
+      "linksBroken": "Broken links",
+      "linksAllOk": "all working",
+      "noAnswer": "no answer",
+      "benchmark": "Better than {pct}% of {industry} sites ({n} checked)"
     }
   }
 }

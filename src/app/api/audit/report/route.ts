@@ -4,7 +4,7 @@ import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { measureSite } from "@/lib/audit/measure";
 import { scoreMeasurement } from "@/lib/audit/score";
-import { persistAudit, toApiResult } from "@/lib/audit/store";
+import { industryBenchmark, persistAudit, toApiResult } from "@/lib/audit/store";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase/server";
 import { createLead, notifyNewLead } from "@/lib/leads";
 
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Captcha failed" }, { status: 403 });
   }
 
-  const measurement = await measureSite(d.url, { screenshot: true, budgetMs: 45_000 });
+  const measurement = await measureSite(d.url, { screenshot: true, budgetMs: 45_000, tools: "full" });
   const score = measurement.reachable ? scoreMeasurement(measurement) : null;
 
   // Reachable audits create a lead + Telegram notification + stored history,
@@ -79,5 +79,10 @@ export async function POST(request: Request) {
     token = saved?.shareToken ?? null;
   }
 
-  return NextResponse.json(toApiResult(measurement, score, "report", token));
+  const result = toApiResult(measurement, score, "report", token);
+  if (score && isSupabaseConfigured()) {
+    const bench = await industryBenchmark(getSupabaseAdmin(), measurement.host, score.total, score.version).catch(() => null);
+    if (bench) result.benchmark = bench;
+  }
+  return NextResponse.json(result);
 }
