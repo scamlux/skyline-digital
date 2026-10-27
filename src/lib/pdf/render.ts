@@ -14,7 +14,7 @@ const LOCAL_CHROME_CANDIDATES = [
  * puppeteer-core at an installed Google Chrome (no Chromium download —
  * override with CHROME_EXECUTABLE_PATH if needed).
  */
-export async function htmlToPdf(html: string): Promise<Uint8Array> {
+export async function htmlToPdf(html: string, opts: { format?: "slides" | "a4" } = {}): Promise<Uint8Array> {
   const isServerless = Boolean(process.env.VERCEL || process.env.AWS_REGION);
 
   let executablePath: string;
@@ -38,13 +38,21 @@ export async function htmlToPdf(html: string): Promise<Uint8Array> {
   try {
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: "load" });
-    // 16:9 slide deck — one .slide per page (1280×720 CSS px).
-    const pdf = await page.pdf({
-      width: "1280px",
-      height: "720px",
-      printBackground: true,
-      margin: { top: "0", right: "0", bottom: "0", left: "0" },
-    });
+    // Default: 16:9 slide deck — one .slide per page (1280×720 CSS px).
+    // "a4": a flowing document (the audit report).
+    const pdf =
+      opts.format === "a4"
+        ? await page.pdf({
+            format: "A4",
+            printBackground: true,
+            margin: { top: "12mm", right: "10mm", bottom: "12mm", left: "10mm" },
+          })
+        : await page.pdf({
+            width: "1280px",
+            height: "720px",
+            printBackground: true,
+            margin: { top: "0", right: "0", bottom: "0", left: "0" },
+          });
     return pdf;
   } finally {
     await browser.close();

@@ -1,0 +1,86 @@
+{
+  "label": "v2.1-tools",
+  "date": "2026-10-27T05:35:43.707Z",
+  "engineVersion": "2.1.0",
+  "sample": {
+    "n": 150,
+    "seed": 42,
+    "conc": 2,
+    "pool": "radar web_status=ok"
+  },
+  "coveragePct": 95.3,
+  "errors": {
+    "HTTP_ERROR": 3,
+    "DNS_FAILED": 3,
+    "BROWSER_FAILED": 1
+  },
+  "grades": {
+    "C": 59,
+    "B": 57,
+    "A": 15,
+    "D": 12
+  },
+  "score": {
+    "p10": 62,
+    "p25": 68,
+    "median": 75,
+    "p75": 83,
+    "p90": 89
+  },
+  "categoryMedian": {
+    "speed": 72,
+    "conversion": 80,
+    "mobile": 85,
+    "seo": 70,
+    "security": 91
+  },
+  "findingPct": {
+    "missing-security-headers": 88.8,
+    "images-without-alt": 72,
+    "tap-targets-small": 69.2,
+    "bad-meta-description": 62.2,
+    "no-structured-data": 56.6,
+    "lcp-slow": 53.1,
+    "too-many-requests": 53.1,
+    "ttfb-slow": 51,
+    "render-blocking": 49,
+    "page-heavy": 46.9,
+    "h1-count": 44.8,
+    "no-open-graph": 44.1,
+    "no-analytics": 43.4,
+    "legacy-images": 25.9,
+    "load-timeout": 25.2,
+    "no-compression": 25.2,
+    "no-caching": 25.2,
+    "main-thread-blocked": 24.5,
+    "no-cta-above-fold": 23.8,
+    "bad-title": 23.1,
+    "no-privacy-policy": 23.1,
+    "no-messenger": 21.7,
+    "layout-shift": 15.4,
+    "no-phone-link": 14.7,
+    "no-contact-action": 14,
+    "no-lang": 12.6,
+    "no-http-redirect": 11.2,
+    "no-robots": 11.2,
+    "stale-copyright": 9.8,
+    "font-too-small": 4.9,
+    "no-viewport": 2.8,
+    "noindex": 2.1
+  },
+  "signalPct": {
+    "contactForm": 34.3,
+    "phoneLink": 71.3,
+    "messenger": 64.3,
+    "analytics": 56.6
+  },
+  "lcpMs": {
+    "median": 2748,
+    "p75": 3988
+  },
+  "msPerAudit": {
+    "median": 5981,
+    "p90": 13222
+  },
+  "wallSeconds": 556
+}

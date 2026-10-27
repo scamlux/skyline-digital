@@ -2,8 +2,9 @@
  * Radar audit batch — runs the production audit engine over radar companies
  * that have a website, stores each result as an `audits` row (source='radar',
  * with a share token) and syncs the company: last_audit_id, last_audit_at,
- * audit_score, audit_grade. Every company then has a personal report link to
- * open a conversation with.
+ * audit_score, audit_grade — and fills EMPTY instagram / email / social_links
+ * from contacts found on the company's own site. Every company then has a
+ * personal report link and, often, a channel to send it through.
  *
  *   npm run audit:radar -- [options]
  *     --limit <n>         companies this run (default 50)
@@ -23,6 +24,7 @@ import { measureSite } from "../../src/lib/audit/measure";
 import { scoreMeasurement } from "../../src/lib/audit/score";
 import { persistAudit } from "../../src/lib/audit/store";
 import { normalizeWebsite } from "../../src/lib/radar/validate";
+import { contactsFill } from "../../src/lib/radar/contacts";
 
 interface Args {
   limit: number;
@@ -66,13 +68,16 @@ interface Company {
   industry: string | null;
   city: string | null;
   last_audit_at: string | null;
+  instagram: string | null;
+  email: string | null;
+  social_links: string[] | null;
 }
 
 async function pickCompanies(db: SupabaseClient, a: Args): Promise<Company[]> {
   const cutoff = new Date(Date.now() - a.staleDays * 86_400_000).toISOString();
   let q = db
     .from("radar_companies")
-    .select("id,name,website,industry,city,last_audit_at")
+    .select("id,name,website,industry,city,last_audit_at,instagram,email,social_links")
     .eq("has_site", true)
     .eq("discarded", false)
     .not("website", "is", null)
@@ -98,7 +103,7 @@ async function main() {
   const batchId = `radar-${new Date().toISOString().slice(0, 16).replace(/[:T]/g, "")}`;
   console.log(`batch ${batchId}: ${companies.length} companies, conc ${args.conc}${args.dryRun ? " (dry run)" : ""}`);
 
-  const tally = { audited: 0, unreachable: 0, skipped: 0, failed: 0 };
+  const tally = { audited: 0, unreachable: 0, skipped: 0, failed: 0, gotInstagram: 0, gotEmail: 0 };
   const grades: Record<string, number> = {};
   let next = 0;
   async function worker() {
@@ -116,7 +121,7 @@ async function main() {
         continue;
       }
       try {
-        const m = await measureSite(site, { screenshot: args.screenshots, budgetMs: 45_000 });
+        const m = await measureSite(site, { screenshot: args.screenshots, budgetMs: 45_000, tools: "full" });
         const s = m.reachable ? scoreMeasurement(m) : null;
         const label = s ? `${s.grade} ${s.total}` : `✗ ${m.error}`;
         console.log(`${s ? "ok   " : "down "} ${c.name} · ${m.host} · ${label}`);
@@ -126,15 +131,16 @@ async function main() {
         if (args.dryRun) continue;
 
         const saved = await persistAudit(db, m, s, { source: "radar", share: Boolean(s), batchId });
-        const { error } = await db
-          .from("radar_companies")
-          .update({
-            last_audit_id: saved?.id ?? null,
-            last_audit_at: new Date().toISOString(),
-            audit_score: s?.total ?? null,
-            audit_grade: s?.grade ?? null,
-          })
-          .eq("id", c.id);
+        const update: Record<string, unknown> = {
+          last_audit_id: saved?.id ?? null,
+          last_audit_at: new Date().toISOString(),
+          audit_score: s?.total ?? null,
+          audit_grade: s?.grade ?? null,
+          ...contactsFill(c, m.tools?.presence),
+        };
+        if (update.instagram) tally.gotInstagram++;
+        if (update.email) tally.gotEmail++;
+        const { error } = await db.from("radar_companies").update(update).eq("id", c.id);
         if (error) console.error(`  ! company update failed: ${error.message}`);
       } catch (err) {
         tally.failed++;

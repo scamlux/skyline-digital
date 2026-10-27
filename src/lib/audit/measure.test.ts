@@ -62,6 +62,8 @@ beforeAll(async () => {
             `<link rel="canonical" href="/canon"></head><body>` +
             `<a href="tel:+998901234567">Позвонить</a>` +
             `<a href="https://t.me/shop">Telegram</a>` +
+            `<a href="https://instagram.com/conv.shop/">IG</a><a href="mailto:hi@conv.uz">mail</a>` +
+            `<a href="/broken">x</a><a href="/">home</a>` +
             `<footer><a href="/privacy">Политика конфиденциальности</a></footer></body></html>`,
         );
       case "/hang.png":
@@ -152,8 +154,20 @@ describe("measureSite — real measurement against a fixture (launches Chrome)",
     expect(m.seo.noindex).toBe(true);
     expect(m.seo.canonical).toBe(`${base}/canon`);
     expect(m.speed.throttled).toBe(true);
+    expect(m.tools?.presence?.instagram).toEqual(["conv.shop"]);
+    expect(m.tools?.presence?.telegram).toEqual(["shop"]);
+    expect(m.tools?.presence?.emails).toEqual(["hi@conv.uz"]);
+    expect(m.tools?.links).toBeUndefined(); // basic mode: no link check
     expect(typeof m.speed.cls).toBe("number");
   }, 30_000);
+
+  it("full tools mode checks same-host links through the guard", async () => {
+    const m = await measureSite(`${base}/conversion`, { ...fixture(), tools: "full" });
+    expect(m.reachable).toBe(true);
+    expect(m.tools?.links?.checked).toBeGreaterThanOrEqual(1);
+    expect(m.tools?.links?.broken.map((b) => b.status)).toContain(404);
+    expect(m.tools?.mail?.domain).toBe("127.0.0.1");
+  }, 40_000);
 
   it("does not treat the word 'telegram' in text as a messenger link", async () => {
     const m = await measureSite(`${base}/`, fixture());

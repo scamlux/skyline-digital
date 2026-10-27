@@ -548,7 +548,8 @@
       "shareRerun": "Saytni qayta tekshirish",
       "measuredAt": "Tekshirildi",
       "history": "Tekshiruvlar tarixi",
-      "previous": "Avval"
+      "previous": "Avval",
+      "downloadPdf": "PDF yuklab olish"
     },
     "findings": {
       "load-timeout": {
@@ -695,6 +696,32 @@
         "title": "Sayt qidiruv tizimlaridan yashirilgan",
         "detail": "Sahifa Google va Yandexdan uni indekslamaslikni soʻraydi (noindex). Odatda bu ishlab chiqishdan qolgan sozlama — sayt qidiruvda chiqmaydi."
       }
+    },
+    "tools": {
+      "presenceTitle": "Sizni qayerdan topish va qanday bogʻlanish mumkin",
+      "none": "topilmadi",
+      "email": "E-mail",
+      "phone": "Telefon",
+      "maps": "Xarita",
+      "mapsMissing": "xaritaga havola yoʻq — sizni topish qiyinroq",
+      "payments": "Onlayn toʻlov",
+      "paymentsMissing": "topilmadi",
+      "languages": "Sayt tillari",
+      "otherSocials": "Boshqa ijtimoiy tarmoqlar",
+      "mailTitle": "{domain} domeni pochtasi",
+      "mx": "Pochta serveri (MX)",
+      "yes": "bor",
+      "no": "yoʻq",
+      "verdict": "Xulosa",
+      "mailOk": "xatlar soxtalashtirishdan himoyalangan va spamga kamroq tushadi",
+      "mailRisk": "xatlar spamga tushishi mumkin, domen nomidan soxta xat yuborish mumkin",
+      "mailNone": "domenda pochta yoʻq",
+      "linksTitle": "Saytdagi havolalar",
+      "linksChecked": "Tekshirilgan havolalar",
+      "linksBroken": "Buzilgan havolalar",
+      "linksAllOk": "hammasi ishlaydi",
+      "noAnswer": "javob bermaydi",
+      "benchmark": "«{industry}» sohasidagi saytlarning {pct}% idan yaxshiroq ({n} ta tekshirildi)"
     }
   }
 }

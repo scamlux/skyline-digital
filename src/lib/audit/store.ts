@@ -116,6 +116,7 @@ export function toApiResult(
     },
     ...(mode === "report" ? { screenshot: measurement.mobile.screenshotMobile } : {}),
     ...(token ? { token } : {}),
+    ...(measurement.tools ? { tools: measurement.tools } : {}),
   };
 }
 
@@ -146,6 +147,7 @@ interface StoredRow {
   findings: Finding[] | null;
   screenshot: string | null;
   created_at: string;
+  tools: Measurement["tools"] | null;
 }
 
 /**
@@ -182,7 +184,7 @@ export async function loadSharedReport(supabase: SupabaseClient, token: string):
   const { data, error } = await supabase
     .from("audits")
     .select(
-      "host,final_url,reachable,error_code,score_total,score_grade,score_version,categories,findings,screenshot,created_at",
+      "host,final_url,reachable,error_code,score_total,score_grade,score_version,categories,findings,screenshot,created_at,tools:measurement->tools",
     )
     .eq("share_token", token)
     .maybeSingle();
@@ -205,6 +207,7 @@ export async function loadSharedReport(supabase: SupabaseClient, token: string):
           },
           screenshot: row.screenshot,
           token,
+          ...(row.tools ? { tools: row.tools } : {}),
         }
       : {
           reachable: false,
@@ -212,5 +215,54 @@ export async function loadSharedReport(supabase: SupabaseClient, token: string):
           finalUrl: row.final_url ?? row.host,
           error: (row.error_code ?? "HTTP_ERROR") as AuditApiResult["error"],
         };
+  if (result.score) {
+    const bench = await industryBenchmark(supabase, row.host, result.score.total, result.score.version).catch(() => null);
+    if (bench) result.benchmark = bench;
+  }
   return { result, createdAt: row.created_at, history };
+}
+
+/** Minimum comparable audits before an industry comparison is shown. */
+export const BENCHMARK_MIN_N = 20;
+
+/** Pure: share of `peers` strictly below `total`, rounded. */
+export function percentileBelow(total: number, peers: number[]): number {
+  if (!peers.length) return 0;
+  return Math.round((100 * peers.filter((p) => p < total).length) / peers.length);
+}
+
+/**
+ * "Better than X% of <industry> sites": compares with the latest radar audit
+ * of each company in that industry, same scoreVersion only. Returns null when
+ * fewer than {@link BENCHMARK_MIN_N} comparable audits exist — a percentage
+ * over 6 sites would be noise dressed as a fact.
+ */
+export async function industryBenchmark(
+  supabase: SupabaseClient,
+  host: string,
+  total: number,
+  scoreVersion: string | undefined,
+): Promise<{ industry: string; betterThanPct: number; n: number } | null> {
+  if (!scoreVersion) return null;
+  const { data: company } = await supabase
+    .from("radar_companies")
+    .select("industry")
+    .or(`domain.eq.${host},website.ilike.%${host.replace(/[%,()]/g, "")}%`)
+    .not("industry", "is", null)
+    .limit(1)
+    .maybeSingle();
+  const industry = (company?.industry as string | undefined) ?? null;
+  if (!industry) return null;
+  const { data: peers } = await supabase
+    .from("radar_companies")
+    .select("audit_score")
+    .eq("industry", industry)
+    .not("audit_score", "is", null)
+    .limit(2000);
+  const scores = (peers ?? []).map((p) => p.audit_score as number);
+  if (scores.length < BENCHMARK_MIN_N) return null;
+  // Human label from the editable radar queries (ru); the key is the fallback.
+  const { data: q } = await supabase.from("radar_queries").select("label").eq("key", industry).maybeSingle();
+  const label = (q?.label as string | undefined) ?? industry;
+  return { industry: label, betterThanPct: percentileBelow(total, scores), n: scores.length };
 }
