@@ -13,8 +13,12 @@ export const restaurantUi = {
   call: { ru: "Позвонить", en: "Call", uz: "Qoʻngʻiroq" },
   telegram: { ru: "Telegram", en: "Telegram", uz: "Telegram" },
   route: { ru: "Построить маршрут", en: "Get directions", uz: "Yoʻnalish" },
-  openNow: { ru: "Открыто до", en: "Open until", uz: "Ochiq:" },
-  closedNow: { ru: "Откроемся в", en: "Opens at", uz: "Ochiladi:" },
+  // {t} — время. Узбекское «gacha/da» ставится после времени, поэтому подстановка, а не склейка.
+  openNow: { ru: "Открыто до {t}", en: "Open until {t}", uz: "{t} gacha ochiq" },
+  closedNow: { ru: "Откроемся в {t}", en: "Opens at {t}", uz: "{t} da ochiladi" },
+  navLabel: { ru: "Разделы сайта", en: "Site sections", uz: "Sayt boʻlimlari" },
+  menuNavLabel: { ru: "Разделы меню", en: "Menu sections", uz: "Menyu boʻlimlari" },
+  quickLabel: { ru: "Быстрые действия", en: "Quick actions", uz: "Tezkor amallar" },
   hoursLabel: { ru: "Работаем ежедневно", en: "Open daily", uz: "Har kuni ochiq" },
   menuTitle: { ru: "Меню", en: "Menu", uz: "Menyu" },
   menuHint: {
@@ -80,6 +84,16 @@ export const restaurantUi = {
       uz: "Demo: haqiqiy saytda soʻrov bir necha soniyada egasining Telegramiga tushadi.",
     },
     again: { ru: "Отправить ещё одну", en: "Send another", uz: "Yana yuborish" },
+    openTelegram: {
+      ru: "Открыть Telegram и отправить",
+      en: "Open Telegram and send",
+      uz: "Telegramni ochib yuborish",
+    },
+    openTelegramHint: {
+      ru: "Если Telegram не открылся сам — нажмите кнопку: заявка уйдёт, когда вы отправите сообщение.",
+      en: "If Telegram did not open by itself, press the button: the request is sent when you send the message.",
+      uz: "Telegram oʻzi ochilmasa, tugmani bosing: xabarni yuborganingizda soʻrov joʻnatiladi.",
+    },
     messageHead: { ru: "Бронь стола", en: "Table booking", uz: "Stol bandi" },
   },
   langLabel: { ru: "Язык", en: "Language", uz: "Til" },

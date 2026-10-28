@@ -19,6 +19,12 @@ describe("шаблоны: тексты на трёх языках", () => {
   const all: { path: string; l: L }[] = [];
   collect(restaurantDemo, "data", all);
   collect(restaurantUi, "ui", all);
+  // Названия, описания и настроения стилей из реестра тоже видны посетителям витрины.
+  collect(
+    TEMPLATES.map((t) => ({ title: t.title, blurb: t.blurb, styles: t.styles.map((s) => ({ name: s.name, mood: s.mood })) })),
+    "registry",
+    all,
+  );
 
   it("нашлись строки для проверки", () => {
     expect(all.length).toBeGreaterThan(60);
@@ -49,6 +55,15 @@ describe("шаблон «Ресторан»: данные", () => {
 
   it("есть позиция в стоп-листе (демонстрация)", () => {
     expect(restaurantDemo.menu.flatMap((c) => c.items).some((i) => i.available === false)).toBe(true);
+  });
+});
+
+describe("шаблон «Ресторан»: подстановки в тексты", () => {
+  it("«открыто/закроется» содержат {t} на всех языках (время подставляется в браузере)", () => {
+    for (const loc of LOCALES) {
+      expect(restaurantUi.openNow[loc]).toContain("{t}");
+      expect(restaurantUi.closedNow[loc]).toContain("{t}");
+    }
   });
 });
 

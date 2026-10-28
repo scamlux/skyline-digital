@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { pick, type Locale } from "../types";
 import { restaurantUi as ui } from "./ui";
 
@@ -37,7 +37,7 @@ export function OpenStatus({ open, close, locale }: { open: string; close: strin
   return (
     <span className="tpl-status" data-state={isOpen ? "open" : "closed"}>
       <i aria-hidden="true" />
-      {isOpen ? `${pick(ui.openNow, locale)} ${close}` : `${pick(ui.closedNow, locale)} ${open}`}
+      {pick(isOpen ? ui.openNow : ui.closedNow, locale).replace("{t}", isOpen ? close : open)}
     </span>
   );
 }
@@ -63,6 +63,18 @@ export function BookingForm({
   const f = ui.form;
   const [errors, setErrors] = useState<Errors>({});
   const [sent, setSent] = useState(false);
+  const [tgUrl, setTgUrl] = useState<string | null>(null);
+  const successRef = useRef<HTMLHeadingElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const wasSent = useRef(false);
+
+  // Кнопка, на которой стоял фокус, исчезает при смене состояния — переносим фокус сами:
+  // на заголовок подтверждения (его же прочитает скринридер), а при «Отправить ещё» — на первое поле.
+  useEffect(() => {
+    if (sent) successRef.current?.focus();
+    else if (wasSent.current) formRef.current?.querySelector<HTMLElement>("[name=name]")?.focus();
+    wasSent.current = sent;
+  }, [sent]);
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -84,7 +96,11 @@ export function BookingForm({
     }
     if (mode === "telegram") {
       const text = `${pick(f.messageHead, locale)} · ${restaurant}\n${name}, ${phone}\n${when}, ${pick(f.guests, locale).toLowerCase()}: ${guests}`;
-      window.open(`https://t.me/${telegram}?text=${encodeURIComponent(text)}`, "_blank", "noopener");
+      const url = `https://t.me/${telegram}?text=${encodeURIComponent(text)}`;
+      // Открыть не получится, если браузер заблокировал окно или Telegram не установлен, а
+      // window.open с noopener ничего об этом не сообщает — поэтому ссылка остаётся на экране.
+      window.open(url, "_blank", "noopener");
+      setTgUrl(url);
     }
     setSent(true);
   }
@@ -92,9 +108,19 @@ export function BookingForm({
   if (sent) {
     return (
       <div className="tpl-success" role="status">
-        <h3>{pick(f.successTitle, locale)}</h3>
+        <h3 ref={successRef} tabIndex={-1}>
+          {pick(f.successTitle, locale)}
+        </h3>
         <p>{pick(f.successText, locale)}</p>
         {mode === "demo" && <p className="tpl-note">{pick(f.demoNote, locale)}</p>}
+        {mode === "telegram" && tgUrl && (
+          <>
+            <a className="tpl-btn" href={tgUrl} target="_blank" rel="noopener noreferrer">
+              {pick(f.openTelegram, locale)}
+            </a>
+            <p className="tpl-note">{pick(f.openTelegramHint, locale)}</p>
+          </>
+        )}
         <button type="button" className="tpl-btn ghost" onClick={() => setSent(false)}>
           {pick(f.again, locale)}
         </button>
@@ -103,7 +129,7 @@ export function BookingForm({
   }
 
   return (
-    <form className="tpl-form" onSubmit={onSubmit} noValidate>
+    <form ref={formRef} className="tpl-form" onSubmit={onSubmit} noValidate>
       <div className="tpl-field">
         <label htmlFor="bk-name">{pick(f.name, locale)}</label>
         <input id="bk-name" name="name" autoComplete="given-name" aria-invalid={!!errors.name} aria-describedby={errors.name ? "bk-name-e" : undefined} />
@@ -174,7 +200,7 @@ export function StickyBar({
     return () => io.disconnect();
   }, []);
   return (
-    <nav className="tpl-sticky" data-hidden={hidden || undefined} aria-label={pick(ui.call, locale)}>
+    <nav className="tpl-sticky" data-hidden={hidden || undefined} inert={hidden} aria-label={pick(ui.quickLabel, locale)}>
       <a href={`tel:${phone}`}>{pick(ui.call, locale)}</a>
       <a href={`https://t.me/${telegram}`} target="_blank" rel="noopener noreferrer">
         {pick(ui.telegram, locale)}

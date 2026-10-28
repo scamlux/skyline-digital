@@ -43,7 +43,7 @@ export function RestaurantSite({ data, locale, style, localeHrefs }: TemplatePro
         <a href="#top" className="tpl-logo" aria-label={data.name}>
           {data.name}
         </a>
-        <nav className="tpl-nav" aria-label={t(ui.nav.menu)}>
+        <nav className="tpl-nav" aria-label={t(ui.navLabel)}>
           <a href={`#${menuId}`}>{t(ui.nav.menu)}</a>
           <a href="#about">{t(ui.nav.about)}</a>
           <a href="#contacts">{t(ui.nav.contacts)}</a>
@@ -86,7 +86,7 @@ export function RestaurantSite({ data, locale, style, localeHrefs }: TemplatePro
             <h2 id="menu-title">{t(ui.menuTitle)}</h2>
             <p>{t(ui.menuHint)}</p>
           </div>
-          <nav className="tpl-chips" aria-label={t(ui.menuTitle)}>
+          <nav className="tpl-chips" aria-label={t(ui.menuNavLabel)}>
             {data.menu.map((c) => (
               <a key={c.id} href={`#cat-${c.id}`}>
                 {t(c.title)}
@@ -136,7 +136,7 @@ export function RestaurantSite({ data, locale, style, localeHrefs }: TemplatePro
               {t(ui.orderTelegram)}
             </a>
             {data.delivery.map((d) => (
-              <a key={d.name} className="tpl-btn ghost" href={d.url} target="_blank" rel="noopener noreferrer">
+              <a key={d.name} className="tpl-btn ghost" href={d.url} {...ext(d.url)}>
                 {d.name}
               </a>
             ))}
@@ -176,7 +176,7 @@ export function RestaurantSite({ data, locale, style, localeHrefs }: TemplatePro
             <div>
               <h3>{t(ui.addressLabel)}</h3>
               <p>{t(data.address)}</p>
-              <a className="tpl-link" href={data.mapUrl} target="_blank" rel="noopener noreferrer">
+              <a className="tpl-link" href={data.mapUrl} {...ext(data.mapUrl)}>
                 {t(ui.route)} →
               </a>
             </div>
@@ -206,7 +206,7 @@ export function RestaurantSite({ data, locale, style, localeHrefs }: TemplatePro
               <p>{t(ui.reviewsText)}</p>
               <p className="tpl-reviews">
                 {data.reviews.map((r) => (
-                  <a key={r.name} className="tpl-link" href={r.url} target="_blank" rel="noopener noreferrer">
+                  <a key={r.name} className="tpl-link" href={r.url} {...ext(r.url)}>
                     {r.name} →
                   </a>
                 ))}
@@ -225,6 +225,9 @@ export function RestaurantSite({ data, locale, style, localeHrefs }: TemplatePro
     </div>
   );
 }
+
+/** Внешняя ссылка открывается в новой вкладке; заглушка «#» (демо) — нет, иначе клик плодит копии страницы. */
+const ext = (url: string) => (/^https?:/.test(url) ? { target: "_blank", rel: "noopener noreferrer" } : {});
 
 function LangSwitch({ locale, hrefs, label }: { locale: Locale; hrefs: Record<Locale, string>; label: string }) {
   return (

@@ -40,7 +40,7 @@ export const TEMPLATES: TemplateDef[] = [
         mood: {
           ru: "Керамическая бирюза, шафран, антиква. Уютно и по-домашнему.",
           en: "Ceramic teal, saffron, a serif. Cosy and homely.",
-          uz: "Keramik firuza, za’faron, antiqua. Qulay va uyday.",
+          uz: "Keramik firuza, zaʼfaron, antiqua. Qulay va uyday.",
         },
       },
       {
@@ -49,7 +49,7 @@ export const TEMPLATES: TemplateDef[] = [
         mood: {
           ru: "Графит и латунь, строгая типографика. Вечерний сервис.",
           en: "Graphite and brass, strict typography. Evening service.",
-          uz: "Grafit va guruch, qat’iy tipografika. Kechki xizmat.",
+          uz: "Grafit va guruch, qatʼiy tipografika. Kechki xizmat.",
         },
       },
     ],
