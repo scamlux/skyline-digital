@@ -13,7 +13,8 @@
     "content": "tsx scripts/content/cli.ts",
     "content:import": "tsx scripts/content/import-plan.mjs",
     "audit:bench": "tsx --conditions=react-server --env-file=.env.local scripts/audit/bench.ts",
-    "audit:radar": "tsx --conditions=react-server --env-file=.env.local scripts/audit/radar-batch.ts"
+    "audit:radar": "tsx --conditions=react-server --env-file=.env.local scripts/audit/radar-batch.ts",
+    "audit:outreach": "tsx --conditions=react-server --env-file=.env.local scripts/audit/outreach-export.ts"
   },
   "dependencies": {
     "@sparticuz/chromium-min": "^149.0.0",

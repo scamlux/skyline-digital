@@ -71,3 +71,6 @@ kp_skyline.pdf
 # Фабрика постов: шрифты и рендер не коммитятся, они пересобираются
 /scripts/content/fonts/*.woff2
 /scripts/content/out/
+
+# Выгрузки с контактами компаний (outreach): не коммитятся
+/exports/
