@@ -1,0 +1,841 @@
+/* ===== шрифты: Literata (A, заголовки) и Onest (тексты и B) — SIL OFL 1.1, лежат в public/ ===== */
+@font-face{font-family:"Literata";font-style:normal;font-weight:400 800;font-display:swap;src:url(/templates/fonts/literata-cyrillic-ext.woff2) format("woff2");unicode-range:U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F}
+@font-face{font-family:"Literata";font-style:normal;font-weight:400 800;font-display:swap;src:url(/templates/fonts/literata-cyrillic.woff2) format("woff2");unicode-range:U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116}
+@font-face{font-family:"Literata";font-style:normal;font-weight:400 800;font-display:swap;src:url(/templates/fonts/literata-latin-ext.woff2) format("woff2");unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF}
+@font-face{font-family:"Literata";font-style:normal;font-weight:400 800;font-display:swap;src:url(/templates/fonts/literata-latin.woff2) format("woff2");unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face { font-family: "Onest"; font-style: normal; font-weight: 400 800; font-display: swap; src: url(/templates/fonts/onest-cyrillic-ext.woff2) format("woff2"); unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F; }
+@font-face { font-family: "Onest"; font-style: normal; font-weight: 400 800; font-display: swap; src: url(/templates/fonts/onest-cyrillic.woff2) format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: "Onest"; font-style: normal; font-weight: 400 800; font-display: swap; src: url(/templates/fonts/onest-latin-ext.woff2) format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Onest"; font-style: normal; font-weight: 400 800; font-display: swap; src: url(/templates/fonts/onest-latin.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
+/*
+ * Шаблон «Ресторан». Всё под [data-tpl="restaurant"]; два стиля — [data-style="a"|"b"].
+ * Самодостаточный файл: ничего не берёт из остального сайта (ADR 0009).
+ *
+ * Токены:  --bg фон · --surface карточки · --ink текст · --dim приглушённый текст
+ *          --line линии · --acc основной акцент · --acc2 второй акцент · --on-acc текст на акценте
+ *          --hot острое/ошибка · --veg без мяса · --disp шрифт заголовков · --body основной шрифт
+ */
+[data-tpl="restaurant"] {
+  --body: "Onest", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --edge: max(20px, calc((100vw - 1180px) / 2));
+  --head-h: 64px;
+  font-family: var(--body);
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.55;
+  letter-spacing: -0.005em;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  overflow-x: clip;
+  padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+}
+@media (min-width: 761px) {
+  [data-tpl="restaurant"] {
+    padding-bottom: 0;
+  }
+}
+[data-tpl="restaurant"] *,
+[data-tpl="restaurant"] *::before,
+[data-tpl="restaurant"] *::after {
+  box-sizing: border-box;
+}
+[data-tpl="restaurant"][data-style="a"] {
+  --bg: #f1ede3;
+  --surface: #fbf8f0;
+  --ink: #1d2a2b;
+  --dim: #55615f;
+  --line: rgba(29, 42, 43, 0.18);
+  --acc: #0e5a63;
+  --acc2: #d9962b;
+  --on-acc: #ffffff;
+  --hot: #a3303a;
+  --veg: #2f6b3a;
+  --disp: "Literata", Georgia, "Times New Roman", serif;
+  color-scheme: light;
+  --r: 14px;
+  --head-bg: rgba(241, 237, 227, 0.88);
+}
+[data-tpl="restaurant"][data-style="b"] {
+  --bg: #131417;
+  --surface: #1b1c21;
+  --ink: #f1ede4;
+  --dim: #a09c92;
+  --line: rgba(241, 237, 228, 0.16);
+  --acc: #c9a66b;
+  --acc2: #c9a66b;
+  --on-acc: #17130c;
+  --hot: #ff9a8f;
+  --veg: #8fc99a;
+  --disp: "Onest", system-ui, sans-serif;
+  color-scheme: dark;
+  --r: 3px;
+  --head-bg: rgba(19, 20, 23, 0.86);
+}
+[data-tpl="restaurant"] a {
+  color: inherit;
+  text-decoration: none;
+}
+[data-tpl="restaurant"] h1,
+[data-tpl="restaurant"] h2,
+[data-tpl="restaurant"] h3 {
+  font-family: var(--disp);
+  margin: 0;
+  text-wrap: balance;
+}
+[data-tpl="restaurant"] p {
+  margin: 0;
+}
+[data-tpl="restaurant"] :focus-visible {
+  outline: 3px solid var(--acc2);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:has([data-tpl="restaurant"]) {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ——— шапка ——— */
+[data-tpl="restaurant"] .tpl-head {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  height: var(--head-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-inline: var(--edge);
+  background: var(--head-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+[data-tpl="restaurant"] .tpl-logo {
+  font-family: var(--disp);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+[data-tpl="restaurant"][data-style="b"] .tpl-logo {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 15px;
+}
+[data-tpl="restaurant"] .tpl-nav {
+  display: none;
+  gap: 4px;
+}
+@media (min-width: 761px) {
+  [data-tpl="restaurant"] .tpl-nav {
+    display: flex;
+  }
+}
+[data-tpl="restaurant"] .tpl-nav a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding-inline: 14px;
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--dim);
+  transition: color 0.2s;
+}
+[data-tpl="restaurant"] .tpl-nav a:hover {
+  color: var(--ink);
+}
+[data-tpl="restaurant"] .tpl-head-r {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+[data-tpl="restaurant"] .tpl-lang {
+  display: flex;
+}
+[data-tpl="restaurant"] .tpl-lang a {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--dim);
+}
+[data-tpl="restaurant"] .tpl-lang a[aria-current="true"] {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 6px;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--acc2);
+}
+/* На телефоне «Забронировать» уже в нижней панели — в шапке дубль не нужен и не помещается. */
+@media (max-width: 760px) {
+  [data-tpl="restaurant"] .tpl-head .tpl-btn {
+    display: none;
+  }
+}
+
+/* ——— кнопки ——— */
+[data-tpl="restaurant"] .tpl-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 26px;
+  border-radius: var(--r);
+  border: 1.5px solid var(--acc);
+  background: var(--acc);
+  color: var(--on-acc);
+  font: 600 16px/1 var(--body);
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s, color 0.2s, border-color 0.2s;
+}
+[data-tpl="restaurant"] .tpl-btn:hover {
+  transform: translateY(-1px);
+}
+[data-tpl="restaurant"] .tpl-btn.sm {
+  min-height: 44px;
+  padding: 0 18px;
+  font-size: 14.5px;
+}
+[data-tpl="restaurant"] .tpl-btn.ghost {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--line);
+}
+[data-tpl="restaurant"] .tpl-btn.ghost:hover {
+  border-color: var(--ink);
+}
+[data-tpl="restaurant"][data-style="b"] .tpl-btn {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 13.5px;
+}
+
+/* ——— hero ——— */
+[data-tpl="restaurant"] .tpl-hero {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  align-items: center;
+  gap: clamp(24px, 5vw, 72px);
+  min-height: min(84vh, 760px);
+  padding: clamp(40px, 7vw, 96px) var(--edge);
+}
+[data-tpl="restaurant"] .tpl-hero h1 {
+  font-size: clamp(52px, 9.5vw, 128px);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+  margin-top: 18px;
+}
+[data-tpl="restaurant"][data-style="a"] .tpl-hero h1 {
+  color: var(--acc);
+}
+[data-tpl="restaurant"] .tpl-tagline {
+  font-family: var(--disp);
+  font-size: clamp(20px, 2.4vw, 30px);
+  line-height: 1.25;
+  margin-top: 22px;
+  max-width: 24ch;
+}
+[data-tpl="restaurant"] .tpl-intro {
+  color: var(--dim);
+  font-size: clamp(16px, 1.5vw, 18px);
+  max-width: 46ch;
+  margin-top: 14px;
+}
+[data-tpl="restaurant"] .tpl-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 30px;
+}
+[data-tpl="restaurant"] .tpl-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 13.5px;
+  font-weight: 600;
+  background: var(--surface);
+}
+[data-tpl="restaurant"] .tpl-status i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--dim);
+}
+[data-tpl="restaurant"] .tpl-status[data-state="open"] i {
+  background: #2e9b57;
+  box-shadow: 0 0 0 4px rgba(46, 155, 87, 0.22);
+}
+
+/* тарелка: ободок-«ишкор», зубцы шафрана, плов в центре */
+[data-tpl="restaurant"] .tpl-plate {
+  position: relative;
+  width: min(100%, 460px);
+  aspect-ratio: 1;
+  justify-self: center;
+}
+[data-tpl="restaurant"] .tpl-plate span {
+  position: absolute;
+  border-radius: 50%;
+}
+[data-tpl="restaurant"] .tpl-plate .r1 {
+  inset: 0;
+  background: var(--acc);
+  -webkit-mask: radial-gradient(circle closest-side, transparent 72%, #000 72.5%);
+  mask: radial-gradient(circle closest-side, transparent 72%, #000 72.5%);
+}
+[data-tpl="restaurant"] .tpl-plate .r2 {
+  inset: 4.5%;
+  background: repeating-conic-gradient(var(--acc2) 0 4deg, transparent 4deg 8deg);
+  -webkit-mask: radial-gradient(circle closest-side, transparent 80%, #000 80.5%, #000 93%, transparent 93.5%);
+  mask: radial-gradient(circle closest-side, transparent 80%, #000 80.5%, #000 93%, transparent 93.5%);
+}
+[data-tpl="restaurant"] .tpl-plate .r3 {
+  inset: 21%;
+  background:
+    repeating-radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.16) 0 1.5px, transparent 1.5px 6px),
+    radial-gradient(circle at 38% 34%, #f0cf7e, var(--acc2) 52%, #8a5a14);
+  box-shadow: inset 0 0 0 6px rgba(255, 255, 255, 0.28), 0 18px 40px -18px rgba(0, 0, 0, 0.45);
+}
+/* B: без тарелки — крупная типографика по центру, латунная линия */
+[data-tpl="restaurant"][data-style="b"] .tpl-hero {
+  grid-template-columns: 1fr;
+  text-align: center;
+  justify-items: center;
+  background: radial-gradient(60% 55% at 50% 30%, rgba(201, 166, 107, 0.14), transparent 70%);
+}
+[data-tpl="restaurant"][data-style="b"] .tpl-plate {
+  display: none;
+}
+[data-tpl="restaurant"][data-style="b"] .tpl-hero h1 {
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: clamp(44px, 10vw, 140px);
+  letter-spacing: -0.03em;
+}
+[data-tpl="restaurant"][data-style="b"] .tpl-hero h1::after {
+  content: "";
+  display: block;
+  width: 72px;
+  height: 2px;
+  background: var(--acc);
+  margin: 26px auto 0;
+}
+[data-tpl="restaurant"][data-style="b"] .tpl-tagline {
+  font-family: var(--body);
+  font-weight: 300;
+  max-width: 30ch;
+}
+[data-tpl="restaurant"][data-style="b"] .tpl-cta {
+  justify-content: center;
+}
+@media (max-width: 760px) {
+  [data-tpl="restaurant"] .tpl-hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+  [data-tpl="restaurant"][data-style="a"] .tpl-plate {
+    width: min(70%, 300px);
+    order: -1;
+    margin-bottom: 8px;
+  }
+  [data-tpl="restaurant"] .tpl-cta .tpl-btn {
+    flex: 1 1 100%;
+  }
+}
+
+/* орнамент-разделитель */
+[data-tpl="restaurant"] .tpl-orn {
+  height: 14px;
+  background:
+    linear-gradient(135deg, var(--acc) 25%, transparent 25%) -7px 0 / 14px 14px,
+    linear-gradient(225deg, var(--acc) 25%, transparent 25%) -7px 0 / 14px 14px,
+    linear-gradient(315deg, var(--acc) 25%, transparent 25%) 0 0 / 14px 14px,
+    linear-gradient(45deg, var(--acc) 25%, transparent 25%) 0 0 / 14px 14px;
+  opacity: 0.85;
+}
+[data-tpl="restaurant"][data-style="b"] .tpl-orn {
+  height: 1px;
+  background: var(--line);
+  opacity: 1;
+}
+
+/* ——— секции ——— */
+[data-tpl="restaurant"] .tpl-sec {
+  padding: clamp(56px, 8vw, 104px) var(--edge);
+}
+[data-tpl="restaurant"] .tpl-sec-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 32px;
+  margin-bottom: 28px;
+}
+[data-tpl="restaurant"] .tpl-sec h2 {
+  font-size: clamp(32px, 5vw, 60px);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+}
+[data-tpl="restaurant"][data-style="b"] .tpl-sec h2 {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.015em;
+  font-size: clamp(28px, 4.4vw, 52px);
+}
+[data-tpl="restaurant"] .tpl-sec-head p {
+  color: var(--dim);
+  font-size: 15px;
+  max-width: 44ch;
+}
+
+/* ——— меню ——— */
+[data-tpl="restaurant"] .tpl-chips {
+  position: sticky;
+  top: var(--head-h);
+  z-index: 20;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin-inline: calc(var(--edge) * -1);
+  padding: 10px var(--edge);
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  scrollbar-width: none;
+}
+[data-tpl="restaurant"] .tpl-chips::-webkit-scrollbar {
+  display: none;
+}
+[data-tpl="restaurant"] .tpl-chips a {
+  flex: none;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 18px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+[data-tpl="restaurant"] .tpl-chips a:hover {
+  background: var(--acc);
+  border-color: var(--acc);
+  color: var(--on-acc);
+}
+[data-tpl="restaurant"][data-style="b"] .tpl-chips a {
+  border-radius: var(--r);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 12.5px;
+}
+/* карточка меню — как печатное меню: категории колонками, блюдо ····· цена */
+[data-tpl="restaurant"] .tpl-card {
+  margin-top: 28px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--r) + 6px);
+  padding: clamp(22px, 4vw, 48px);
+}
+@media (min-width: 900px) {
+  [data-tpl="restaurant"][data-style="a"] .tpl-card {
+    column-count: 2;
+    column-gap: 64px;
+    column-rule: 1px solid var(--line);
+  }
+}
+[data-tpl="restaurant"] .tpl-cat {
+  break-inside: avoid;
+  scroll-margin-top: calc(var(--head-h) + 70px);
+  padding-bottom: 8px;
+}
+[data-tpl="restaurant"] .tpl-cat + .tpl-cat {
+  margin-top: 34px;
+}
+[data-tpl="restaurant"] .tpl-cat h3 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--acc);
+  padding-bottom: 12px;
+  margin-bottom: 6px;
+  border-bottom: 2px solid var(--acc2);
+}
+[data-tpl="restaurant"][data-style="b"] .tpl-cat h3 {
+  font-size: 12.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  border-bottom: 1px solid var(--acc);
+}
+[data-tpl="restaurant"] .tpl-cat ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+[data-tpl="restaurant"] .tpl-item {
+  padding: 16px 0;
+}
+[data-tpl="restaurant"] .tpl-item + .tpl-item {
+  border-top: 1px solid var(--line);
+}
+[data-tpl="restaurant"] .tpl-item-top {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+[data-tpl="restaurant"] .tpl-item-name {
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.25;
+}
+[data-tpl="restaurant"] .tpl-leader {
+  flex: 1;
+  min-width: 14px;
+  border-bottom: 2px dotted color-mix(in srgb, var(--ink) 38%, transparent);
+  transform: translateY(-4px);
+}
+[data-tpl="restaurant"] .tpl-item-price {
+  font-weight: 700;
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+[data-tpl="restaurant"] .tpl-item-desc {
+  color: var(--dim);
+  font-size: 15px;
+  margin-top: 4px;
+  max-width: 52ch;
+}
+[data-tpl="restaurant"] .tpl-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+[data-tpl="restaurant"] .tpl-tags span {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+[data-tpl="restaurant"] .tpl-tags [data-tag="spicy"] {
+  color: var(--hot);
+}
+[data-tpl="restaurant"] .tpl-tags [data-tag="veg"] {
+  color: var(--veg);
+}
+[data-tpl="restaurant"] .tpl-tags [data-tag="hit"] {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--acc2) 38%, transparent);
+  border-color: transparent;
+}
+[data-tpl="restaurant"] .tpl-item[data-out] .tpl-item-name {
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+  color: var(--dim);
+}
+[data-tpl="restaurant"] .tpl-item[data-out] .tpl-leader {
+  border-bottom-style: none;
+}
+[data-tpl="restaurant"] .tpl-item[data-out] .tpl-item-price {
+  font-weight: 600;
+  font-size: 13.5px;
+  color: var(--hot);
+}
+
+/* ——— заказ, о нас ——— */
+[data-tpl="restaurant"] .tpl-order {
+  background: var(--acc);
+  color: var(--on-acc);
+}
+[data-tpl="restaurant"][data-style="b"] .tpl-order {
+  background: var(--surface);
+  color: var(--ink);
+  border-block: 1px solid var(--line);
+}
+[data-tpl="restaurant"] .tpl-order .tpl-sec-head p {
+  color: inherit;
+  opacity: 0.85;
+}
+[data-tpl="restaurant"] .tpl-order .tpl-btn {
+  background: var(--on-acc);
+  color: var(--acc);
+  border-color: var(--on-acc);
+}
+[data-tpl="restaurant"] .tpl-order .tpl-btn.ghost {
+  background: transparent;
+  color: inherit;
+  border-color: color-mix(in srgb, currentColor 45%, transparent);
+}
+[data-tpl="restaurant"][data-style="b"] .tpl-order .tpl-btn {
+  background: var(--acc);
+  color: var(--on-acc);
+  border-color: var(--acc);
+}
+[data-tpl="restaurant"][data-style="b"] .tpl-order .tpl-btn.ghost {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--line);
+}
+[data-tpl="restaurant"] .tpl-about {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: clamp(28px, 6vw, 88px);
+  align-items: start;
+}
+[data-tpl="restaurant"] .tpl-about-copy p {
+  font-size: clamp(17px, 1.7vw, 20px);
+  color: var(--dim);
+  max-width: 52ch;
+  margin-top: 18px;
+}
+[data-tpl="restaurant"] .tpl-about-copy p:first-of-type {
+  color: var(--ink);
+}
+[data-tpl="restaurant"] .tpl-facts {
+  margin: 0;
+  display: grid;
+  border-top: 1px solid var(--line);
+}
+[data-tpl="restaurant"] .tpl-facts div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+[data-tpl="restaurant"] .tpl-facts dt {
+  color: var(--dim);
+  font-size: 14px;
+}
+[data-tpl="restaurant"] .tpl-facts dd {
+  margin: 0;
+  font-weight: 600;
+  text-align: right;
+}
+@media (max-width: 760px) {
+  [data-tpl="restaurant"] .tpl-about {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ——— бронь ——— */
+[data-tpl="restaurant"] .tpl-book {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: clamp(28px, 6vw, 88px);
+  align-items: start;
+  background: var(--surface);
+  border-block: 1px solid var(--line);
+}
+[data-tpl="restaurant"] .tpl-book-copy p {
+  color: var(--dim);
+  font-size: 17px;
+  margin-top: 16px;
+  max-width: 36ch;
+}
+@media (max-width: 760px) {
+  [data-tpl="restaurant"] .tpl-book {
+    grid-template-columns: 1fr;
+  }
+}
+[data-tpl="restaurant"] .tpl-form {
+  display: grid;
+  gap: 16px;
+}
+[data-tpl="restaurant"] .tpl-row {
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  gap: 16px;
+}
+@media (max-width: 420px) {
+  [data-tpl="restaurant"] .tpl-row {
+    grid-template-columns: 1fr;
+  }
+}
+[data-tpl="restaurant"] .tpl-field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+[data-tpl="restaurant"] .tpl-field label {
+  font-size: 14px;
+  font-weight: 600;
+}
+[data-tpl="restaurant"] .tpl-field input,
+[data-tpl="restaurant"] .tpl-field select {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 14px;
+  font: 500 16px var(--body);
+  color: var(--ink);
+  background: var(--bg);
+  border: 1.5px solid var(--line);
+  border-radius: var(--r);
+}
+[data-tpl="restaurant"] .tpl-field input:hover,
+[data-tpl="restaurant"] .tpl-field select:hover {
+  border-color: var(--dim);
+}
+[data-tpl="restaurant"] .tpl-field input[aria-invalid="true"] {
+  border-color: var(--hot);
+}
+[data-tpl="restaurant"] .tpl-err {
+  color: var(--hot);
+  font-size: 14px;
+  font-weight: 600;
+}
+[data-tpl="restaurant"] .tpl-note {
+  color: var(--dim);
+  font-size: 13.5px;
+}
+[data-tpl="restaurant"] .tpl-form .tpl-btn {
+  width: 100%;
+}
+[data-tpl="restaurant"] .tpl-success {
+  display: grid;
+  gap: 12px;
+  padding: 28px;
+  border: 1.5px solid var(--acc);
+  border-radius: calc(var(--r) + 4px);
+  background: var(--bg);
+}
+[data-tpl="restaurant"] .tpl-success h3 {
+  font-size: 26px;
+  color: var(--acc);
+}
+[data-tpl="restaurant"][data-style="b"] .tpl-success h3 {
+  color: var(--ink);
+}
+[data-tpl="restaurant"] .tpl-success .tpl-btn {
+  justify-self: start;
+}
+
+/* ——— контакты ——— */
+[data-tpl="restaurant"] .tpl-contacts-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px 28px;
+}
+@media (max-width: 960px) {
+  [data-tpl="restaurant"] .tpl-contacts-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 520px) {
+  [data-tpl="restaurant"] .tpl-contacts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+[data-tpl="restaurant"] .tpl-contacts-grid h3 {
+  font-family: var(--body);
+  font-size: 12.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--dim);
+  margin-bottom: 10px;
+}
+[data-tpl="restaurant"] .tpl-contacts-grid p {
+  font-size: 17px;
+}
+[data-tpl="restaurant"] .tpl-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 600;
+  color: var(--acc);
+  text-underline-offset: 4px;
+}
+[data-tpl="restaurant"][data-style="b"] .tpl-link {
+  color: var(--acc);
+}
+[data-tpl="restaurant"] .tpl-link:hover {
+  text-decoration: underline;
+}
+[data-tpl="restaurant"] .tpl-link.big {
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+}
+[data-tpl="restaurant"] .tpl-reviews {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin-top: 4px;
+}
+
+/* ——— подвал и липкая панель ——— */
+[data-tpl="restaurant"] .tpl-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
+  padding: 24px var(--edge);
+  border-top: 1px solid var(--line);
+  color: var(--dim);
+  font-size: 14px;
+}
+[data-tpl="restaurant"] .tpl-sticky {
+  display: none;
+}
+@media (max-width: 760px) {
+  [data-tpl="restaurant"] .tpl-sticky {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 40;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.3fr;
+    gap: 8px;
+    padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+    background: var(--head-bg);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-top: 1px solid var(--line);
+  }
+  [data-tpl="restaurant"] .tpl-sticky a {
+    min-height: 52px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid var(--line);
+    border-radius: var(--r);
+    font-weight: 600;
+    font-size: 15px;
+  }
+  [data-tpl="restaurant"] .tpl-sticky {
+    transition: transform 0.25s, visibility 0s;
+  }
+  [data-tpl="restaurant"] .tpl-sticky[data-hidden] {
+    transform: translateY(110%);
+    pointer-events: none;
+    visibility: hidden;
+    transition: transform 0.25s, visibility 0s 0.25s;
+  }
+  [data-tpl="restaurant"] .tpl-sticky a.primary {
+    background: var(--acc);
+    border-color: var(--acc);
+    color: var(--on-acc);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-tpl="restaurant"] * {
+    transition: none !important;
+  }
+}

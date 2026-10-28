@@ -1,0 +1,100 @@
+import type { L } from "../types";
+
+/** Тексты интерфейса шаблона «Ресторан» (отдельно от данных ресторана). */
+export const restaurantUi = {
+  nav: {
+    menu: { ru: "Меню", en: "Menu", uz: "Menyu" },
+    about: { ru: "О нас", en: "About", uz: "Biz haqimizda" },
+    contacts: { ru: "Контакты", en: "Contact", uz: "Aloqa" },
+  },
+  book: { ru: "Забронировать стол", en: "Book a table", uz: "Stol band qilish" },
+  bookShort: { ru: "Забронировать", en: "Book", uz: "Band qilish" },
+  seeMenu: { ru: "Смотреть меню", en: "See the menu", uz: "Menyuni koʻrish" },
+  call: { ru: "Позвонить", en: "Call", uz: "Qoʻngʻiroq" },
+  telegram: { ru: "Telegram", en: "Telegram", uz: "Telegram" },
+  route: { ru: "Построить маршрут", en: "Get directions", uz: "Yoʻnalish" },
+  // {t} — время. Узбекское «gacha/da» ставится после времени, поэтому подстановка, а не склейка.
+  openNow: { ru: "Открыто до {t}", en: "Open until {t}", uz: "{t} gacha ochiq" },
+  closedNow: { ru: "Откроемся в {t}", en: "Opens at {t}", uz: "{t} da ochiladi" },
+  navLabel: { ru: "Разделы сайта", en: "Site sections", uz: "Sayt boʻlimlari" },
+  menuNavLabel: { ru: "Разделы меню", en: "Menu sections", uz: "Menyu boʻlimlari" },
+  quickLabel: { ru: "Быстрые действия", en: "Quick actions", uz: "Tezkor amallar" },
+  hoursLabel: { ru: "Работаем ежедневно", en: "Open daily", uz: "Har kuni ochiq" },
+  menuTitle: { ru: "Меню", en: "Menu", uz: "Menyu" },
+  menuHint: {
+    ru: "Цены в сумах. Позиции без наличия отмечены.",
+    en: "Prices in UZS. Dishes that are out are marked.",
+    uz: "Narxlar soʻmda. Tugagan taomlar belgilangan.",
+  },
+  unavailable: { ru: "Сегодня нет", en: "Out today", uz: "Bugun yoʻq" },
+  tags: {
+    spicy: { ru: "Острое", en: "Spicy", uz: "Achchiq" },
+    veg: { ru: "Без мяса", en: "Meat-free", uz: "Goʻshtsiz" },
+    hit: { ru: "Хит", en: "Popular", uz: "Mashhur" },
+  },
+  deliveryTitle: { ru: "Заказать домой", en: "Order for delivery", uz: "Uyga buyurtma" },
+  deliveryText: {
+    ru: "Доставляют агрегаторы. Заказ напрямую в Telegram — без комиссии сервиса.",
+    en: "Delivery runs through the apps. Order directly on Telegram — no service commission.",
+    uz: "Yetkazib berishni ilovalar bajaradi. Telegramda toʻgʻridan-toʻgʻri buyurtma — xizmat komissiyasiz.",
+  },
+  orderTelegram: { ru: "Заказать в Telegram", en: "Order on Telegram", uz: "Telegramda buyurtma" },
+  contactsTitle: { ru: "Как нас найти", en: "Find us", uz: "Bizni toping" },
+  addressLabel: { ru: "Адрес", en: "Address", uz: "Manzil" },
+  hoursTitle: { ru: "Часы работы", en: "Hours", uz: "Ish vaqti" },
+  reviewsTitle: { ru: "Отзывы гостей", en: "Guest reviews", uz: "Mehmonlar fikri" },
+  reviewsText: {
+    ru: "Читайте и пишите отзывы там, где их видят все.",
+    en: "Read and leave reviews where everyone can see them.",
+    uz: "Fikrlarni hamma koʻradigan joyda oʻqing va qoldiring.",
+  },
+  form: {
+    title: { ru: "Бронь стола", en: "Reserve a table", uz: "Stol band qilish" },
+    lead: {
+      ru: "Оставьте имя и телефон — подтвердим бронь в течение 15 минут.",
+      en: "Leave your name and phone — we confirm within 15 minutes.",
+      uz: "Ism va telefonni qoldiring — 15 daqiqa ichida tasdiqlaymiz.",
+    },
+    name: { ru: "Имя", en: "Name", uz: "Ism" },
+    phone: { ru: "Телефон", en: "Phone", uz: "Telefon" },
+    when: { ru: "Дата и время", en: "Date and time", uz: "Sana va vaqt" },
+    guests: { ru: "Гостей", en: "Guests", uz: "Mehmonlar" },
+    submit: { ru: "Забронировать", en: "Request booking", uz: "Band qilish" },
+    consent: {
+      ru: "Имя и телефон видит только ресторан — нужны, чтобы подтвердить бронь.",
+      en: "Only the restaurant sees your name and phone — used to confirm the booking.",
+      uz: "Ism va telefonni faqat restoran koʻradi — bronni tasdiqlash uchun.",
+    },
+    errName: { ru: "Укажите имя", en: "Enter your name", uz: "Ismingizni kiriting" },
+    errPhone: {
+      ru: "Укажите телефон в формате +998 90 123 45 67",
+      en: "Enter a phone like +998 90 123 45 67",
+      uz: "Telefonni +998 90 123 45 67 koʻrinishida kiriting",
+    },
+    errWhen: { ru: "Выберите дату и время", en: "Pick a date and time", uz: "Sana va vaqtni tanlang" },
+    successTitle: { ru: "Заявка принята", en: "Request received", uz: "Soʻrov qabul qilindi" },
+    successText: {
+      ru: "Мы напишем или позвоним в течение 15 минут и подтвердим стол.",
+      en: "We will message or call within 15 minutes to confirm your table.",
+      uz: "15 daqiqa ichida yozamiz yoki qoʻngʻiroq qilamiz va stolni tasdiqlaymiz.",
+    },
+    demoNote: {
+      ru: "Демо: на настоящем сайте заявка за секунды приходит владельцу в Telegram.",
+      en: "Demo: on a real site the request reaches the owner on Telegram within seconds.",
+      uz: "Demo: haqiqiy saytda soʻrov bir necha soniyada egasining Telegramiga tushadi.",
+    },
+    again: { ru: "Отправить ещё одну", en: "Send another", uz: "Yana yuborish" },
+    openTelegram: {
+      ru: "Открыть Telegram и отправить",
+      en: "Open Telegram and send",
+      uz: "Telegramni ochib yuborish",
+    },
+    openTelegramHint: {
+      ru: "Если Telegram не открылся сам — нажмите кнопку: заявка уйдёт, когда вы отправите сообщение.",
+      en: "If Telegram did not open by itself, press the button: the request is sent when you send the message.",
+      uz: "Telegram oʻzi ochilmasa, tugmani bosing: xabarni yuborganingizda soʻrov joʻnatiladi.",
+    },
+    messageHead: { ru: "Бронь стола", en: "Table booking", uz: "Stol bandi" },
+  },
+  langLabel: { ru: "Язык", en: "Language", uz: "Til" },
+} satisfies Record<string, L | Record<string, L | Record<string, L>>>;
