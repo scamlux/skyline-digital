@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
 import type { L, Locale, StyleId } from "./types";
 import { RestaurantSite } from "./restaurant/Restaurant";
+import { RestaurantAdmin } from "./restaurant/Admin";
 import { restaurantDemo } from "./restaurant/data";
 
 export interface TemplateStyle {
@@ -16,7 +17,11 @@ export interface TemplateDef {
   styles: TemplateStyle[];
   /** Имя вымышленного бизнеса в демо — для заголовка страницы. */
   demoName: string;
+  /** Превью для соцсетей (Telegram/WhatsApp): JPG, а не WebP — WebP там показывается плохо. */
+  og: { image: string; description: L };
   render: (p: { locale: Locale; style: StyleId; localeHrefs: Record<Locale, string> }) => ReactElement;
+  /** Демо-кабинет владельца (если у шаблона он есть). */
+  renderAdmin?: (p: { locale: Locale; localeHrefs: Record<Locale, string>; siteHref: string }) => ReactElement;
 }
 
 /**
@@ -27,6 +32,7 @@ export const TEMPLATES: TemplateDef[] = [
   {
     id: "restaurant",
     demoName: restaurantDemo.name,
+    og: { image: "/templates/restaurant/img/og-1200.jpg", description: restaurantDemo.tagline },
     title: { ru: "Ресторан и кафе", en: "Restaurant & café", uz: "Restoran va kafe" },
     blurb: {
       ru: "Меню как печатная карточка, бронь стола в Telegram, кнопки доставки.",
@@ -54,6 +60,7 @@ export const TEMPLATES: TemplateDef[] = [
       },
     ],
     render: (p) => <RestaurantSite data={restaurantDemo} {...p} />,
+    renderAdmin: (p) => <RestaurantAdmin data={restaurantDemo} {...p} />,
   },
 ];
 
