@@ -7,6 +7,8 @@ import { demoUi, localePath, upcoming } from "@/site-templates/demo";
 import { TEMPLATES } from "@/site-templates/registry";
 import { pick, type Locale } from "@/site-templates/types";
 
+const SHOWROOM_CSS = "/templates/showroom.css";
+
 // Витрина шаблонов — для показа клиентам, в поиск не нужна.
 export const metadata: Metadata = { title: "Сайты для бизнеса по подписке", robots: { index: false, follow: false } };
 
@@ -19,6 +21,9 @@ export default async function ShowroomPage({ params }: { params: Promise<{ local
 
   return (
     <main className="min-h-screen bg-day text-ink">
+      <link rel="stylesheet" href={SHOWROOM_CSS} precedence="default" />
+      <link rel="preload" href="/templates/fonts/onest-latin.woff2" as="font" type="font/woff2" crossOrigin="" />
+      <link rel="preload" href="/templates/fonts/onest-cyrillic.woff2" as="font" type="font/woff2" crossOrigin="" />
       <div className="mx-auto max-w-5xl px-5 py-12 md:px-8 md:py-20">
         <a href={localePath(locale, "/")} className="text-sm text-muted hover:text-ink">
           Skyline Digital

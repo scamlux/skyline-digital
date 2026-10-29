@@ -7,6 +7,8 @@ import type { L } from "../types";
 export type Tag = "spicy" | "veg" | "hit";
 
 export interface MenuItem {
+  /** Стабильный ключ блюда: по нему хранятся правки владельца (цена, стоп-лист, фото). */
+  id: string;
   name: L;
   desc?: L;
   /** Сум. */
@@ -14,8 +16,11 @@ export interface MenuItem {
   tags?: Tag[];
   /** false — позиция в стоп-листе: остаётся в меню, но помечена «сегодня нет». */
   available?: boolean;
-  /** Необязательное фото блюда (путь или URL); без него меню остаётся чисто типографским. */
-  image?: string;
+  /**
+   * Необязательное фото блюда: базовое имя файла в public/templates/restaurant/img
+   * (лежат -480/-960 .webp). Без фото меню остаётся чисто типографским.
+   */
+  photo?: string;
 }
 
 export interface MenuCategory {
@@ -38,6 +43,10 @@ export interface RestaurantData {
   delivery: { name: string; url: string }[];
   /** Ссылки на карточки на картах — отзывы читают там, а не копируются на сайт. */
   reviews: { name: string; url: string }[];
+  /** Баннер-акция под шапкой; владелец включает/выключает и меняет текст в кабинете. */
+  promo: L;
+  /** Фото: hero (первый экран), about (о нас), gallery (3 кадра в «О нас»). Базовые имена файлов. */
+  photos: { hero: string; about: string; gallery: string[] };
   menu: MenuCategory[];
   about: { title: L; paragraphs: L[]; facts: { k: L; v: L }[] };
   booking: {
@@ -75,12 +84,20 @@ export const restaurantDemo: RestaurantData = {
     { name: "Google Maps", url: "#" },
     { name: "2GIS", url: "#" },
   ],
+  promo: {
+    ru: "Бизнес-ланч с 12:00 до 15:00 — плов и чай за 70 000 сум",
+    en: "Business lunch 12:00–15:00 — plov and tea for 70,000 UZS",
+    uz: "Biznes-lanch 12:00–15:00 — osh va choy 70 000 soʻm",
+  },
+  photos: { hero: "hero", about: "kazan", gallery: ["interior", "tandir", "table"] },
   menu: [
     {
       id: "hot",
       title: { ru: "Горячее", en: "Mains", uz: "Issiq taomlar" },
       items: [
         {
+          id: "plov",
+          photo: "plov",
           name: { ru: "Плов праздничный", en: "Festive plov", uz: "Bayramona osh" },
           desc: {
             ru: "Говядина, нут, изюм, айва, чеснок. Варим на казане с утра.",
@@ -91,6 +108,8 @@ export const restaurantDemo: RestaurantData = {
           tags: ["hit"],
         },
         {
+          id: "lagman",
+          photo: "lagman",
           name: { ru: "Лагман жареный", en: "Fried lagman", uz: "Qovurma lagʻmon" },
           desc: {
             ru: "Домашняя лапша, говядина, болгарский перец, зелень.",
@@ -101,6 +120,8 @@ export const restaurantDemo: RestaurantData = {
           tags: ["spicy"],
         },
         {
+          id: "manti",
+          photo: "manti",
           name: { ru: "Манты с тыквой", en: "Pumpkin manti", uz: "Qovoqli manti" },
           desc: {
             ru: "Пять штук, на пару, с сметаной.",
@@ -111,6 +132,8 @@ export const restaurantDemo: RestaurantData = {
           tags: ["veg"],
         },
         {
+          id: "naryn",
+          photo: "naryn",
           name: { ru: "Нарын", en: "Naryn", uz: "Norin" },
           desc: {
             ru: "Тонкая лапша с конониной по-домашнему.",
@@ -127,6 +150,8 @@ export const restaurantDemo: RestaurantData = {
       title: { ru: "Шашлык", en: "Grill", uz: "Kabob" },
       items: [
         {
+          id: "shashlik",
+          photo: "shashlik",
           name: { ru: "Шашлык из баранины", en: "Lamb skewer", uz: "Qoʻy goʻshti kabobi" },
           desc: {
             ru: "На углях, с луком и лавашом. Порция — 2 шпажки.",
@@ -137,11 +162,15 @@ export const restaurantDemo: RestaurantData = {
           tags: ["hit"],
         },
         {
+          id: "lula",
+          photo: "lula",
           name: { ru: "Люля-кебаб", en: "Lula kebab", uz: "Lyulya-kabob" },
           price: 38000,
           tags: ["spicy"],
         },
         {
+          id: "veg-grill",
+          photo: "veg-grill",
           name: { ru: "Овощи на углях", en: "Charred vegetables", uz: "Choʻgʻda sabzavotlar" },
           price: 32000,
           tags: ["veg"],
@@ -153,6 +182,8 @@ export const restaurantDemo: RestaurantData = {
       title: { ru: "Закуски и самса", en: "Starters & samsa", uz: "Gazaklar va somsa" },
       items: [
         {
+          id: "samsa",
+          photo: "samsa",
           name: { ru: "Самса из тандыра", en: "Tandoor samsa", uz: "Tandir somsa" },
           desc: {
             ru: "С бараниной и луком, горячая из печи.",
@@ -163,6 +194,8 @@ export const restaurantDemo: RestaurantData = {
           tags: ["hit"],
         },
         {
+          id: "achichuk",
+          photo: "achichuk",
           name: { ru: "Ачичук", en: "Achichuk", uz: "Achchiq-chuchuk" },
           desc: {
             ru: "Помидоры, лук, базилик.",
@@ -173,6 +206,8 @@ export const restaurantDemo: RestaurantData = {
           tags: ["veg"],
         },
         {
+          id: "lepyoshka",
+          photo: "lepyoshka",
           name: { ru: "Лепёшка", en: "Flatbread", uz: "Non" },
           price: 8000,
         },
@@ -183,14 +218,20 @@ export const restaurantDemo: RestaurantData = {
       title: { ru: "Напитки", en: "Drinks", uz: "Ichimliklar" },
       items: [
         {
+          id: "tea",
+          photo: "tea",
           name: { ru: "Чай зелёный, чайник", en: "Green tea, pot", uz: "Koʻk choy, choynak" },
           price: 12000,
         },
         {
+          id: "ayran",
+          photo: "ayran",
           name: { ru: "Айран", en: "Ayran", uz: "Ayron" },
           price: 15000,
         },
         {
+          id: "mors",
+          photo: "mors",
           name: { ru: "Морс ягодный", en: "Berry mors", uz: "Rezavor mors" },
           price: 18000,
         },
