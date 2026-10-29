@@ -1,0 +1,40 @@
+/*
+ * Стили лёгкой группы маршрутов /sites. Не импортируем globals.css основного сайта:
+ * он тянет за собой шрифты next/font (Unbounded, Golos, JetBrains) и все утилиты проекта.
+ * Здесь — только токены и утилиты, которые реально встречаются в (sites) и в src/site-templates.
+ * Шрифт Onest подключают сами шаблон и витрина (public/templates/*.css).
+ */
+@import "tailwindcss" source(none);
+@source "./";
+@source "../../site-templates";
+
+@theme inline {
+  --color-night: #1a2238;
+  --color-day: #f5f7fa;
+  --color-surface: #ffffff;
+  --color-ink: #1c2130;
+  --color-muted: #5b6272;
+  --color-mist: #8b93a7;
+  --color-line: #dde2ea;
+  --color-line-night: #2c3550;
+  --color-apricot: #ffae5c;
+  --font-display: "Onest", system-ui, sans-serif;
+}
+
+body {
+  background: var(--color-day);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+:where(a, button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 2px solid var(--color-apricot);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.bg-night :where(a, button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  box-shadow: 0 0 0 4px var(--color-night);
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}

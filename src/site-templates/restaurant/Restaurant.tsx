@@ -1,12 +1,17 @@
-import { formatSum, LOCALES, pick, type Locale, type TemplateProps } from "../types";
-import { BookingForm, OpenStatus, StickyBar } from "./client";
+/* eslint-disable @next/next/no-img-element -- шаблон переносимый (без next/image): адаптивные <img srcset> с готовыми webp */
+import { LOCALES, pick, type Locale, type TemplateProps } from "../types";
+import { BookingForm, HoursText, ItemPrice, ItemRow, OpenStatus, PageView, PromoBar, StickyBar, TrackedLink } from "./client";
 import type { RestaurantData } from "./data";
 import { restaurantUi as ui } from "./ui";
 
 // CSS лежит в public/, а не импортируется: импортированный .css Turbopack добавляет во все
 // маршруты сайта (ADR 0007), а шаблону нужно оставаться переносимым (ADR 0009).
 const TEMPLATE_CSS = "/templates/restaurant.css";
-const FONT_PRELOAD = ["/templates/fonts/literata-latin.woff2", "/templates/fonts/literata-cyrillic.woff2"];
+// Прелоадим только то, чем набран первый экран: у стиля A заголовки — Literata, у B всё — Onest.
+const FONT_PRELOAD = {
+  a: ["/templates/fonts/literata-latin.woff2", "/templates/fonts/literata-cyrillic.woff2"],
+  b: ["/templates/fonts/onest-latin.woff2", "/templates/fonts/onest-cyrillic.woff2"],
+} as const;
 
 /**
  * Шаблон «Ресторан». Сервер-компонент без зависимостей от остального сайта:
@@ -20,6 +25,14 @@ const FONT_PRELOAD = ["/templates/fonts/literata-latin.woff2", "/templates/fonts
 export function RestaurantSite({ data, locale, style, localeHrefs }: TemplateProps<RestaurantData>) {
   const t = (l: Parameters<typeof pick>[0]) => pick(l, locale);
   const menuId = "menu";
+  // Ширины файлов в public/templates/restaurant/img (<имя>-<ширина>.webp). Нужные есть не у каждого кадра:
+  // 240 — миниатюры блюд и галерея, 720/800 — только hero.
+  type W = 240 | 480 | 720 | 800 | 960 | 1280;
+  const img = (base: string, w: W) => `/templates/restaurant/img/${base}-${w}.webp`;
+  const srcSet = (base: string, sizes: W[]) => sizes.map((w) => `${img(base, w)} ${w}w`).join(", ");
+  // Hero: в A — половина экрана на десктопе; в B — фон на всю ширину под тёмной вуалью,
+  // поэтому на телефоне хватает файла по ширине экрана (его кадрирует object-fit).
+  const heroSizes = style === "b" ? "100vw" : "(max-width: 760px) calc(100vw - 40px), 50vw";
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -34,7 +47,7 @@ export function RestaurantSite({ data, locale, style, localeHrefs }: TemplatePro
   return (
     <div className="tpl" data-tpl="restaurant" data-style={style} lang={locale === "uz" ? "uz-Latn" : locale}>
       <link rel="stylesheet" href={TEMPLATE_CSS} precedence="default" />
-      {FONT_PRELOAD.map((href) => (
+      {FONT_PRELOAD[style].map((href) => (
         <link key={href} rel="preload" href={href} as="font" type="font/woff2" crossOrigin="" />
       ))}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
@@ -57,6 +70,8 @@ export function RestaurantSite({ data, locale, style, localeHrefs }: TemplatePro
       </header>
 
       <main id="top">
+        <PageView />
+        <PromoBar text={t(data.promo)} locale={locale} />
         <section className="tpl-hero">
           <div className="tpl-hero-copy">
             <OpenStatus open={data.hours.open} close={data.hours.close} locale={locale} />
@@ -72,11 +87,18 @@ export function RestaurantSite({ data, locale, style, localeHrefs }: TemplatePro
               </a>
             </div>
           </div>
-          <div className="tpl-plate" aria-hidden="true">
-            <span className="r1" />
-            <span className="r2" />
-            <span className="r3" />
-          </div>
+          <figure className="tpl-hero-photo">
+            <img
+              src={img(data.photos.hero, 960)}
+              srcSet={srcSet(data.photos.hero, [480, 720, 800, 960, 1280])}
+              sizes={heroSizes}
+              width={1280}
+              height={853}
+              alt=""
+              fetchPriority="high"
+              decoding="async"
+            />
+          </figure>
         </section>
 
         <div className="tpl-orn" aria-hidden="true" />
@@ -99,13 +121,25 @@ export function RestaurantSite({ data, locale, style, localeHrefs }: TemplatePro
                 <h3 id={`cat-${c.id}-t`}>{t(c.title)}</h3>
                 <ul>
                   {c.items.map((it) => {
-                    const out = it.available === false;
                     return (
-                      <li key={t(it.name)} className="tpl-item" data-out={out || undefined}>
+                      <ItemRow key={it.id} id={it.id} available={it.available !== false}>
+                        {it.photo && (
+                          <img
+                            className="tpl-item-img"
+                            src={img(it.photo, 480)}
+                            srcSet={srcSet(it.photo, [240, 480])}
+                            sizes="(max-width: 760px) 88px, 112px"
+                            width={480}
+                            height={360}
+                            alt=""
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        )}
                         <div className="tpl-item-top">
                           <span className="tpl-item-name">{t(it.name)}</span>
                           <span className="tpl-leader" aria-hidden="true" />
-                          <span className="tpl-item-price">{out ? t(ui.unavailable) : formatSum(it.price, locale)}</span>
+                          <ItemPrice id={it.id} price={it.price} available={it.available !== false} unavailableLabel={t(ui.unavailable)} locale={locale} />
                         </div>
                         {it.desc && <p className="tpl-item-desc">{t(it.desc)}</p>}
                         {(it.tags?.length ?? 0) > 0 && (
@@ -117,7 +151,7 @@ export function RestaurantSite({ data, locale, style, localeHrefs }: TemplatePro
                             ))}
                           </p>
                         )}
-                      </li>
+                      </ItemRow>
                     );
                   })}
                 </ul>
@@ -132,9 +166,9 @@ export function RestaurantSite({ data, locale, style, localeHrefs }: TemplatePro
             <p>{t(ui.deliveryText)}</p>
           </div>
           <div className="tpl-cta">
-            <a className="tpl-btn" href={`https://t.me/${data.telegram}`} target="_blank" rel="noopener noreferrer">
+            <TrackedLink type="telegram" className="tpl-btn" href={`https://t.me/${data.telegram}`} external>
               {t(ui.orderTelegram)}
-            </a>
+            </TrackedLink>
             {data.delivery.map((d) => (
               <a key={d.name} className="tpl-btn ghost" href={d.url} {...ext(d.url)}>
                 {d.name}
@@ -149,6 +183,23 @@ export function RestaurantSite({ data, locale, style, localeHrefs }: TemplatePro
             {data.about.paragraphs.map((p) => (
               <p key={t(p)}>{t(p)}</p>
             ))}
+          </div>
+          <div className="tpl-about-media">
+            <img
+              src={img(data.photos.about, 960)}
+              srcSet={srcSet(data.photos.about, [480, 960])}
+              sizes="(max-width: 760px) 100vw, 40vw"
+              width={960}
+              height={640}
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+            <div className="tpl-gallery" aria-hidden="true">
+              {data.photos.gallery.map((g) => (
+                <img key={g} src={img(g, 480)} srcSet={srcSet(g, [240, 480, 960])} sizes="(max-width: 760px) 30vw, 13vw" width={480} height={480} alt="" loading="lazy" decoding="async" />
+              ))}
+            </div>
           </div>
           <dl className="tpl-facts">
             {data.about.facts.map((f) => (
@@ -176,30 +227,28 @@ export function RestaurantSite({ data, locale, style, localeHrefs }: TemplatePro
             <div>
               <h3>{t(ui.addressLabel)}</h3>
               <p>{t(data.address)}</p>
-              <a className="tpl-link" href={data.mapUrl} {...ext(data.mapUrl)}>
+              <TrackedLink type="route" className="tpl-link" href={data.mapUrl} external={/^https?:/.test(data.mapUrl)}>
                 {t(ui.route)} →
-              </a>
+              </TrackedLink>
             </div>
             <div>
               <h3>{t(ui.hoursTitle)}</h3>
               <p>
                 {t(ui.hoursLabel)}
                 <br />
-                <strong>
-                  {data.hours.open}–{data.hours.close}
-                </strong>
+                <HoursText open={data.hours.open} close={data.hours.close} />
               </p>
             </div>
             <div>
               <h3>{t(ui.call)}</h3>
               <p>
-                <a className="tpl-link big" href={`tel:${data.phone.e164}`}>
+                <TrackedLink type="call" className="tpl-link big" href={`tel:${data.phone.e164}`}>
                   {data.phone.display}
-                </a>
+                </TrackedLink>
               </p>
-              <a className="tpl-link" href={`https://t.me/${data.telegram}`} target="_blank" rel="noopener noreferrer">
+              <TrackedLink type="telegram" className="tpl-link" href={`https://t.me/${data.telegram}`} external>
                 @{data.telegram} →
-              </a>
+              </TrackedLink>
             </div>
             <div>
               <h3>{t(ui.reviewsTitle)}</h3>

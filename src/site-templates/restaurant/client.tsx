@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { pick, type Locale } from "../types";
+import { formatSum, pick, type Locale } from "../types";
 import { restaurantUi as ui } from "./ui";
+import { demo, useDemoState, type EventType } from "./store";
 
 const minutes = (hhmm: string) => {
   const [h, m] = hhmm.split(":").map(Number);
@@ -24,8 +25,11 @@ const subscribe = (cb: () => void) => {
  * «Открыто до 23:00» / «Откроемся в 10:00». Считается в браузере по времени Ташкента;
  * до гидрации показываем нейтральные часы работы, чтобы разметка совпала с серверной.
  */
-export function OpenStatus({ open, close, locale }: { open: string; close: string; locale: Locale }) {
+export function OpenStatus({ open: o, close: c, locale }: { open: string; close: string; locale: Locale }) {
   const now = useSyncExternalStore(subscribe, tashkentMinutes, () => -1);
+  const edited = useDemoState().hours;
+  const open = edited?.open ?? o;
+  const close = edited?.close ?? c;
   if (now < 0) {
     return (
       <span className="tpl-status" data-state="idle">
@@ -94,6 +98,7 @@ export function BookingForm({
       if (first) e.currentTarget.querySelector<HTMLElement>(`[name="${first}"]`)?.focus();
       return;
     }
+    demo.addLead({ name, phone, when, guests });
     if (mode === "telegram") {
       const text = `${pick(f.messageHead, locale)} · ${restaurant}\n${name}, ${phone}\n${when}, ${pick(f.guests, locale).toLowerCase()}: ${guests}`;
       const url = `https://t.me/${telegram}?text=${encodeURIComponent(text)}`;
@@ -201,13 +206,108 @@ export function StickyBar({
   }, []);
   return (
     <nav className="tpl-sticky" data-hidden={hidden || undefined} inert={hidden} aria-label={pick(ui.quickLabel, locale)}>
-      <a href={`tel:${phone}`}>{pick(ui.call, locale)}</a>
-      <a href={`https://t.me/${telegram}`} target="_blank" rel="noopener noreferrer">
+      <a href={`tel:${phone}`} onClick={() => demo.track("call")}>
+        {pick(ui.call, locale)}
+      </a>
+      <a href={`https://t.me/${telegram}`} target="_blank" rel="noopener noreferrer" onClick={() => demo.track("telegram")}>
         {pick(ui.telegram, locale)}
       </a>
       <a href="#book" className="primary">
         {pick(ui.bookShort, locale)}
       </a>
     </nav>
+  );
+}
+
+/** Ссылка-действие (позвонить, Telegram, маршрут): клик фиксируется в демо-кабинете. */
+export function TrackedLink({
+  type,
+  className,
+  href,
+  children,
+  external,
+}: {
+  type: EventType;
+  className?: string;
+  href: string;
+  children: React.ReactNode;
+  external?: boolean;
+}) {
+  return (
+    <a
+      className={className}
+      href={href}
+      onClick={() => demo.track(type)}
+      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+    >
+      {children}
+    </a>
+  );
+}
+
+/** Один просмотр страницы = одно событие «view» (для счётчика в кабинете). */
+export function PageView() {
+  useEffect(() => {
+    demo.track("view");
+  }, []);
+  return null;
+}
+
+/**
+ * Часы работы с учётом правок владельца. Серверная разметка — из данных; после
+ * гидрации подставляются часы из кабинета.
+ */
+export function HoursText({ open, close }: { open: string; close: string }) {
+  const edited = useDemoState().hours;
+  return (
+    <strong>
+      {edited?.open ?? open}–{edited?.close ?? close}
+    </strong>
+  );
+}
+
+/** Баннер-акция: текст и включение — из кабинета; по умолчанию показан текст из данных. */
+export function PromoBar({ text, locale }: { text: string; locale: Locale }) {
+  const promo = useDemoState().promo;
+  if (promo && !promo.on) return null;
+  const t = promo?.text?.[locale] ?? text;
+  return (
+    <p className="tpl-promo" role="note">
+      {t}
+    </p>
+  );
+}
+
+/**
+ * Цена и наличие блюда с учётом правок владельца. Серверная разметка — из данных;
+ * после гидрации подставляются значения из кабинета.
+ */
+export function ItemPrice({
+  id,
+  price,
+  available,
+  unavailableLabel,
+  locale,
+}: {
+  id: string;
+  price: number;
+  available: boolean;
+  unavailableLabel: string;
+  locale: Locale;
+}) {
+  const o = useDemoState().items[id];
+  const out = o?.available === false || (o?.available === undefined && !available);
+  return <span className="tpl-item-price">{out ? unavailableLabel : formatSum(o?.price ?? price, locale)}</span>;
+}
+
+/** Обёртка позиции меню: data-out для стоп-листа, hidden — если владелец скрыл блюдо. */
+export function ItemRow({ id, available, children }: { id: string; available: boolean; children: React.ReactNode }) {
+  const o = useDemoState().items[id];
+  const out = o?.available === false || (o?.available === undefined && !available);
+  if (o?.hidden) return null;
+  return (
+    <li className="tpl-item" data-out={out || undefined}>
+      {children}
+    </li>
   );
 }

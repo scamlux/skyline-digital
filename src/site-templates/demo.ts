@@ -25,6 +25,7 @@ export const demoUi = {
     uz: "Soha va uslubni tanlang — jonli namuna ochiladi. Bitta tarif: oyiga 50 $, buyurtmalardan foizsiz.",
   },
   open: { ru: "Открыть пример", en: "Open example", uz: "Namunani ochish" },
+  admin: { ru: "Кабинет владельца", en: "Owner dashboard", uz: "Egasining kabineti" },
   soon: { ru: "Скоро", en: "Coming soon", uz: "Tez orada" },
   includes: {
     ru: "Входит: 5–7 страниц, русский и узбекский, заявки в Telegram, правка меню и цен за 2 минуты.",

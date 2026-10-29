@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
+import { SITE_URL } from "@/lib/seo";
 import { demoUi, localePath } from "@/site-templates/demo";
 import { TEMPLATES, getTemplate } from "@/site-templates/registry";
 import { LOCALES, pick, type Locale, type StyleId } from "@/site-templates/types";
@@ -14,10 +15,23 @@ export function generateStaticParams() {
 type Params = { locale: string; niche: string; style: string };
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
-  const { niche } = await params;
+  const { locale: raw, niche, style } = await params;
   const tpl = getTemplate(niche);
-  // Демо на нашем домене — в индекс не нужно.
-  return { title: tpl ? `${tpl.demoName} — демо` : "Демо", robots: { index: false, follow: false } };
+  if (!tpl) return { title: "Демо", robots: { index: false, follow: false } };
+  const locale = (hasLocale(routing.locales, raw) ? raw : "ru") as Locale;
+  const title = `${tpl.demoName} — ${pick(demoUi.badge, locale).toLowerCase()}`;
+  const description = pick(tpl.og.description, locale);
+  const url = `${SITE_URL}${localePath(locale, `/sites/${tpl.id}/${style}`)}`;
+  const image = { url: `${SITE_URL}${tpl.og.image}`, width: 1200, height: 630, alt: tpl.demoName };
+  return {
+    metadataBase: new URL(SITE_URL),
+    title,
+    description,
+    // Демо на нашем домене — в индекс не нужно; превью для мессенджеров при этом работает.
+    robots: { index: false, follow: false },
+    openGraph: { type: "website", siteName: tpl.demoName, title, description, url, images: [image] },
+    twitter: { card: "summary_large_image", title, description, images: [image.url] },
+  };
 }
 
 export default async function TemplatePage({ params }: { params: Promise<Params> }) {
@@ -56,6 +70,11 @@ export default async function TemplatePage({ params }: { params: Promise<Params>
               {s.id.toUpperCase()}<span className="hidden md:inline"> · {t(s.name)}</span>
             </a>
           ))}
+          {tpl.renderAdmin && (
+            <a href={localePath(locale, `/sites/${tpl.id}/admin`)} className="ml-2 inline-flex min-h-[44px] items-center rounded-full border border-line-night px-3 text-day hover:border-day">
+              {t(demoUi.admin)}
+            </a>
+          )}
           <a href={localePath(locale, "/contact")} className="ml-2 inline-flex min-h-[44px] items-center rounded-full bg-apricot px-4 font-medium text-night hover:opacity-90">
             {t(demoUi.order)}
           </a>
