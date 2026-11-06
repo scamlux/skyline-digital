@@ -26,6 +26,9 @@ export const demoUi = {
   },
   open: { ru: "Открыть пример", en: "Open example", uz: "Namunani ochish" },
   admin: { ru: "Кабинет владельца", en: "Owner dashboard", uz: "Egasining kabineti" },
+  // Короткие подписи для панели демо на узком экране (≤480px): панель остаётся в одну строку.
+  adminShort: { ru: "Кабинет", en: "Admin", uz: "Kabinet" },
+  orderShort: { ru: "50 $/мес", en: "$50/mo", uz: "50 $/oy" },
   soon: { ru: "Скоро", en: "Coming soon", uz: "Tez orada" },
   includes: {
     ru: "Входит: 5–7 страниц, русский и узбекский, заявки в Telegram, правка меню и цен за 2 минуты.",
@@ -36,6 +39,4 @@ export const demoUi = {
 
 /** Ниши, которые готовятся (показываем честно как «скоро», без ссылок). */
 export const upcoming: { id: string; title: L }[] = [
-  { id: "clinic", title: { ru: "Клиника и стоматология", en: "Clinic & dentistry", uz: "Klinika va stomatologiya" } },
-  { id: "salon", title: { ru: "Салон и барбершоп", en: "Salon & barbershop", uz: "Salon va barbershop" } },
 ];
