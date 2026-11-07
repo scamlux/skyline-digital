@@ -1,0 +1,508 @@
+/* ===== шрифт Onest (SIL OFL 1.1) — тот же набор, что в restaurant.css; лежит в public/templates/fonts ===== */
+/* ===== шрифт Onest (SIL OFL 1.1) — тот же набор, что в restaurant.css; кабинет не грузит CSS сайта ===== */
+@font-face { font-family: "Onest"; font-style: normal; font-weight: 400 800; font-display: swap; src: url(/templates/fonts/onest-cyrillic-ext.woff2) format("woff2"); unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F; }
+@font-face { font-family: "Onest"; font-style: normal; font-weight: 400 800; font-display: swap; src: url(/templates/fonts/onest-cyrillic.woff2) format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: "Onest"; font-style: normal; font-weight: 400 800; font-display: swap; src: url(/templates/fonts/onest-latin-ext.woff2) format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+/*
+ * Шаблон «Клиника / стоматология». Всё под [data-tpl="clinic"]; два стиля — [data-style="a"|"b"].
+ * Самодостаточный файл: ничего не берёт из остального сайта (ADR 0009).
+ *
+ * Правила скорости: анимируем только transform и opacity; всё, что движется, стартует после
+ * первой отрисовки (атрибут data-live на корне ставит MotionLayer) и ставится на паузу, когда
+ * блок вне экрана (data-off) или вкладка скрыта (data-paused). При prefers-reduced-motion
+ * страница статична. Контент первого экрана никогда не прячется.
+ *
+ * Токены: --bg фон · --surface карточки · --ink текст · --dim приглушённый текст · --line линии
+ *         --acc основной акцент · --on-acc текст на акценте · --acc2 второй акцент · --soft тихая заливка
+ *         --r радиус · --glass/--glass-line стекло плавающих карточек
+ */
+[data-tpl="clinic"] {
+  --body: "Onest", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --edge: max(20px, calc((100vw - 1180px) / 2));
+  --head-h: 64px;
+  font-family: var(--body);
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.55;
+  letter-spacing: -0.005em;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  overflow-x: clip;
+  padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+}
+@media (min-width: 761px) {
+  [data-tpl="clinic"] { padding-bottom: 0; }
+}
+[data-tpl="clinic"] *, [data-tpl="clinic"] *::before, [data-tpl="clinic"] *::after { box-sizing: border-box; }
+
+/* ——— стиль A «Свет»: воздух, мята, небо, персик ——— */
+[data-tpl="clinic"][data-style="a"] {
+  --bg: #f4fbf9;
+  --surface: #ffffff;
+  --ink: #0e2a2d;
+  --dim: #4b6467;
+  --line: rgba(14, 42, 45, 0.11);
+  --acc: #0a7568;
+  --on-acc: #ffffff;
+  --acc2: #ff9a72;
+  --soft: #e4f6f2;
+  --r: 16px;
+  --head-bg: #f4fbf9;
+  --glass: rgba(255, 255, 255, 0.66);
+  --glass-line: rgba(255, 255, 255, 0.85);
+  --shadow: 0 24px 50px -28px rgba(10, 80, 72, 0.35);
+  --h-weight: 650;
+}
+/* ——— стиль B «Глубина»: тёмный navy, бирюзовое свечение ——— */
+[data-tpl="clinic"][data-style="b"] {
+  --bg: #07111f;
+  --surface: #0d1c2f;
+  --ink: #e9f5f7;
+  --dim: #9fb7c0;
+  --line: rgba(255, 255, 255, 0.1);
+  --acc: #34e3cf;
+  --on-acc: #04201c;
+  --acc2: #7fa8ff;
+  --soft: rgba(52, 227, 207, 0.1);
+  --r: 12px;
+  --head-bg: #07111f;
+  --glass: rgba(9, 24, 44, 0.62);
+  --glass-line: rgba(255, 255, 255, 0.14);
+  --shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.9);
+  --h-weight: 600;
+}
+
+[data-tpl="clinic"] a { color: inherit; text-decoration: none; }
+[data-tpl="clinic"] img { display: block; max-width: 100%; }
+[data-tpl="clinic"] h1, [data-tpl="clinic"] h2, [data-tpl="clinic"] h3 { font-weight: var(--h-weight); letter-spacing: -0.025em; line-height: 1.1; margin: 0; }
+[data-tpl="clinic"] p { margin: 0; }
+[data-tpl="clinic"] ul { list-style: none; margin: 0; padding: 0; }
+[data-tpl="clinic"] :focus-visible { outline: 3px solid var(--acc2); outline-offset: 3px; border-radius: 6px; }
+[data-tpl="clinic"] button { font-family: inherit; color: inherit; }
+
+/* ——— шапка ——— */
+[data-tpl="clinic"] .tpl-head {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  min-height: var(--head-h); padding: 0 var(--edge);
+  background: var(--head-bg); border-bottom: 1px solid var(--line);
+}
+[data-tpl="clinic"] .tpl-logo { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-size: 19px; font-weight: 700; letter-spacing: -0.02em; }
+[data-tpl="clinic"] .tpl-logo svg { color: var(--acc); flex: none; }
+[data-tpl="clinic"] .tpl-nav { display: none; gap: 2px; }
+@media (min-width: 981px) { [data-tpl="clinic"] .tpl-nav { display: flex; } }
+[data-tpl="clinic"] .tpl-nav a { min-height: 44px; display: inline-flex; align-items: center; padding-inline: 12px; font-weight: 500; font-size: 15px; color: var(--dim); transition: color 0.2s; }
+[data-tpl="clinic"] .tpl-nav a:hover { color: var(--ink); }
+[data-tpl="clinic"] .tpl-head-r { display: flex; align-items: center; gap: 10px; }
+[data-tpl="clinic"] .tpl-lang { display: flex; }
+[data-tpl="clinic"] .tpl-lang a { min-width: 40px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; color: var(--dim); }
+[data-tpl="clinic"] .tpl-lang a[aria-current="true"] { color: var(--ink); text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 2px; text-decoration-color: var(--acc); }
+@media (max-width: 760px) { [data-tpl="clinic"] .tpl-head .tpl-btn { display: none; } }
+
+/* ——— кнопки ——— */
+[data-tpl="clinic"] .tpl-btn {
+  display: inline-flex; align-items: center; justify-content: center; text-align: center;
+  min-height: 48px; padding: 0 26px; border-radius: 999px;
+  border: 1.5px solid var(--acc); background: var(--acc); color: var(--on-acc);
+  font: 600 16px/1.1 var(--body); cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.25s, background 0.2s, color 0.2s;
+}
+[data-tpl="clinic"] .tpl-btn:hover { transform: translateY(-2px); }
+[data-tpl="clinic"][data-style="a"] .tpl-btn { box-shadow: 0 10px 24px -12px rgba(10, 117, 104, 0.7); }
+[data-tpl="clinic"][data-style="b"] .tpl-btn { box-shadow: 0 0 0 0 rgba(52, 227, 207, 0), 0 10px 40px -10px rgba(52, 227, 207, 0.55); }
+[data-tpl="clinic"][data-style="b"] .tpl-btn:hover { box-shadow: 0 0 0 4px rgba(52, 227, 207, 0.18), 0 10px 44px -8px rgba(52, 227, 207, 0.75); }
+[data-tpl="clinic"] .tpl-btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); box-shadow: none; }
+[data-tpl="clinic"] .tpl-btn.ghost:hover { border-color: var(--acc); }
+[data-tpl="clinic"] .tpl-btn.sm { min-height: 44px; padding: 0 20px; font-size: 15px; }
+[data-tpl="clinic"] .tpl-btn[aria-disabled="true"] { opacity: 0.45; pointer-events: none; box-shadow: none; }
+[data-tpl="clinic"] .tpl-link { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; color: var(--acc); background: none; border: 0; padding: 0; cursor: pointer; font-size: 15px; }
+[data-tpl="clinic"][data-style="a"] .tpl-link { color: var(--acc); }
+[data-tpl="clinic"] .tpl-link.big { font-size: 22px; letter-spacing: -0.01em; color: var(--ink); }
+[data-tpl="clinic"] .tpl-link:hover { text-decoration: underline; text-underline-offset: 4px; }
+
+/* ——— акция ——— */
+[data-tpl="clinic"] .tpl-promo { padding: 10px var(--edge); background: var(--acc2); color: #1a1208; font-size: 14.5px; font-weight: 600; text-align: center; }
+[data-tpl="clinic"][data-style="b"] .tpl-promo { background: linear-gradient(90deg, #1b4f6b, #167e78); color: #eafffb; }
+
+/* ——— статус «открыто» ——— */
+[data-tpl="clinic"] .tpl-status { display: inline-flex; align-items: center; gap: 8px; min-height: 32px; padding: 4px 14px; border-radius: 999px; font-size: 13.5px; font-weight: 600; background: var(--soft); color: var(--ink); width: fit-content; }
+[data-tpl="clinic"] .tpl-status i { width: 8px; height: 8px; border-radius: 50%; background: #9aa; flex: none; }
+[data-tpl="clinic"] .tpl-status[data-state="open"] i { background: #1fb77a; }
+[data-tpl="clinic"] .tpl-status[data-state="closed"] i { background: var(--acc2); }
+
+/* ——— hero ——— */
+[data-tpl="clinic"] .tpl-hero {
+  position: relative; isolation: isolate; overflow: hidden;
+  display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr); gap: 48px; align-items: center;
+  padding: 56px var(--edge) 72px; min-height: min(86vh, 760px);
+  --px: 0; --py: 0;
+}
+[data-tpl="clinic"] .tpl-hero-copy { display: grid; gap: 20px; justify-items: start; position: relative; z-index: 2; }
+[data-tpl="clinic"] .tpl-hero h1 { font-size: clamp(40px, 6.4vw, 78px); letter-spacing: -0.035em; line-height: 1.02; font-weight: 700; }
+[data-tpl="clinic"] .tpl-h1-lead { display: inline; }
+/* слово, которое сменяется: все слова в одной ячейке сетки — ширина по самому длинному, прыжка нет */
+[data-tpl="clinic"] .tpl-cyc { display: inline-grid; vertical-align: top; }
+[data-tpl="clinic"] .tpl-cyc-w { grid-area: 1 / 1; opacity: 0; color: var(--acc); }
+[data-tpl="clinic"] .tpl-cyc-w:first-child { opacity: 1; }
+[data-tpl="clinic"][data-style="a"] .tpl-cyc-w { color: var(--acc); }
+[data-tpl="clinic"][data-style="b"] .tpl-cyc-w { color: var(--acc); text-shadow: 0 0 28px rgba(52, 227, 207, 0.55); }
+[data-tpl="clinic"] .tpl-tagline { font-size: clamp(18px, 2.2vw, 24px); font-weight: 600; color: var(--ink); letter-spacing: -0.015em; }
+[data-tpl="clinic"] .tpl-intro { max-width: 52ch; color: var(--dim); font-size: 17px; }
+[data-tpl="clinic"] .tpl-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
+
+/* фон: A — аврора из трёх мягких пятен; B — свет за курсором и зерно */
+[data-tpl="clinic"] .tpl-fx { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+[data-tpl="clinic"] .tpl-blob { position: absolute; border-radius: 50%; will-change: transform; }
+[data-tpl="clinic"] .b1 { width: 62vmax; height: 62vmax; left: -22vmax; top: -30vmax; background: radial-gradient(closest-side, rgba(94, 224, 196, 0.55), rgba(94, 224, 196, 0)); }
+[data-tpl="clinic"] .b2 { width: 58vmax; height: 58vmax; right: -24vmax; top: -16vmax; background: radial-gradient(closest-side, rgba(120, 190, 255, 0.5), rgba(120, 190, 255, 0)); }
+[data-tpl="clinic"] .b3 { width: 52vmax; height: 52vmax; right: 6vmax; bottom: -34vmax; background: radial-gradient(closest-side, rgba(255, 176, 140, 0.5), rgba(255, 176, 140, 0)); }
+[data-tpl="clinic"][data-style="b"] .tpl-spot {
+  position: absolute; left: 0; top: 0; width: 720px; height: 720px; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(52, 227, 207, 0.3), rgba(52, 227, 207, 0.08) 55%, rgba(52, 227, 207, 0));
+  transform: translate3d(calc(var(--mx, 72vw) - 360px), calc(var(--my, 30%) - 360px), 0);
+  will-change: transform;
+}
+[data-tpl="clinic"][data-style="b"] .tpl-grain {
+  position: absolute; inset: 0; opacity: 0.16;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size: 160px 160px;
+}
+
+/* фото: A — арка; B — на всю ширину под вуалью */
+[data-tpl="clinic"] .tpl-hero-visual { position: relative; }
+[data-tpl="clinic"] .tpl-hero-photo { margin: 0; position: relative; }
+[data-tpl="clinic"][data-style="a"] .tpl-hero-photo { aspect-ratio: 4 / 5; max-width: 480px; margin-inline: auto; border-radius: 999px 999px 32px 32px; overflow: hidden; box-shadow: var(--shadow), 0 0 0 10px rgba(255, 255, 255, 0.6); }
+[data-tpl="clinic"] .tpl-hero-photo img { width: 100%; height: 100%; object-fit: cover; }
+[data-tpl="clinic"][data-style="a"] .tpl-hero-photo img { object-position: 52% 50%; }
+[data-tpl="clinic"][data-style="b"] .tpl-hero-visual { position: static; }
+[data-tpl="clinic"][data-style="b"] .tpl-hero-photo { position: absolute; inset: 0; z-index: -2; }
+[data-tpl="clinic"][data-style="b"] .tpl-hero-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(7, 17, 31, 0.96) 0%, rgba(7, 17, 31, 0.82) 38%, rgba(7, 17, 31, 0.3) 72%, rgba(7, 17, 31, 0.12) 100%), linear-gradient(180deg, rgba(7, 17, 31, 0) 70%, #07111f 100%); }
+[data-tpl="clinic"][data-style="b"] .tpl-hero-photo img { object-position: 70% 50%; filter: saturate(1); }
+
+/* плавающие стеклянные карточки: параллакс по курсору (родитель), покачивание (ребёнок) */
+[data-tpl="clinic"] .tpl-floats { position: absolute; inset: 0; pointer-events: none; }
+[data-tpl="clinic"] .tpl-float { position: absolute; pointer-events: auto; transform: translate3d(calc(var(--px, 0) * var(--k, 1) * 16px), calc(var(--py, 0) * var(--k, 1) * 12px), 0); transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1); }
+[data-tpl="clinic"] .tpl-glass {
+  display: grid; gap: 2px; padding: 12px 16px; min-width: 150px; max-width: 230px; border-radius: 16px;
+  background: var(--glass); border: 1px solid var(--glass-line);
+  -webkit-backdrop-filter: blur(14px) saturate(1.5); backdrop-filter: blur(14px) saturate(1.5);
+  box-shadow: var(--shadow);
+}
+[data-tpl="clinic"] .tpl-glass small { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: var(--dim); text-transform: uppercase; }
+[data-tpl="clinic"] .tpl-glass small:first-child:not(:only-child) { letter-spacing: 0.1em; }
+[data-tpl="clinic"] .tpl-glass b { font-size: 15.5px; font-weight: 650; line-height: 1.3; color: var(--ink); }
+[data-tpl="clinic"] .tpl-glass span { font-size: 13px; color: var(--dim); min-height: 1.3em; }
+[data-tpl="clinic"] .tpl-glass-slot { text-decoration: none; }
+[data-tpl="clinic"] .tpl-glass-slot b { font-variant-numeric: tabular-nums; min-width: 12ch; }
+[data-tpl="clinic"][data-style="a"] .f1 small { color: #d98a00; letter-spacing: 0.12em; font-size: 14px; }
+[data-tpl="clinic"][data-style="b"] .f1 small { color: #ffc861; letter-spacing: 0.12em; font-size: 14px; }
+/* A: карточки вокруг арки */
+[data-tpl="clinic"][data-style="a"] .f1 { left: -4%; top: 10%; }
+[data-tpl="clinic"][data-style="a"] .f2 { left: -2%; bottom: 14%; }
+[data-tpl="clinic"][data-style="a"] .f3 { right: -2%; top: 46%; }
+/* B: справа, поверх тёмной вуали */
+[data-tpl="clinic"][data-style="b"] .f1 { right: calc(var(--edge) + 60px); top: 14%; }
+[data-tpl="clinic"][data-style="b"] .f2 { right: calc(var(--edge) + 0px); top: 42%; }
+[data-tpl="clinic"][data-style="b"] .f3 { right: calc(var(--edge) + 110px); bottom: 12%; }
+
+/* ——— бегущая строка доверия ——— */
+[data-tpl="clinic"] .tpl-marquee { overflow: hidden; border-block: 1px solid var(--line); background: var(--surface); -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
+[data-tpl="clinic"] .tpl-marquee-track { display: flex; width: max-content; }
+[data-tpl="clinic"] .tpl-marquee ul { display: flex; flex: none; }
+[data-tpl="clinic"] .tpl-marquee li { display: inline-flex; align-items: center; gap: 14px; padding: 18px 0 18px 28px; font-size: 15px; font-weight: 600; white-space: nowrap; color: var(--ink); }
+[data-tpl="clinic"] .tpl-marquee li::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--acc); flex: none; }
+@media (prefers-reduced-motion: reduce) {
+  [data-tpl="clinic"] .tpl-marquee { -webkit-mask-image: none; mask-image: none; }
+  [data-tpl="clinic"] .tpl-marquee-track { width: auto; }
+  [data-tpl="clinic"] .tpl-marquee ul { flex-wrap: wrap; padding-inline: var(--edge); }
+  [data-tpl="clinic"] .tpl-marquee ul[aria-hidden="true"] { display: none; }
+}
+
+/* ——— цифры ——— */
+[data-tpl="clinic"] .tpl-stats { padding: 56px var(--edge) 8px; }
+[data-tpl="clinic"] .tpl-stats dl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin: 0; }
+[data-tpl="clinic"] .tpl-stats dl > div { display: flex; flex-direction: column-reverse; gap: 4px; padding: 20px 22px; border-radius: calc(var(--r) + 4px); background: var(--surface); border: 1px solid var(--line); }
+[data-tpl="clinic"] .tpl-stats dd { margin: 0; font-size: clamp(32px, 4.4vw, 52px); font-weight: 700; letter-spacing: -0.04em; line-height: 1; color: var(--acc); font-variant-numeric: tabular-nums; }
+[data-tpl="clinic"][data-style="b"] .tpl-stats dd { text-shadow: 0 0 30px rgba(52, 227, 207, 0.4); }
+[data-tpl="clinic"] .tpl-stats dt { font-size: 14px; color: var(--dim); font-weight: 500; }
+[data-tpl="clinic"] .tpl-stats > p { margin-top: 12px; font-size: 12.5px; color: var(--dim); }
+
+/* ——— секции ——— */
+[data-tpl="clinic"] .tpl-sec { padding: 72px var(--edge) 8px; }
+[data-tpl="clinic"] .tpl-sec-head { display: grid; gap: 10px; margin-bottom: 32px; max-width: 62ch; }
+[data-tpl="clinic"] .tpl-sec-head h2 { font-size: clamp(30px, 4.2vw, 48px); }
+[data-tpl="clinic"] .tpl-sec-head p { color: var(--dim); font-size: 17px; }
+
+/* ——— услуги ——— */
+[data-tpl="clinic"] .tpl-svc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+[data-tpl="clinic"] .tpl-svc-grid > li { display: flex; }
+[data-tpl="clinic"] .tpl-svc {
+  position: relative; display: flex; flex-direction: column; gap: 8px; width: 100%; padding: 24px;
+  border-radius: calc(var(--r) + 6px); background: var(--surface); border: 1px solid var(--line);
+  transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.25s, border-color 0.25s;
+}
+@media (hover: hover) {
+  [data-tpl="clinic"] .tpl-svc:hover {
+    transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-6px);
+    box-shadow: var(--shadow); border-color: var(--acc);
+  }
+  [data-tpl="clinic"][data-style="b"] .tpl-svc:hover { box-shadow: 0 0 0 1px rgba(52, 227, 207, 0.4), 0 20px 50px -20px rgba(52, 227, 207, 0.35); }
+}
+[data-tpl="clinic"] .tpl-svc-ico { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px; background: var(--soft); color: var(--acc); margin-bottom: 6px; }
+[data-tpl="clinic"] .tpl-svc h3 { font-size: 20px; }
+[data-tpl="clinic"] .tpl-svc p { color: var(--dim); font-size: 15px; }
+[data-tpl="clinic"] .tpl-svc .tpl-svc-unit { font-size: 13px; margin-top: auto; padding-top: 10px; }
+[data-tpl="clinic"] .tpl-svc .tpl-svc-price { color: var(--ink); font-weight: 700; font-size: 17px; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+[data-tpl="clinic"] .tpl-svc-book { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-weight: 600; color: var(--acc); font-size: 15px; }
+[data-tpl="clinic"] .tpl-svc-book span { transition: transform 0.2s; }
+[data-tpl="clinic"] .tpl-svc-book:hover span { transform: translateX(4px); }
+
+/* ——— калькулятор ——— */
+[data-tpl="clinic"] .tpl-calc { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+[data-tpl="clinic"] .tpl-calc-list { display: grid; gap: 10px; }
+[data-tpl="clinic"] .tpl-calc-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 14px 16px; border-radius: calc(var(--r) + 2px); background: var(--surface); border: 1px solid var(--line); transition: border-color 0.2s, background 0.2s; }
+[data-tpl="clinic"] .tpl-calc-row[data-on] { border-color: var(--acc); background: linear-gradient(0deg, var(--soft), var(--soft)), var(--surface); }
+[data-tpl="clinic"] .tpl-calc-ico { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; background: var(--soft); color: var(--acc); }
+[data-tpl="clinic"] .tpl-calc-name { display: grid; gap: 2px; min-width: 0; }
+[data-tpl="clinic"] .tpl-calc-name > span { font-weight: 600; font-size: 16px; }
+[data-tpl="clinic"] .tpl-calc-name small { color: var(--dim); font-size: 13px; font-variant-numeric: tabular-nums; }
+[data-tpl="clinic"] .tpl-stepper { display: inline-flex; align-items: center; gap: 4px; }
+[data-tpl="clinic"] .tpl-stepper button { width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--bg); font-size: 22px; line-height: 1; cursor: pointer; display: grid; place-items: center; transition: border-color 0.2s, background 0.2s, transform 0.15s; }
+[data-tpl="clinic"] .tpl-stepper button:hover:not(:disabled) { border-color: var(--acc); background: var(--soft); }
+[data-tpl="clinic"] .tpl-stepper button:active:not(:disabled) { transform: scale(0.92); }
+[data-tpl="clinic"] .tpl-stepper button:disabled { opacity: 0.4; cursor: default; }
+[data-tpl="clinic"] .tpl-stepper output { min-width: 28px; text-align: center; font-weight: 700; font-size: 18px; font-variant-numeric: tabular-nums; }
+[data-tpl="clinic"] .tpl-calc-total { position: sticky; top: calc(var(--head-h) + 16px); display: grid; gap: 8px; padding: 24px; border-radius: calc(var(--r) + 8px); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
+[data-tpl="clinic"][data-style="a"] .tpl-calc-total { background: linear-gradient(160deg, #ffffff, #e9f8f4); }
+[data-tpl="clinic"][data-style="b"] .tpl-calc-total { background: linear-gradient(160deg, #0f2238, #0b1a2c); border-color: rgba(52, 227, 207, 0.3); box-shadow: 0 0 60px -20px rgba(52, 227, 207, 0.4); }
+[data-tpl="clinic"] .tpl-calc-label { font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); }
+[data-tpl="clinic"] .tpl-calc-sum { font-size: clamp(26px, 3.4vw, 36px); font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; min-height: 2.35em; display: flex; align-items: center; font-variant-numeric: tabular-nums; color: var(--ink); }
+[data-tpl="clinic"] .tpl-calc-empty { font-size: 16px; font-weight: 500; letter-spacing: 0; color: var(--dim); }
+[data-tpl="clinic"] .tpl-calc-visits { font-weight: 600; color: var(--acc); }
+[data-tpl="clinic"] .tpl-calc-total .tpl-btn { margin-top: 8px; }
+[data-tpl="clinic"] .tpl-calc-reset { justify-self: start; min-height: 44px; padding: 0 4px; background: none; border: 0; color: var(--dim); font-size: 14px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+[data-tpl="clinic"] .tpl-calc-reset:disabled { opacity: 0.35; cursor: default; }
+[data-tpl="clinic"] .tpl-note { color: var(--dim); font-size: 13px; line-height: 1.5; }
+
+/* ——— врачи ——— */
+[data-tpl="clinic"] .tpl-doctors { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+[data-tpl="clinic"] .tpl-doc { display: flex; flex-direction: column; border-radius: calc(var(--r) + 8px); overflow: hidden; background: var(--surface); border: 1px solid var(--line); transition: transform 0.3s, box-shadow 0.3s; }
+@media (hover: hover) { [data-tpl="clinic"] .tpl-doc:hover { transform: translateY(-6px); box-shadow: var(--shadow); } }
+[data-tpl="clinic"] .tpl-doc img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 20%; background: var(--soft); }
+[data-tpl="clinic"] .tpl-doc-body { display: grid; gap: 4px; padding: 18px 20px 12px; }
+[data-tpl="clinic"] .tpl-doc h3 { font-size: 21px; }
+[data-tpl="clinic"] .tpl-doc-role { color: var(--dim); font-size: 15px; }
+[data-tpl="clinic"] .tpl-doc-years { font-size: 14px; color: var(--dim); margin-bottom: 6px; }
+[data-tpl="clinic"] .tpl-doc-years b { color: var(--acc); font-size: 22px; font-weight: 700; margin-right: 2px; }
+@media (max-width: 860px) {
+  [data-tpl="clinic"] .tpl-doctors { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 14px; margin-inline: calc(var(--edge) * -1); padding: 4px var(--edge) 12px; scroll-padding-inline: var(--edge); scrollbar-width: none; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
+  [data-tpl="clinic"] .tpl-doctors::-webkit-scrollbar { display: none; }
+  [data-tpl="clinic"] .tpl-doc { flex: 0 0 min(72vw, 300px); scroll-snap-align: start; }
+}
+
+/* ——— отзывы ——— */
+[data-tpl="clinic"] .tpl-carousel-track { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 4px 2px 10px; overscroll-behavior-x: contain; border-radius: var(--r); }
+[data-tpl="clinic"] .tpl-carousel-track::-webkit-scrollbar { display: none; }
+[data-tpl="clinic"] .tpl-review { flex: 0 0 min(88%, 440px); scroll-snap-align: start; margin: 0; display: grid; gap: 12px; align-content: start; padding: 26px; border-radius: calc(var(--r) + 6px); background: var(--surface); border: 1px solid var(--line); }
+[data-tpl="clinic"] .tpl-stars { color: #f2a900; letter-spacing: 0.14em; font-size: 16px; }
+[data-tpl="clinic"] .tpl-review blockquote { margin: 0; font-size: 17px; line-height: 1.55; color: var(--ink); }
+[data-tpl="clinic"] .tpl-review figcaption { font-size: 14px; color: var(--dim); }
+[data-tpl="clinic"] .tpl-review figcaption b { color: var(--ink); }
+[data-tpl="clinic"] .tpl-carousel-nav { display: flex; gap: 10px; margin-top: 14px; }
+[data-tpl="clinic"] .tpl-carousel-nav button { width: 48px; height: 48px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--surface); font-size: 20px; cursor: pointer; display: grid; place-items: center; transition: border-color 0.2s, transform 0.15s; }
+[data-tpl="clinic"] .tpl-carousel-nav button:hover:not(:disabled) { border-color: var(--acc); }
+[data-tpl="clinic"] .tpl-carousel-nav button:disabled { opacity: 0.35; cursor: default; }
+
+/* ——— о клинике ——— */
+[data-tpl="clinic"] .tpl-about { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: center; }
+[data-tpl="clinic"] .tpl-about-copy { display: grid; gap: 16px; }
+[data-tpl="clinic"] .tpl-about-copy h2 { font-size: clamp(28px, 3.8vw, 44px); }
+[data-tpl="clinic"] .tpl-about-copy p { color: var(--dim); font-size: 17px; }
+[data-tpl="clinic"] .tpl-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 8px 0 0; }
+[data-tpl="clinic"] .tpl-facts > div { padding: 14px 16px; border-radius: var(--r); background: var(--surface); border: 1px solid var(--line); }
+[data-tpl="clinic"] .tpl-facts dt { font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--dim); }
+[data-tpl="clinic"] .tpl-facts dd { margin: 4px 0 0; font-weight: 600; }
+[data-tpl="clinic"] .tpl-about-media { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+[data-tpl="clinic"] .tpl-about-media img { width: 100%; object-fit: cover; border-radius: calc(var(--r) + 8px); border: 1px solid var(--line); }
+[data-tpl="clinic"] .tpl-about-media img:nth-child(1) { aspect-ratio: 1; }
+[data-tpl="clinic"] .tpl-about-media img:nth-child(2) { aspect-ratio: 4 / 5; }
+[data-tpl="clinic"] .tpl-about-media img:nth-child(3) { grid-column: 1 / -1; aspect-ratio: 16 / 9; object-position: 50% 60%; }
+
+/* ——— FAQ ——— */
+[data-tpl="clinic"] .tpl-faq-list { display: grid; gap: 10px; max-width: 820px; }
+[data-tpl="clinic"] .tpl-faq details { border-radius: var(--r); background: var(--surface); border: 1px solid var(--line); transition: border-color 0.2s; }
+[data-tpl="clinic"] .tpl-faq details[open] { border-color: var(--acc); }
+[data-tpl="clinic"] .tpl-faq summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 60px; padding: 14px 20px; font-weight: 600; font-size: 17px; }
+[data-tpl="clinic"] .tpl-faq summary::-webkit-details-marker { display: none; }
+[data-tpl="clinic"] .tpl-faq summary::after { content: ""; width: 10px; height: 10px; flex: none; border-right: 2px solid var(--acc); border-bottom: 2px solid var(--acc); transform: rotate(45deg) translateY(-2px); transition: transform 0.25s; }
+[data-tpl="clinic"] .tpl-faq details[open] summary::after { transform: rotate(-135deg) translateY(-2px); }
+[data-tpl="clinic"] .tpl-faq details p { padding: 0 20px 20px; color: var(--dim); font-size: 16px; max-width: 70ch; }
+
+/* ——— запись ——— */
+[data-tpl="clinic"] .tpl-book { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.4fr); gap: 40px; align-items: start; padding-bottom: 72px; }
+[data-tpl="clinic"] .tpl-book-copy { display: grid; gap: 12px; position: sticky; top: calc(var(--head-h) + 24px); }
+[data-tpl="clinic"] .tpl-book-copy h2 { font-size: clamp(30px, 4vw, 46px); }
+[data-tpl="clinic"] .tpl-book-copy p { color: var(--dim); font-size: 17px; }
+[data-tpl="clinic"] .tpl-form { display: grid; gap: 22px; padding: 28px; border-radius: calc(var(--r) + 10px); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
+[data-tpl="clinic"] .tpl-step { margin: 0; padding: 0; border: 0; display: grid; gap: 12px; min-width: 0; }
+[data-tpl="clinic"] .tpl-step legend { display: flex; align-items: center; gap: 10px; padding: 0; margin-bottom: 12px; font-weight: 650; font-size: 17px; letter-spacing: -0.01em; }
+[data-tpl="clinic"] .tpl-step legend i { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--acc); color: var(--on-acc); font-size: 13px; font-weight: 700; font-style: normal; }
+[data-tpl="clinic"] .tpl-chipset { display: flex; flex-wrap: wrap; gap: 8px; }
+[data-tpl="clinic"] .tpl-chipset button, [data-tpl="clinic"] .tpl-docset button, [data-tpl="clinic"] .tpl-dates button, [data-tpl="clinic"] .tpl-slots button { cursor: pointer; border: 1.5px solid var(--line); background: var(--bg); color: var(--ink); transition: border-color 0.18s, background 0.18s, color 0.18s, transform 0.12s; }
+[data-tpl="clinic"] .tpl-chipset button { min-height: 44px; padding: 0 16px; border-radius: 999px; font: 500 15px/1.1 var(--body); }
+[data-tpl="clinic"] .tpl-chipset button:hover, [data-tpl="clinic"] .tpl-docset button:hover, [data-tpl="clinic"] .tpl-dates button:hover:not(:disabled), [data-tpl="clinic"] .tpl-slots button:hover:not(:disabled) { border-color: var(--acc); }
+[data-tpl="clinic"] [aria-pressed="true"] { border-color: var(--acc) !important; background: var(--acc) !important; color: var(--on-acc) !important; }
+[data-tpl="clinic"] [aria-pressed="true"] small, [data-tpl="clinic"] [aria-pressed="true"] em { color: inherit !important; opacity: 0.85; }
+[data-tpl="clinic"] .tpl-docset { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
+[data-tpl="clinic"] .tpl-docset button { display: grid; gap: 2px; text-align: left; min-height: 56px; padding: 10px 14px; border-radius: var(--r); font-family: var(--body); }
+[data-tpl="clinic"] .tpl-docset b { font-size: 15px; font-weight: 650; }
+[data-tpl="clinic"] .tpl-docset small { font-size: 12.5px; color: var(--dim); }
+[data-tpl="clinic"] .tpl-dates { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 8px; scrollbar-width: thin; min-height: 96px; }
+[data-tpl="clinic"] .tpl-dates button { flex: 0 0 auto; min-width: 66px; display: grid; justify-items: center; gap: 0; padding: 8px 6px; border-radius: var(--r); font-family: var(--body); }
+[data-tpl="clinic"] .tpl-dates small { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--dim); }
+[data-tpl="clinic"] .tpl-dates b { font-size: 22px; font-weight: 700; line-height: 1.2; font-variant-numeric: tabular-nums; }
+[data-tpl="clinic"] .tpl-dates em { font-style: normal; font-size: 11px; color: var(--dim); min-height: 1.3em; }
+[data-tpl="clinic"] .tpl-dates button:disabled { opacity: 0.5; cursor: not-allowed; background: transparent; }
+[data-tpl="clinic"] .tpl-dates-skel { flex: 1; height: 82px; border-radius: var(--r); background: var(--soft); }
+[data-tpl="clinic"] .tpl-slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 8px; }
+[data-tpl="clinic"] .tpl-slots button { min-height: 44px; border-radius: 12px; font: 600 15px/1 var(--body); font-variant-numeric: tabular-nums; }
+[data-tpl="clinic"] .tpl-slots button:disabled { cursor: not-allowed; text-decoration: line-through; text-decoration-thickness: 1.5px; background: transparent; opacity: 0.45; border-style: dashed; }
+[data-tpl="clinic"] .tpl-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+[data-tpl="clinic"] .tpl-field { display: grid; gap: 6px; }
+[data-tpl="clinic"] .tpl-field label { font-size: 14px; font-weight: 600; color: var(--dim); }
+[data-tpl="clinic"] .tpl-field input { min-height: 48px; padding: 0 14px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--bg); color: var(--ink); font: 500 16px/1 var(--body); width: 100%; transition: border-color 0.2s, box-shadow 0.2s; }
+[data-tpl="clinic"] .tpl-field input:focus { outline: none; border-color: var(--acc); box-shadow: 0 0 0 3px var(--soft); }
+[data-tpl="clinic"] .tpl-field input[aria-invalid="true"] { border-color: #d6453d; }
+[data-tpl="clinic"] .tpl-err { color: #d6453d; font-size: 14px; font-weight: 600; }
+[data-tpl="clinic"][data-style="b"] .tpl-err { color: #ff8f86; }
+[data-tpl="clinic"] .tpl-plan { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 12px 16px; border-radius: var(--r); background: var(--soft); border: 1px dashed var(--acc); }
+[data-tpl="clinic"] .tpl-plan > div { display: grid; gap: 2px; font-size: 14.5px; }
+[data-tpl="clinic"] .tpl-plan b { font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--acc); }
+[data-tpl="clinic"] .tpl-summary { padding: 12px 16px; border-radius: var(--r); background: var(--soft); font-weight: 600; font-size: 15px; }
+[data-tpl="clinic"] .tpl-success { display: grid; gap: 14px; justify-items: start; padding: 32px; border-radius: calc(var(--r) + 10px); background: var(--surface); border: 1px solid var(--acc); box-shadow: var(--shadow); }
+[data-tpl="clinic"] .tpl-success h3 { font-size: 28px; color: var(--acc); }
+[data-tpl="clinic"] .tpl-success h3:focus { outline: none; }
+[data-tpl="clinic"] .tpl-success-card { display: grid; gap: 10px; width: 100%; margin: 0; padding: 16px 18px; border-radius: var(--r); background: var(--soft); }
+[data-tpl="clinic"] .tpl-success-card dt { font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--dim); }
+[data-tpl="clinic"] .tpl-success-card dd { margin: 2px 0 0; font-weight: 650; font-size: 17px; }
+
+/* ——— контакты ——— */
+[data-tpl="clinic"] .tpl-contacts { padding-bottom: 72px; }
+[data-tpl="clinic"] .tpl-contacts-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 24px; align-items: stretch; }
+[data-tpl="clinic"] .tpl-contacts-list { display: grid; gap: 22px; align-content: start; }
+[data-tpl="clinic"] .tpl-contacts-list h3 { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); font-weight: 600; margin-bottom: 6px; }
+[data-tpl="clinic"] .tpl-contacts-list p { font-size: 18px; }
+[data-tpl="clinic"] .tpl-map { position: relative; min-height: 280px; border-radius: calc(var(--r) + 10px); overflow: hidden; border: 1px solid var(--line); }
+[data-tpl="clinic"] .tpl-map svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+[data-tpl="clinic"] .tpl-map small { position: absolute; left: 14px; bottom: 12px; padding: 4px 10px; border-radius: 999px; background: var(--glass); font-size: 12px; font-weight: 600; color: var(--ink); }
+[data-tpl="clinic"] .m-bg { fill: #e9f1ef; }
+[data-tpl="clinic"] .m-park { fill: #cfe9d6; }
+[data-tpl="clinic"] .m-river { fill: #c6e0f2; }
+[data-tpl="clinic"] .m-road path { stroke: #ffffff; stroke-width: 9; fill: none; }
+[data-tpl="clinic"] .m-minor path { stroke: #ffffff; stroke-width: 4; fill: none; opacity: 0.8; }
+[data-tpl="clinic"][data-style="b"] .m-bg { fill: #0f2338; }
+[data-tpl="clinic"][data-style="b"] .m-park { fill: #123a37; }
+[data-tpl="clinic"][data-style="b"] .m-river { fill: #12324d; }
+[data-tpl="clinic"][data-style="b"] .m-road path { stroke: #1c3a57; }
+[data-tpl="clinic"][data-style="b"] .m-minor path { stroke: #16304a; }
+[data-tpl="clinic"] .tpl-pin { position: absolute; left: 56%; top: 46%; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: var(--acc); border: 4px solid #fff; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3); }
+[data-tpl="clinic"] .tpl-pin i { position: absolute; inset: -14px; border-radius: 50%; border: 2px solid var(--acc); opacity: 0.5; }
+
+/* ——— подвал и липкая панель ——— */
+[data-tpl="clinic"] .tpl-foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 24px var(--edge) 28px; border-top: 1px solid var(--line); color: var(--dim); font-size: 14px; }
+[data-tpl="clinic"] .tpl-sticky { display: none; }
+@media (max-width: 760px) {
+  [data-tpl="clinic"] .tpl-sticky {
+    position: fixed; inset: auto 0 0 0; z-index: 40; display: grid; grid-template-columns: 1fr 1fr 1.3fr; gap: 8px;
+    padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+    background: var(--head-bg); border-top: 1px solid var(--line);
+    transition: transform 0.25s, visibility 0s;
+  }
+  [data-tpl="clinic"] .tpl-sticky a { min-height: 52px; display: inline-flex; align-items: center; justify-content: center; border: 1.5px solid var(--line); border-radius: 999px; font-weight: 600; font-size: 15px; }
+  [data-tpl="clinic"] .tpl-sticky[data-hidden] { transform: translateY(110%); pointer-events: none; visibility: hidden; transition: transform 0.25s, visibility 0s 0.25s; }
+  [data-tpl="clinic"] .tpl-sticky a.primary { background: var(--acc); border-color: var(--acc); color: var(--on-acc); }
+}
+
+/* ——— появление при прокрутке: прячет только то, что MotionLayer нашёл ниже экрана ——— */
+[data-tpl="clinic"] .rv { opacity: 0; transform: translate3d(0, 28px, 0); }
+[data-tpl="clinic"] .rv-in { opacity: 1; transform: none; transition: opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1); transition-delay: calc(var(--d, 0) * 90ms); }
+
+/* ——— живые анимации: только после первой отрисовки (data-live) ——— */
+@keyframes tpl-drift-a { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(7vmax, 5vmax, 0) scale(1.14); } }
+@keyframes tpl-drift-b { from { transform: translate3d(0, 0, 0) scale(1.06); } to { transform: translate3d(-8vmax, 6vmax, 0) scale(0.94); } }
+@keyframes tpl-drift-c { from { transform: translate3d(0, 0, 0) scale(0.96); } to { transform: translate3d(-5vmax, -7vmax, 0) scale(1.12); } }
+@keyframes tpl-bob { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(0, -9px, 0); } }
+@keyframes tpl-cyc { 0% { opacity: 0; transform: translate3d(0, 55%, 0); } 3% { opacity: 1; transform: none; } 22% { opacity: 1; transform: none; } 26% { opacity: 0; transform: translate3d(0, -55%, 0); } 100% { opacity: 0; transform: translate3d(0, -55%, 0); } }
+@keyframes tpl-marquee { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-50%, 0, 0); } }
+@keyframes tpl-ping { 0% { transform: scale(0.6); opacity: 0.6; } 100% { transform: scale(1.7); opacity: 0; } }
+@media (prefers-reduced-motion: no-preference) {
+  [data-tpl="clinic"][data-live] .b1 { animation: tpl-drift-a 26s ease-in-out infinite alternate; }
+  [data-tpl="clinic"][data-live] .b2 { animation: tpl-drift-b 31s ease-in-out infinite alternate; }
+  [data-tpl="clinic"][data-live] .b3 { animation: tpl-drift-c 29s ease-in-out infinite alternate; }
+  [data-tpl="clinic"][data-live] .tpl-glass { animation: tpl-bob 7s ease-in-out infinite; }
+  [data-tpl="clinic"][data-live] .f2 .tpl-glass { animation-delay: -2.4s; animation-duration: 8.5s; }
+  [data-tpl="clinic"][data-live] .f3 .tpl-glass { animation-delay: -4.6s; animation-duration: 7.5s; }
+  /* слова сменяются: цикл 4 × 3 с; отрицательная задержка — первое слово уже на экране, без вспышки */
+  [data-tpl="clinic"][data-live] .tpl-cyc-w { animation: tpl-cyc 12s ease-in-out infinite; animation-delay: calc(var(--i) * 3s - 0.6s); }
+  [data-tpl="clinic"][data-live] .tpl-marquee-track { animation: tpl-marquee 42s linear infinite; }
+  [data-tpl="clinic"][data-live] .tpl-marquee:hover .tpl-marquee-track { animation-play-state: paused; }
+  [data-tpl="clinic"][data-live] .tpl-pin i { animation: tpl-ping 2.4s ease-out infinite; }
+  /* вне экрана и в фоновой вкладке — пауза */
+  [data-tpl="clinic"][data-paused="1"] *, [data-tpl="clinic"] [data-off="1"] *, [data-tpl="clinic"] [data-off="1"] { animation-play-state: paused !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-tpl="clinic"] *, [data-tpl="clinic"] *::before, [data-tpl="clinic"] *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+  [data-tpl="clinic"] .rv { opacity: 1; transform: none; }
+}
+
+/* ——— адаптив ——— */
+@media (max-width: 980px) {
+  [data-tpl="clinic"] .tpl-stats dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  [data-tpl="clinic"] .tpl-calc { grid-template-columns: minmax(0, 1fr); }
+  [data-tpl="clinic"] .tpl-calc-total { position: static; }
+  [data-tpl="clinic"] .tpl-book { grid-template-columns: minmax(0, 1fr); }
+  [data-tpl="clinic"] .tpl-book-copy { position: static; }
+}
+@media (max-width: 860px) {
+  [data-tpl="clinic"] .tpl-hero { grid-template-columns: minmax(0, 1fr); gap: 32px; padding: 36px var(--edge) 56px; min-height: 0; }
+  [data-tpl="clinic"] .tpl-hero h1 { font-size: clamp(38px, 11.5vw, 56px); }
+  [data-tpl="clinic"] .tpl-about { grid-template-columns: minmax(0, 1fr); }
+  [data-tpl="clinic"] .tpl-contacts-grid { grid-template-columns: minmax(0, 1fr); }
+  [data-tpl="clinic"] .tpl-sec { padding-top: 56px; }
+  [data-tpl="clinic"] .tpl-glass { min-width: 128px; max-width: 176px; padding: 9px 12px; border-radius: 14px; }
+  [data-tpl="clinic"] .tpl-glass b { font-size: 13.5px; }
+  [data-tpl="clinic"] .tpl-glass span { font-size: 12px; }
+  /* A на телефоне: первый экран «живой» — под заголовком компактное фото и одна стеклянная карточка, абзац после него */
+  [data-tpl="clinic"] .tpl-hero { gap: 18px; }
+  [data-tpl="clinic"] .tpl-hero-copy { display: contents; }
+  [data-tpl="clinic"] .tpl-status { order: 0; justify-self: start; }
+  [data-tpl="clinic"] .tpl-hero h1 { order: 1; }
+  [data-tpl="clinic"] .tpl-tagline { order: 2; }
+  [data-tpl="clinic"] .tpl-hero-visual { order: 3; }
+  [data-tpl="clinic"] .tpl-intro { order: 4; font-size: 16px; }
+  [data-tpl="clinic"] .tpl-cta { order: 5; }
+  [data-tpl="clinic"][data-style="a"] .tpl-hero-visual { margin-bottom: 22px; }
+  [data-tpl="clinic"][data-style="a"] .tpl-hero-photo { aspect-ratio: 16 / 9; max-width: 560px; margin-inline: 0; border-radius: 28px; box-shadow: var(--shadow), 0 0 0 6px rgba(255, 255, 255, 0.6); }
+  [data-tpl="clinic"][data-style="a"] .tpl-hero-photo img { object-position: 60% 58%; }
+  [data-tpl="clinic"][data-style="a"] .f1, [data-tpl="clinic"][data-style="a"] .f3 { display: none; }
+  [data-tpl="clinic"][data-style="a"] .f2 { left: 12px; bottom: -22px; }
+  /* B на телефоне: фото полосой сверху (видно сразу), заголовок начинается там, где вуаль уже темнеет; из карточек — «ближайшее окно» */
+  [data-tpl="clinic"][data-style="b"] .tpl-hero { padding-top: calc(46vw + 12px); padding-bottom: 56px; }
+  [data-tpl="clinic"][data-style="b"] .tpl-hero-photo { inset: 0 0 auto 0; height: 68vw; }
+  [data-tpl="clinic"][data-style="b"] .tpl-hero-photo::after { background: linear-gradient(180deg, rgba(7, 17, 31, 0.1) 0%, rgba(7, 17, 31, 0.2) 38%, rgba(7, 17, 31, 0.85) 82%, #07111f 100%); }
+  [data-tpl="clinic"][data-style="b"] .tpl-hero-photo img { object-position: 62% 55%; }
+  [data-tpl="clinic"][data-style="b"] .f1, [data-tpl="clinic"][data-style="b"] .f3 { display: none; }
+  [data-tpl="clinic"][data-style="b"] .f2 { right: var(--edge); left: auto; top: 16px; bottom: auto; }
+}
+}
+@media (max-width: 560px) {
+  [data-tpl="clinic"] .tpl-row { grid-template-columns: minmax(0, 1fr); }
+  [data-tpl="clinic"] .tpl-form { padding: 18px 14px; }
+  [data-tpl="clinic"] .tpl-facts { grid-template-columns: minmax(0, 1fr); }
+  [data-tpl="clinic"] .tpl-svc-grid { grid-template-columns: minmax(0, 1fr); }
+  [data-tpl="clinic"] .tpl-calc-row { grid-template-columns: auto minmax(0, 1fr); }
+  [data-tpl="clinic"] .tpl-calc-row .tpl-stepper { grid-column: 1 / -1; justify-content: flex-end; }
+  [data-tpl="clinic"] .tpl-stats dl > div { padding: 16px; }
+  [data-tpl="clinic"] .tpl-foot { flex-direction: column; align-items: flex-start; }
+}

@@ -50,12 +50,12 @@ export default async function TemplatePage({ params }: { params: Promise<Params>
   return (
     <>
       {/* Слой «демо»: к самому шаблону не относится и на сайт клиента не попадает. */}
-      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 bg-night px-4 py-2 text-sm text-day md:px-8">
-        <p className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 bg-night px-4 py-2 text-sm text-day max-[480px]:flex-nowrap max-[480px]:gap-x-2 max-[480px]:px-3 max-[480px]:py-1 max-[480px]:text-xs md:px-8">
+        <p className="flex items-center gap-3 max-[480px]:gap-2">
           <span className="rounded bg-apricot px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-night">{t(demoUi.badge)}</span>
           <span className="hidden sm:inline">{t(demoUi.ribbon)}</span>
         </p>
-        <nav aria-label={t(demoUi.style)} className="flex items-center gap-1">
+        <nav aria-label={t(demoUi.style)} className="flex items-center gap-1 max-[480px]:gap-1.5">
           <a href={localePath(locale, "/sites")} className="mr-2 hidden px-2 py-2 text-mist hover:text-day md:inline">
             {t(demoUi.back)}
           </a>
@@ -64,19 +64,21 @@ export default async function TemplatePage({ params }: { params: Promise<Params>
               key={s.id}
               href={localePath(locale, `/sites/${tpl.id}/${s.id}`)}
               aria-current={s.id === st.id ? "page" : undefined}
-              className={`inline-flex min-h-[44px] items-center rounded-full px-3 py-1 ${s.id === st.id ? "bg-day text-night" : "border border-line-night text-day hover:border-day"}`}
+              className={`inline-flex min-h-[44px] items-center rounded-full px-3 py-1 max-[480px]:min-h-[40px] max-[480px]:min-w-[40px] max-[480px]:justify-center max-[480px]:px-2 ${s.id === st.id ? "bg-day text-night" : "border border-line-night text-day hover:border-day"}`}
             >
               <span className="sr-only">{t(demoUi.style)} </span>
               {s.id.toUpperCase()}<span className="hidden md:inline"> · {t(s.name)}</span>
             </a>
           ))}
           {tpl.renderAdmin && (
-            <a href={localePath(locale, `/sites/${tpl.id}/admin`)} className="ml-2 inline-flex min-h-[44px] items-center rounded-full border border-line-night px-3 text-day hover:border-day">
-              {t(demoUi.admin)}
+            <a href={localePath(locale, `/sites/${tpl.id}/admin`)} className="ml-2 inline-flex min-h-[44px] items-center whitespace-nowrap rounded-full border border-line-night px-3 text-day hover:border-day max-[480px]:ml-0 max-[480px]:min-h-[40px] max-[480px]:px-2.5">
+              <span className="max-[480px]:hidden">{t(demoUi.admin)}</span>
+              <span className="min-[481px]:hidden">{t(demoUi.adminShort)}</span>
             </a>
           )}
-          <a href={localePath(locale, "/contact")} className="ml-2 inline-flex min-h-[44px] items-center rounded-full bg-apricot px-4 font-medium text-night hover:opacity-90">
-            {t(demoUi.order)}
+          <a href={localePath(locale, "/contact")} className="ml-2 inline-flex min-h-[44px] items-center whitespace-nowrap rounded-full bg-apricot px-4 font-medium text-night hover:opacity-90 max-[480px]:ml-0 max-[480px]:min-h-[40px] max-[480px]:px-3">
+            <span className="max-[480px]:hidden">{t(demoUi.order)}</span>
+            <span className="min-[481px]:hidden">{t(demoUi.orderShort)}</span>
           </a>
         </nav>
       </div>
