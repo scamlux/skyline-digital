@@ -172,7 +172,7 @@ export function SalonSite({ data, locale, style, localeHrefs }: TemplateProps<Sa
               <h1 aria-label={heroLabel}>
                 <span className="sl-line l1">
                   <Letters text={t(line1)} offset={0} />
-                </span>
+                </span>{" "}
                 <span className="sl-line l2">
                   <Letters text={t(line2)} offset={Array.from(t(line1)).length} />
                 </span>
