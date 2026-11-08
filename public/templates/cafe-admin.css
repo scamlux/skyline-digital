@@ -1,0 +1,213 @@
+/*
+ * Кабинет владельца для шаблона «Кафе» (демо). Всё под .adm; тёплая сливочная бумага и терракота.
+ * Самодостаточный файл: ничего не берёт из остального сайта (ADR 0009). Шрифт Nunito объявлен
+ * здесь же (тот же файл, что и у сайта — браузер возьмёт из кеша).
+ */
+@font-face { font-family: "Nunito"; font-style: normal; font-weight: 200 1000; font-display: swap; src: url(/templates/fonts/nunito-cyrillic-ext.woff2) format("woff2"); unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F; }
+@font-face { font-family: "Nunito"; font-style: normal; font-weight: 200 1000; font-display: swap; src: url(/templates/fonts/nunito-cyrillic.woff2) format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: "Nunito"; font-style: normal; font-weight: 200 1000; font-display: swap; src: url(/templates/fonts/nunito-latin-ext.woff2) format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Nunito"; font-style: normal; font-weight: 200 1000; font-display: swap; src: url(/templates/fonts/nunito-latin.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
+.adm[data-tpl="cafe"] {
+  --bg: #fbf3e6;
+  --surface: #fffaf1;
+  --surface-2: #f4e4cc;
+  --ink: #3a2418;
+  --dim: #6f5848;
+  --acc: #b4532f;
+  --acc-deep: #8f3f22;
+  --on-acc: #fffaf1;
+  --acc-soft: #f6d9c4;
+  --almond: #e9c99a;
+  --hot: #a52f27;
+  --hot-soft: #f3d4cf;
+  --ok: #2f6b2c;
+  --ok-soft: #dcead3;
+  --glyph-1: #e6b979; --glyph-2: #6a3d22; --glyph-3: #f3d7a4;
+  --r: 20px;
+  --edge: max(16px, calc((100vw - 1080px) / 2));
+  font-family: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-weight: 600;
+  background: var(--bg);
+  color: var(--ink);
+  color-scheme: light;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: clip;
+}
+.adm[data-tpl="cafe"] *, .adm[data-tpl="cafe"] *::before, .adm[data-tpl="cafe"] *::after { box-sizing: border-box; }
+.adm[data-tpl="cafe"] :is(p, h2, ul, ol, pre) { margin: 0; }
+.adm[data-tpl="cafe"] :is(ul, ol) { padding: 0; list-style: none; }
+.adm[data-tpl="cafe"] a { color: inherit; text-decoration: none; }
+.adm[data-tpl="cafe"] button, .adm[data-tpl="cafe"] input { font: inherit; color: inherit; }
+.adm[data-tpl="cafe"] button { cursor: pointer; }
+.adm[data-tpl="cafe"] :focus-visible { outline: 3px solid var(--acc); outline-offset: 2px; border-radius: 8px; }
+
+/* ——— шапка ——— */
+.adm-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 12px var(--edge); }
+.adm-title { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.adm-badge { padding: 4px 12px; border-radius: 99px; background: var(--acc); color: var(--on-acc); font-size: 14px; font-weight: 900; }
+.adm-name { font-size: 24px; font-weight: 1000; letter-spacing: -0.03em; }
+.adm-head-r { display: flex; align-items: center; gap: 10px; }
+.adm-lang { display: flex; gap: 2px; padding: 3px; border-radius: 99px; background: var(--surface-2); }
+.adm-lang a { display: grid; place-items: center; min-width: 40px; min-height: 40px; padding: 0 6px; border-radius: 99px; font-size: 14px; font-weight: 900; color: var(--dim); }
+.adm-lang a[aria-current="true"] { background: var(--acc); color: var(--on-acc); }
+.adm-open { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: 99px; background: var(--surface-2); font-size: 15px; font-weight: 900; white-space: nowrap; transition: background-color 0.15s; }
+.adm-open:hover { background: var(--almond); }
+
+/* ——— вкладки ——— */
+.adm-tabs { display: flex; gap: 6px; padding: 6px var(--edge) 10px; overflow-x: auto; scrollbar-width: none; }
+.adm-tabs::-webkit-scrollbar { display: none; }
+.adm-tabs button { position: relative; flex: none; display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 20px; border: 0; border-radius: 99px; background: var(--surface-2); font-size: 16px; font-weight: 900; color: var(--dim); white-space: nowrap; transition: background-color 0.15s, color 0.15s; }
+.adm-tabs button:hover { color: var(--ink); }
+.adm-tabs button[aria-current="page"] { background: var(--ink); color: var(--bg); }
+.adm-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 0 3px var(--acc-soft); }
+
+/* ——— основной блок ——— */
+.adm-main { padding: 18px var(--edge) 28px; }
+.adm-main > section { display: flex; flex-direction: column; gap: 14px; }
+.adm-h2 { font-size: 22px; font-weight: 1000; letter-spacing: -0.02em; margin-top: 8px !important; }
+.adm-hint { font-size: 15px; color: var(--dim); font-weight: 700; max-width: 62ch; }
+.adm-period { font-size: 15px; font-weight: 900; color: var(--dim); }
+.adm-skel { min-height: 560px; border-radius: var(--r); background: var(--surface-2); opacity: 0.6; }
+
+/* ——— цифры ——— */
+.adm-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.adm-stats.three { grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); }
+.adm-stat { display: grid; gap: 2px; align-content: start; padding: 16px 18px; border-radius: var(--r); background: var(--surface); }
+.adm-stat b { font-size: 28px; font-weight: 1000; line-height: 1.1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.adm-stat > span { font-size: 15px; font-weight: 800; color: var(--dim); }
+.adm-stat em { font-style: normal; font-size: 14px; font-weight: 900; color: var(--hot); }
+.adm-stat em[data-up] { color: var(--ok); }
+
+/* топ напитков */
+.adm-top { display: grid; gap: 10px; padding: 16px 18px; border-radius: var(--r); background: var(--surface); }
+.adm-top li { display: grid; grid-template-columns: minmax(0, 9em) minmax(0, 1fr) auto; align-items: center; gap: 12px; }
+.adm-top-name { font-weight: 900; }
+.adm-top-bar { display: block; height: 16px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.adm-top-bar i { display: block; height: 100%; border-radius: 99px; background: var(--acc); transform-origin: left center; }
+.adm-top b { font-variant-numeric: tabular-nums; font-size: 18px; font-weight: 1000; }
+
+/* столбики по дням */
+.adm-bars { display: flex; align-items: stretch; gap: 10px; height: 170px; padding: 24px 14px 12px; border-radius: var(--r); background: var(--surface); }
+.adm-bar { flex: 1 1 0; min-width: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; justify-items: center; gap: 6px; }
+.adm-bar b { align-self: end; position: relative; width: min(100%, 44px); border-radius: 12px 12px 4px 4px; background: var(--acc); min-height: 6px; }
+.adm-bar b::after { content: attr(data-n); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 3px; font-size: 13px; font-weight: 900; font-variant-numeric: tabular-nums; color: var(--dim); }
+.adm-bar span { font-size: 13px; font-weight: 800; color: var(--dim); }
+
+/* ——— заказы ——— */
+.adm-leads { display: grid; gap: 10px; }
+.adm-lead { --pill: var(--acc-deep); --pill-bg: var(--acc-soft); display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: start; gap: 8px 16px; padding: 14px 16px; border-radius: var(--r); background: var(--surface); border-left: 8px solid var(--pill); }
+.adm-lead[data-status="cooking"] { --pill: #7a4d00; --pill-bg: #f6e3bd; }
+.adm-lead[data-status="ready"] { --pill: var(--ok); --pill-bg: var(--ok-soft); }
+.adm-lead[data-status="done"] { --pill: #5f554c; --pill-bg: #ebe3d8; }
+.adm-lead[data-status="cancelled"] { --pill: var(--hot); --pill-bg: var(--hot-soft); }
+.adm-lead[data-status="cancelled"] .adm-lead-main > b { text-decoration: line-through; text-decoration-color: var(--hot); text-decoration-thickness: 2px; }
+.adm-time { display: grid; justify-items: center; min-width: 58px; line-height: 1.1; }
+.adm-time b { font-size: 24px; font-weight: 1000; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.adm-time small { font-size: 13px; font-weight: 800; color: var(--dim); }
+.adm-lead-main { display: grid; gap: 2px; min-width: 0; font-size: 15px; }
+.adm-lead-main > b { font-size: 17px; font-weight: 1000; }
+.adm-lead-main > span { color: var(--dim); font-weight: 700; overflow-wrap: anywhere; }
+.adm-lead-main .adm-phone { font-variant-numeric: tabular-nums; }
+.adm-site { margin-left: 8px; padding: 2px 10px; border-radius: 99px; background: var(--acc-soft); color: var(--acc-deep); font-size: 13px; font-weight: 900; font-style: normal; }
+.adm-site.free { background: var(--almond); color: var(--ink); }
+.adm-lead-side { display: grid; justify-items: end; gap: 6px; }
+.adm-sum { font-size: 17px; font-weight: 1000; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.adm-pill { padding: 3px 12px; border-radius: 99px; background: var(--pill-bg); color: var(--pill); font-size: 14px; font-weight: 900; white-space: nowrap; }
+.adm-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+
+/* ——— кнопки ——— */
+.adm-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 18px; border: 0; border-radius: 99px; background: var(--acc); color: var(--on-acc); font-size: 15px; font-weight: 900; white-space: nowrap; transition: background-color 0.15s, transform 0.12s; }
+.adm-btn:hover { background: var(--acc-deep); }
+.adm-btn:active { transform: scale(0.96); }
+.adm-btn.ghost, .adm-btn.sm[aria-pressed] { background: var(--surface-2); color: var(--ink); }
+.adm-btn[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.adm-btn[data-tone="bad"] { background: var(--hot-soft); color: var(--hot); }
+.adm-link { min-height: 44px; min-width: 44px; padding: 0 4px; border: 0; background: none; font-size: 15px; font-weight: 900; color: var(--acc-deep); text-decoration: underline; text-underline-offset: 4px; }
+
+/* ——— меню и цены ——— */
+.adm-cat { display: grid; gap: 8px; }
+.adm-items { overflow: hidden; border-radius: var(--r); background: var(--surface); }
+.adm-item { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto auto auto; align-items: center; gap: 6px 14px; padding: 10px 16px; min-height: 68px; }
+.adm-item:nth-child(even) { background: color-mix(in srgb, var(--surface-2) 40%, transparent); }
+.adm-thumb { display: grid; place-items: center; width: 48px; height: 48px; overflow: hidden; border-radius: 14px; background: var(--acc-soft); }
+.adm-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.adm-thumb .cf-glyph { width: 74%; height: auto; }
+.adm-item-name { display: grid; font-weight: 900; font-size: 16px; line-height: 1.2; }
+.adm-item-name small { font-size: 13px; font-weight: 800; color: var(--hot); }
+.adm-item[data-hidden] .adm-thumb { opacity: 0.45; }
+.adm-item[data-hidden] .adm-item-name { color: var(--dim); }
+.adm-item[data-off] .adm-item-name { color: var(--dim); }
+.adm-price, .adm-price-input { min-width: 112px; min-height: 44px; text-align: right; font-size: 16px; font-weight: 900; font-variant-numeric: tabular-nums; }
+.adm-price { padding: 0 6px; background: none; border: 0; text-decoration: underline dotted var(--dim); text-decoration-thickness: 2px; text-underline-offset: 6px; white-space: nowrap; }
+.adm-price:hover { color: var(--acc); text-decoration-color: var(--acc); }
+.adm-price small { margin-left: 6px; font-size: 13px; font-weight: 900; color: var(--ok); text-decoration: none; }
+.adm-price-input { padding: 0 12px; border: 2px solid var(--acc); border-radius: 14px; background: var(--surface); }
+.adm-price-input:focus { outline: none; }
+
+/* витрина */
+.adm-count { display: inline-flex; align-items: center; gap: 8px; grid-column: span 3; justify-self: end; }
+.adm-count b { min-width: 74px; text-align: center; font-size: 22px; font-weight: 1000; font-variant-numeric: tabular-nums; }
+.adm-count small { font-size: 14px; font-weight: 800; color: var(--dim); }
+.adm-round { display: grid; place-items: center; width: 48px; height: 48px; padding: 0; border: 0; border-radius: 50%; background: var(--acc); color: var(--on-acc); transition: transform 0.12s; }
+.adm-round:active { transform: scale(0.92); }
+.adm-round:disabled { opacity: 0.35; cursor: default; }
+.adm-round svg { width: 22px; height: 22px; }
+.adm-case[data-out] .adm-item-name { color: var(--dim); }
+
+/* лояльность */
+.adm-stamps { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.adm-stamps i { width: 36px; height: 36px; border-radius: 50%; background: var(--surface-2); }
+.adm-stamps i[data-filled] { background: var(--acc); }
+.adm-stamps b { margin-left: 8px; font-size: 20px; font-weight: 1000; }
+
+/* акция и поля */
+.adm-check { display: inline-flex; align-items: center; align-self: flex-start; gap: 12px; min-height: 48px; font-size: 16px; font-weight: 900; cursor: pointer; }
+.adm-check input { width: 24px; height: 24px; margin: 0; accent-color: var(--acc); }
+.adm-field { display: grid; gap: 6px; max-width: 560px; font-weight: 900; font-size: 15px; }
+.adm-field input { min-height: 52px; padding: 0 16px; border: 2px solid transparent; border-radius: 16px; background: var(--surface); font-size: 17px; font-weight: 800; }
+.adm-field input:focus { outline: none; border-color: var(--acc); }
+.adm-promo-preview { display: block; max-width: 560px; padding: 14px 20px; border-radius: 16px; background: #a9b98f; color: #1f2d17; font-weight: 900; text-align: center; }
+
+/* сводка */
+.adm-digest { display: grid; gap: 8px; margin-top: 8px; padding: 18px; border-radius: var(--r); background: var(--surface); }
+.adm-digest-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.adm-digest-head .adm-h2 { margin: 0 !important; }
+.adm-sample { padding: 3px 12px; border-radius: 99px; background: var(--almond); font-size: 13px; font-weight: 900; }
+.adm-digest pre { margin: 0; padding: 14px 16px; border-radius: 16px; background: var(--surface-2); font-family: var(--font, "Nunito", system-ui, sans-serif); font-size: 15px; font-weight: 700; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* ——— подвал ——— */
+.adm-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; padding: 18px var(--edge) calc(28px + env(safe-area-inset-bottom, 0px)); font-size: 15px; font-weight: 700; color: var(--dim); }
+.adm-foot > p { flex: 1 1 320px; max-width: 62ch; }
+.adm-foot > div { display: flex; gap: 14px; }
+
+/* ——— планшет и телефон ——— */
+@media (min-width: 761px) {
+  .adm-stats { grid-template-columns: repeat(4, 1fr); }
+}
+@media (max-width: 760px) {
+  .adm-stat b { font-size: 24px; }
+  .adm-name { font-size: 22px; }
+  .adm-item { grid-template-columns: 48px minmax(0, 1fr) auto; padding: 10px 14px; }
+  .adm-item .adm-btn { grid-column: 2 / 4; justify-self: stretch; }
+  .adm-item .adm-btn + .adm-btn { grid-column: 2 / 4; }
+  .adm-item .adm-price, .adm-item .adm-price-input { grid-column: 3; grid-row: 1; }
+  .adm-count { grid-column: 2 / 4; justify-self: end; }
+  .adm-lead { grid-template-columns: auto minmax(0, 1fr); }
+  .adm-lead-side { grid-column: 1 / -1; grid-template-columns: 1fr auto; align-items: center; justify-items: start; }
+  .adm-lead-side .adm-sum { grid-column: 1; }
+  .adm-lead-side .adm-pill { grid-column: 2; }
+  .adm-actions { grid-column: 1 / -1; justify-content: flex-start; }
+  .adm-top li { grid-template-columns: minmax(0, 7em) minmax(0, 1fr) auto; }
+}
+@media (max-width: 480px) {
+  .adm-tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; padding-inline: 12px; overflow: visible; }
+  .adm-tabs button { justify-content: center; padding: 0 6px; min-height: 48px; font-size: 14px; white-space: normal; text-align: center; line-height: 1.1; }
+  .adm-bars { gap: 6px; padding-inline: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .adm *, .adm *::before, .adm *::after { transition: none !important; animation: none !important; }
+}
