@@ -1,83 +1,115 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { formatSum, pick } from "../types";
 import { useOverrides } from "./client-bits";
 import { useSalon } from "./context";
-import { CATEGORIES, type Category } from "./data";
-import { bookingDraft, goToBooking } from "./draft-store";
-import { formatMinutes } from "./format";
-import { effectiveService } from "./schedule";
+import type { CatalogPackage, CatalogService } from "./catalog";
+import { bookingDraft } from "./draft-store";
+import { fill, formatMinutes } from "./format";
+import { Icon } from "./icons";
+import { effectiveService, packageBasket, packagePct, type SalonOverrides } from "./schedule";
 import { salonUi as ui } from "./ui";
 
-/**
- * Прайс-лист с вкладками «Мужской зал / Женский зал / Борода и уход». Цена, длительность и
- * скрытие берутся из правок кабинета — владелец поменял, сайт показал сразу.
- */
-export function ServicesList() {
-  const { services, locale } = useSalon();
+/** Плитка услуги: иконка, название, время и цена. Используется и на странице, и в шторке записи. */
+export function ServiceTile({ svc, ov, selected, dim, dimLabel, onPick }: { svc: CatalogService; ov: SalonOverrides; selected?: boolean; dim?: boolean; dimLabel?: string; onPick: () => void }) {
+  const { locale } = useSalon();
+  const eff = effectiveService({ id: svc.id, minutes: svc.minutes, price: svc.price }, ov);
+  return (
+    <li>
+      <button type="button" className="sl-tile" aria-pressed={selected === undefined ? undefined : selected} data-dim={dim || undefined} onClick={onPick}>
+        <span className="sl-tile-ic">
+          <Icon id={selected ? "check" : svc.icon} size={26} />
+        </span>
+        <span className="sl-tile-name">{svc.name}</span>
+        <span className="sl-tile-meta">
+          <b>{eff.price === 0 ? "0" : formatSum(eff.price, locale)}</b>
+          <span>{formatMinutes(eff.minutes, locale)}</span>
+        </span>
+        {svc.note && !dim && <span className="sl-tile-note">{svc.note}</span>}
+        {dim && dimLabel && <span className="sl-tile-note">{dimLabel}</span>}
+      </button>
+    </li>
+  );
+}
+
+/** Карточка пакета: набор услуг со скидкой, считает та же функция, что и запись. */
+export function PackageCard({ pkg, ov, selected, onPick }: { pkg: CatalogPackage; ov: SalonOverrides; selected?: boolean; onPick: () => void }) {
+  const { locale, sched, services } = useSalon();
+  const core = sched.packages.find((p) => p.id === pkg.id);
+  const b = core ? packageBasket(sched, ov, core) : null;
+  if (!core || !b) return null;
+  const pct = packagePct(core, ov);
+  const names = pkg.serviceIds.map((id) => services.find((s) => s.id === id)?.name ?? id).join(" + ");
+  return (
+    <li>
+      <button type="button" className="sl-pack" aria-pressed={selected === undefined ? undefined : selected} onClick={onPick}>
+        <span className="sl-pack-top">
+          <Icon id={pkg.icon} size={24} />
+          {pct > 0 && <em>{fill(pick(ui.services.save, locale), { pct })}</em>}
+        </span>
+        <b className="sl-pack-name">{pkg.name}</b>
+        <span className="sl-pack-svc">{names}</span>
+        <span className="sl-pack-price">
+          {b.saved > 0 && <s>{formatSum(b.full, locale)}</s>}
+          <b>{formatSum(b.price, locale)}</b>
+          <small>{formatMinutes(b.minutes, locale)}</small>
+        </span>
+      </button>
+    </li>
+  );
+}
+
+/** Пакеты, видимые для гостя (скрытые владельцем не показываются). */
+export function usePackages(): CatalogPackage[] {
+  const { packages, sched } = useSalon();
   const ov = useOverrides();
-  const [cat, setCat] = useState<Category>("men");
-  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  return packages.filter((p) => {
+    const core = sched.packages.find((x) => x.id === p.id);
+    return core ? packageBasket(sched, ov, core) !== null : false;
+  });
+}
 
-  const rows = services
-    .filter((s) => s.cat === cat)
-    .map((s) => ({ ...s, ...effectiveService({ id: s.id, minutes: s.minutes, price: s.price }, ov) }))
-    .filter((s) => !s.hidden);
-
-  function onKey(e: React.KeyboardEvent, index: number) {
-    const dir = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
-    if (!dir) return;
-    e.preventDefault();
-    const next = CATEGORIES[(index + dir + CATEGORIES.length) % CATEGORIES.length];
-    setCat(next);
-    tabRefs.current[next]?.focus();
-  }
+/**
+ * Услуги на странице: группы чипами, плитки с ценой и временем, пакеты. Нажатие на плитку или
+ * пакет сразу открывает запись с этим выбором.
+ */
+export function ServicesPicker() {
+  const { groups, services, packages, sched, locale } = useSalon();
+  const ov = useOverrides();
+  const [group, setGroup] = useState(groups[0]?.id ?? "");
+  const visible = services.filter((s) => !ov.services[s.id]?.hidden && sched.masters.some((m) => m.serviceIds.includes(s.id)));
+  const rows = visible.filter((s) => s.group === group);
+  const shownPacks = usePackages();
 
   return (
-    <div className="sl-price">
-      <div className="sl-tabs" role="tablist" aria-label={pick(ui.services.tabsLabel, locale)}>
-        {CATEGORIES.map((c, i) => (
-          <button
-            key={c}
-            ref={(el) => {
-              tabRefs.current[c] = el;
-            }}
-            type="button"
-            role="tab"
-            id={`tab-${c}`}
-            aria-selected={cat === c}
-            aria-controls="price-panel"
-            tabIndex={cat === c ? 0 : -1}
-            onClick={() => setCat(c)}
-            onKeyDown={(e) => onKey(e, i)}
-          >
-            {pick(ui.services[c], locale)}
+    <div className="sl-services">
+      {shownPacks.length > 0 && (
+        <section aria-label={pick(ui.services.packages, locale)}>
+          <ul className="sl-packs sl-snap">
+            {packages.filter((p) => shownPacks.includes(p)).map((p) => (
+              <PackageCard
+                key={p.id}
+                pkg={p}
+                ov={ov}
+                onPick={() => bookingDraft.open({ serviceIds: p.serviceIds, step: 2 })}
+              />
+            ))}
+          </ul>
+        </section>
+      )}
+      <div className="sl-chips" role="tablist" aria-label={pick(ui.services.groupsLabel, locale)}>
+        {groups.map((g) => (
+          <button key={g.id} type="button" role="tab" id={`sl-g-${g.id}`} aria-selected={group === g.id} aria-controls="sl-svc-panel" className="sl-chip" onClick={() => setGroup(g.id)}>
+            <Icon id={g.icon} size={20} />
+            {g.name}
           </button>
         ))}
       </div>
-      <ul className="sl-price-list" role="tabpanel" id="price-panel" aria-labelledby={`tab-${cat}`}>
+      <ul className="sl-tiles" role="tabpanel" id="sl-svc-panel" aria-labelledby={`sl-g-${group}`}>
         {rows.length === 0 && <li className="sl-note">{pick(ui.services.empty, locale)}</li>}
         {rows.map((s) => (
-          <li key={s.id} className="sl-price-row" data-pointer>
-            <div className="sl-price-main">
-              <h3>{s.name}</h3>
-              <p>{s.blurb}</p>
-            </div>
-            <span className="sl-price-min">{formatMinutes(s.minutes, locale)}</span>
-            <b className="sl-price-sum">{s.price === 0 ? "0" : formatSum(s.price, locale)}</b>
-            <button
-              type="button"
-              className="sl-price-book"
-              onClick={() => {
-                bookingDraft.send({ serviceIds: [s.id] });
-                goToBooking();
-              }}
-              aria-label={`${pick(ui.services.book, locale)}: ${s.name}`}
-            >
-              {pick(ui.services.book, locale)} <span aria-hidden="true">→</span>
-            </button>
-          </li>
+          <ServiceTile key={s.id} svc={s} ov={ov} onPick={() => bookingDraft.open({ serviceIds: [s.id], step: 2 })} />
         ))}
       </ul>
     </div>

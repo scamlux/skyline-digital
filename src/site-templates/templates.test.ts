@@ -1,15 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { restaurantDemo } from "./restaurant/data";
 import { restaurantUi } from "./restaurant/ui";
+import { adminUi as restaurantAdminUi } from "./restaurant/admin-ui";
+import { MAX_DISCOUNT } from "./restaurant/sets";
 import { clinicDemo } from "./clinic/data";
 import { clinicUi } from "./clinic/ui";
 import { adminUi as clinicAdminUi, adminWords } from "./clinic/admin-ui";
 import { slotTimes } from "./clinic/schedule";
-import { salonDemo, CATEGORIES } from "./salon/data";
+import { salonBusinesses } from "./salon/data";
 import { salonUi } from "./salon/ui";
-import { adminUi as salonAdminUi, adminWords as salonAdminWords } from "./salon/admin-ui";
-import { slotTimes as salonSlotTimes } from "./salon/schedule";
-import { splitHeadline } from "./salon/format";
+import { adminUi as salonAdminUi } from "./salon/admin-ui";
+import { cafeDemo, menu as cafeMenu, OPTIONS as cafeOptions, CATS as cafeCats } from "./cafe/data";
+import { cafeUi } from "./cafe/ui";
+import { adminUi as cafeAdminUi } from "./cafe/admin-ui";
 import { TEMPLATES } from "./registry";
 import { formatSum, LOCALES, STYLE_IDS, type L } from "./types";
 
@@ -28,12 +31,18 @@ describe("шаблоны: тексты на трёх языках", () => {
   const all: { path: string; l: L }[] = [];
   collect(restaurantDemo, "data", all);
   collect(restaurantUi, "ui", all);
+  collect(restaurantAdminUi, "restaurant.admin", all);
   collect(clinicDemo, "clinic.data", all);
   collect(clinicUi, "clinic.ui", all);
   collect(clinicAdminUi, "clinic.admin", all);
-  collect(salonDemo, "salon.data", all);
+  collect(salonBusinesses, "salon.data", all);
   collect(salonUi, "salon.ui", all);
   collect(salonAdminUi, "salon.admin", all);
+  collect(cafeDemo, "cafe.data", all);
+  collect(cafeMenu, "cafe.menu", all);
+  collect(cafeOptions, "cafe.options", all);
+  collect(cafeUi, "cafe.ui", all);
+  collect(cafeAdminUi, "cafe.admin", all);
   // Названия, описания и настроения стилей из реестра тоже видны посетителям витрины.
   collect(
     TEMPLATES.map((t) => ({ title: t.title, blurb: t.blurb, styles: t.styles.map((s) => ({ name: s.name, mood: s.mood })) })),
@@ -61,6 +70,36 @@ describe("шаблон «Ресторан»: данные", () => {
       expect(c.items.length).toBeGreaterThan(0);
       for (const it of c.items) expect(it.price).toBeGreaterThan(0);
     }
+  });
+
+  it("первый экран: заголовок до пяти слов и одна строка пояснения до 90 знаков, на всех языках и в обоих стилях", () => {
+    for (const style of STYLE_IDS) {
+      for (const loc of LOCALES) {
+        const h = restaurantDemo.hero[style];
+        expect(h.title[loc].trim().split(/\s+/).length).toBeLessThanOrEqual(5);
+        expect(h.lead[loc].length).toBeLessThanOrEqual(90);
+      }
+    }
+  });
+
+  it("наборы «на компанию»: блюда существуют, порции и скидка в допустимых пределах", () => {
+    const ids = new Set(restaurantDemo.menu.flatMap((c) => c.items.map((i) => i.id)));
+    expect(restaurantDemo.sets.length).toBeGreaterThanOrEqual(2);
+    for (const s of restaurantDemo.sets) {
+      expect(s.discount).toBeGreaterThanOrEqual(0);
+      expect(s.discount).toBeLessThanOrEqual(MAX_DISCOUNT);
+      expect(s.items.length).toBeGreaterThan(0);
+      for (const i of s.items) {
+        expect(ids.has(i.id)).toBe(true);
+        expect(i.per).toBeGreaterThanOrEqual(1);
+      }
+    }
+  });
+
+  it("у каждого стиля первого экрана есть фото, стили витрины ресторана имеют короткие подписи", () => {
+    for (const style of STYLE_IDS) expect(restaurantDemo.photos.hero[style].length).toBeGreaterThan(0);
+    const t = TEMPLATES.find((x) => x.id === "restaurant")!;
+    for (const st of t.styles) for (const loc of LOCALES) expect(st.label?.[loc].length ?? 99).toBeLessThanOrEqual(8);
   });
 
   it("часы работы в формате HH:MM", () => {
@@ -102,8 +141,9 @@ describe("шаблон «Клиника»: данные", () => {
     for (const s of clinicDemo.services) expect(clinicDemo.doctors.some((d) => d.serviceIds.includes(s.id))).toBe(true);
   });
 
-  it("слова в смене заголовка: ровно четыре (CSS-цикл рассчитан на 4 слова)", () => {
-    expect(clinicDemo.hero.words).toHaveLength(4);
+  it("плитки «Что беспокоит?»: шесть, подписи короткие (до трёх слов)", () => {
+    expect(clinicDemo.symptoms).toHaveLength(6);
+    for (const s of clinicDemo.symptoms) for (const loc of LOCALES) expect(s.label[loc].split(/\s+/).length).toBeLessThanOrEqual(3);
   });
 
   it("часы работы HH:MM, сетка записи шагом 30 минут, воскресенье закрыто", () => {
@@ -129,69 +169,12 @@ function clinicAdminWordsUz(): string[] {
   return Object.values(adminWords).flatMap((w) => Object.values(w.uz));
 }
 
-describe("шаблон «Салон»: данные", () => {
-  it("услуги: положительные длительность и цена, категории из списка, у каждой есть мастер", () => {
-    for (const s of salonDemo.services) {
-      expect(s.minutes).toBeGreaterThan(0);
-      expect(s.price).toBeGreaterThan(0);
-      expect(CATEGORIES).toContain(s.cat);
-      expect(salonDemo.masters.some((m) => m.serviceIds.includes(s.id))).toBe(true);
-    }
-    for (const c of CATEGORIES) expect(salonDemo.services.some((s) => s.cat === c)).toBe(true);
-  });
-
-  it("мастера: три, ведут существующие услуги, работают хотя бы пять дней", () => {
-    expect(salonDemo.masters).toHaveLength(3);
-    const ids = new Set(salonDemo.services.map((s) => s.id));
-    for (const m of salonDemo.masters) {
-      for (const id of m.serviceIds) expect(ids.has(id)).toBe(true);
-      expect(m.days.length).toBeGreaterThanOrEqual(5);
-    }
-  });
-
-  it("лукбук: шесть работ, услуги и мастер существуют, мастер ведёт все услуги работы", () => {
-    expect(salonDemo.looks).toHaveLength(6);
-    for (const l of salonDemo.looks) {
-      const master = salonDemo.masters.find((m) => m.id === l.masterId)!;
-      expect(master).toBeTruthy();
-      for (const id of l.serviceIds) expect(master.serviceIds).toContain(id);
-    }
-  });
-
-  it("часы 10:00–21:00, сетка шагом 30 минут, работает каждый день", () => {
-    expect(salonDemo.hours).toEqual({ open: "10:00", close: "21:00" });
-    expect(salonSlotTimes(salonDemo)).toHaveLength(22);
-  });
-
-  it("узбекский: нет апострофов; склонения и дни недели кабинета заполнены", () => {
-    expect(Object.keys(salonUi.years.ru).sort()).toEqual(["few", "many", "one"]);
-    const forms = [...Object.values(salonUi.years.uz), ...Object.values(salonAdminWords).flatMap((w) => Object.values(w.uz))];
-    expect(forms.join("")).not.toMatch(/[‘’'`]/);
-    for (const loc of LOCALES) expect(salonAdminUi.days[loc]).toHaveLength(7);
-    expect(salonAdminUi.days.uz.join("")).not.toMatch(/[‘’'`]/);
-  });
-
-  it("заголовок hero: слова и буквы собираются обратно в исходную строку (пробелы не теряются)", () => {
-    for (const style of ["a", "b"] as const)
-      for (const line of salonDemo.hero[style])
-        for (const loc of LOCALES) {
-          const words = splitHeadline(line[loc]);
-          expect(words.map((w) => w.join("")).join(" ")).toBe(line[loc]);
-        }
-    expect(splitHeadline("без спешки")).toEqual([Array.from("без"), Array.from("спешки")]);
-  });
-
-  it("демо-пометки: оценка в плавающей карточке и в цифрах помечена «демо» на всех языках", () => {
-    for (const loc of LOCALES) {
-      expect(salonUi.float.rating[loc].toLowerCase()).toContain(loc === "ru" ? "демо" : "demo");
-      expect(salonDemo.stats.find((s) => s.id === "rating")!.label[loc].toLowerCase()).toContain(loc === "ru" ? "демо" : "demo");
-    }
-  });
-
-  it("шаблон «Салон» зарегистрирован с кабинетом и OG-картинкой", () => {
+describe("шаблон «Салон»: реестр", () => {
+  it("шаблон «Салон» зарегистрирован с кабинетом, OG-картинкой и подписями стилей для панели демо", () => {
     const t = TEMPLATES.find((x) => x.id === "salon")!;
     expect(t.renderAdmin).toBeTruthy();
     expect(t.og.image).toBe("/templates/salon/img/og-1200.jpg");
+    expect(t.styles.map((s) => s.label?.ru)).toEqual(["Муж", "Жен"]);
   });
 });
 
@@ -208,5 +191,57 @@ describe("реестр шаблонов", () => {
     const ids = TEMPLATES.map((t) => t.id);
     expect(new Set(ids).size).toBe(ids.length);
     for (const t of TEMPLATES) expect(t.styles.map((s) => s.id)).toEqual(STYLE_IDS);
+  });
+});
+
+describe("шаблон «Кафе»: данные", () => {
+  it("меню: цены положительные, категории из списка, в каждой категории есть позиции", () => {
+    for (const m of cafeMenu) {
+      expect(m.price).toBeGreaterThan(0);
+      expect(cafeCats).toContain(m.cat);
+    }
+    for (const c of cafeCats) expect(cafeMenu.some((m) => m.cat === c)).toBe(true);
+  });
+
+  it("опции позиций существуют, у каждой группы значение по умолчанию есть среди вариантов", () => {
+    for (const m of cafeMenu) for (const k of m.options) expect(cafeOptions[k]).toBeTruthy();
+    for (const g of Object.values(cafeOptions)) expect(g.choices.some((c) => c.id === g.def)).toBe(true);
+  });
+
+  it("часы работы в формате HH:MM, открытие раньше закрытия", () => {
+    expect(cafeDemo.hours.open).toMatch(/^\d{2}:\d{2}$/);
+    expect(cafeDemo.hours.close).toMatch(/^\d{2}:\d{2}$/);
+    expect(cafeDemo.hours.open < cafeDemo.hours.close).toBe(true);
+  });
+
+  it("витрина: у позиций с остатком он положительный и есть и в выпечке, и в десертах", () => {
+    const stocked = cafeMenu.filter((m) => m.stock !== undefined);
+    expect(stocked.length).toBeGreaterThanOrEqual(3);
+    expect(stocked.some((m) => m.cat === "bakery") && stocked.some((m) => m.cat === "dessert")).toBe(true);
+    for (const m of stocked) expect(m.stock).toBeGreaterThan(0);
+  });
+
+  it("заголовки героя — не больше пяти слов", () => {
+    for (const st of ["a", "b"] as const) for (const loc of LOCALES) expect(cafeDemo.hero[st].title[loc].split(/\s+/).length).toBeLessThanOrEqual(5);
+  });
+
+  it("реестр: кафе с кабинетом и превью для соцсетей", () => {
+    const t = TEMPLATES.find((x) => x.id === "cafe")!;
+    expect(t.renderAdmin).toBeTruthy();
+    expect(t.og.image).toMatch(/^\/templates\/cafe\/img\//);
+  });
+});
+
+describe("шаблон «Кафе»: тексты", () => {
+  it("«открыто/закрыто» содержат {t} на всех языках (время подставляется в браузере)", () => {
+    for (const loc of LOCALES) {
+      expect(cafeUi.openUntil[loc]).toContain("{t}");
+      expect(cafeUi.closedUntil[loc]).toContain("{t}");
+    }
+  });
+
+  it("у каждой категории и статуса заказа есть подпись", () => {
+    for (const c of cafeCats) expect(cafeUi.cats[c].ru.length).toBeGreaterThan(0);
+    for (const st of ["new", "cooking", "ready", "done", "cancelled"] as const) expect(cafeAdminUi.orders.status[st].ru.length).toBeGreaterThan(0);
   });
 });

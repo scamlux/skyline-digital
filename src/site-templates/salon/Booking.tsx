@@ -4,21 +4,22 @@ import { useEffect, useRef, useState } from "react";
 import { useMinuteClock } from "../kit/hooks";
 import { addDays, dayOfMonth, formatDate, tashkentNow } from "../kit/tashkent";
 import { formatSum, pick } from "../types";
-import { useOverrides } from "./client-bits";
-import { useSalon } from "./context";
-import { CATEGORIES } from "./data";
-import { bookingDraft, useBookingDraft } from "./draft-store";
+import { StepServices } from "./BookingServices";
+import { useOverrides, useNextWindowFor } from "./client-bits";
+import { useSalon, useSalonStore } from "./context";
+import { bookingDraft, useBookingDraft, type Step } from "./draft-store";
 import { fill, formatMinutes, whenLabel } from "./format";
-import { basketOf, effectiveService, masterDays, mastersFor, slotsForDay, type Slot } from "./schedule";
-import { demo, useSalonState } from "./store";
+import { Icon } from "./icons";
+import { basketOf, DAY_PARTS, masterDays, mastersFor, partOfDay, slotsForDay, type DayPart, type Slot } from "./schedule";
 import { salonUi as ui } from "./ui";
 
 /** Сколько ближайших дней показываем в выборе даты. */
 const DAYS_AHEAD = 7;
 const MIN_PHONE_DIGITS = 9;
 const MIN_NAME_LENGTH = 2;
+const STEPS: Step[] = [1, 2, 3];
 
-type Errors = Partial<Record<"service" | "time" | "name" | "phone", string>>;
+type Errors = Partial<Record<"time" | "name" | "phone", string>>;
 
 interface Done {
   url: string;
@@ -29,81 +30,86 @@ interface Done {
 }
 
 /**
- * Запись онлайн: услуги (можно несколько, сумма и время считаются на лету) → мастер или любой →
- * день (7 дней, салон работает ежедневно) → время (сетка по 30 минут, длина записи = сумма
- * услуг, часть окон занята) → имя и телефон. Сетка считается той же функцией, что и карточки
- * «ближайшее окно»: график мастеров, чужие и свои записи учитываются. Режим "demo" показывает
- * подтверждение и кнопку со ссылкой в Telegram; "telegram" открывает чат сразу.
+ * Запись онлайн в три шага со шторкой: 1) услуги, 2) мастер и время, 3) контакты. На телефоне
+ * шторка выезжает снизу на всю высоту, на компьютере это окно по центру. Внизу всегда липкая
+ * сводка (услуги, время, цена, выгода по пакету) и одна кнопка «Далее» / «Записаться».
+ * Сетка свободного времени считается той же функцией, что и «ближайшее окно» в карточках мастеров.
  */
-export function BookingForm() {
-  const { locale, name: salon, telegram, mode, sched, services, masters, looks } = useSalon();
-  const state = useSalonState();
+export function BookingSheet() {
+  const { locale, name: salon, telegram, mode, sched, services, masters, perks, style } = useSalon();
+  const { state, demo } = useSalonStore();
   const ov = useOverrides();
   const draft = useBookingDraft();
   const clock = useMinuteClock();
   const now = clock > 0 ? tashkentNow(clock) : null;
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const headRef = useRef<HTMLHeadingElement>(null);
+  const successRef = useRef<HTMLHeadingElement>(null);
 
-  const [picked, setPicked] = useState<string[] | null>(null);
-  const [pickedMaster, setPickedMaster] = useState("any");
   const [pickedDate, setPickedDate] = useState<string | null>(null);
   const [pickedTime, setPickedTime] = useState<string | null>(null);
-  const [lookId, setLookId] = useState<string | null>(null);
-  const [seenNonce, setSeenNonce] = useState(0);
+  const [part, setPart] = useState<DayPart | "all">("all");
+  const [perk, setPerk] = useState<string | null>(null);
   const [errors, setErrors] = useState<Errors>({});
   const [done, setDone] = useState<Done | null>(null);
-  const successRef = useRef<HTMLHeadingElement>(null);
-  const formRef = useRef<HTMLFormElement>(null);
-  const wasDone = useRef(false);
+  const [seenNonce, setSeenNonce] = useState(0);
 
-  // Предвыбор из лукбука / подбора образа / карточки мастера. Обновление состояния во время
-  // рендера (а не в эффекте) — штатный приём React для «подхватить новое значение пропса».
+  // Каждое открытие шторки начинает с чистого дня и времени (обновление при рендере — штатный приём React).
   if (draft.nonce !== seenNonce) {
     setSeenNonce(draft.nonce);
-    setPicked(draft.serviceIds.length > 0 ? draft.serviceIds : null);
-    setPickedMaster(draft.masterId ?? "any");
-    setLookId(draft.lookId);
+    setPickedDate(null);
     setPickedTime(null);
+    setPart("all");
+    setErrors({});
     setDone(null);
   }
 
-  // Услуги, которые владелец не скрыл и которые кто-то ведёт.
+  // Нативный <dialog>: showModal даёт фокус-ловушку, Esc и инертный фон.
+  useEffect(() => {
+    const d = dialogRef.current;
+    if (!d) return;
+    if (draft.open && !d.open) d.showModal();
+    if (!draft.open && d.open) d.close();
+    document.documentElement.toggleAttribute("data-sheet", draft.open);
+    return () => document.documentElement.removeAttribute("data-sheet");
+  }, [draft.open]);
+
+  // Фокус на заголовок шага, когда шаг меняется.
+  useEffect(() => {
+    if (draft.open) (done ? successRef.current : headRef.current)?.focus();
+  }, [draft.step, draft.open, done]);
+
   const visible = services.filter((s) => !ov.services[s.id]?.hidden && mastersFor(sched, [s.id]).length > 0);
-  const ids = (picked ?? (visible[0] ? [visible[0].id] : [])).filter((id) => visible.some((s) => s.id === id));
+  const ids = draft.serviceIds.filter((id) => visible.some((s) => s.id === id));
   const basket = basketOf(sched, ov, ids);
   const able = mastersFor(sched, basket.ids);
-  const masterId = pickedMaster !== "any" && able.some((m) => m.id === pickedMaster) ? pickedMaster : "any";
+  const masterId = draft.masterId && able.some((m) => m.id === draft.masterId) ? draft.masterId : "any";
 
   const dates = now ? Array.from({ length: DAYS_AHEAD }, (_, i) => addDays(now.iso, i)) : [];
   const grids: Record<string, Slot[]> = {};
-  if (now && basket.ids.length > 0) {
+  if (now && basket.ids.length > 0 && draft.step >= 2) {
     for (const d of dates) grids[d] = slotsForDay({ data: sched, ov, bookings: state.bookings, date: d, serviceIds: basket.ids, masterId, now });
   }
-
   const firstOpenDate = dates.find((d) => grids[d]?.some((s) => s.status === "free"));
   const date = pickedDate && dates.includes(pickedDate) ? pickedDate : (firstOpenDate ?? dates[0] ?? null);
   const slots = date ? (grids[date] ?? []) : [];
   const slot = slots.find((s) => s.time === pickedTime && s.status === "free") ?? null;
+  const shownSlots = part === "all" ? slots : slots.filter((s) => partOfDay(s.time) === part);
   const masterName = (id: string | null) => masters.find((m) => m.id === id)?.name ?? "";
   const nameOf = (id: string) => services.find((s) => s.id === id)?.name ?? id;
 
-  // Фокус: кнопка, на которой стоял фокус, исчезает при смене состояния — переносим сами.
-  useEffect(() => {
-    if (done) successRef.current?.focus();
-    else if (wasDone.current) formRef.current?.querySelector<HTMLElement>("[name=name]")?.focus();
-    wasDone.current = !!done;
-  }, [done]);
+  const close = () => bookingDraft.close();
 
-  function toggle(id: string) {
-    setPicked(ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]);
-    setPickedTime(null);
-  }
-
-  function dayNote(iso: string): string {
-    const day = grids[iso] ?? [];
-    if (basket.ids.length === 0) return "";
-    if (day.length === 0) return pick(ui.form.dayOff, locale);
-    if (!day.some((s) => s.status === "free")) return pick(ui.form.noFree, locale);
-    return now && iso === now.iso ? pick(ui.form.todayShort, locale) : "";
+  function next() {
+    if (draft.step === 1 && basket.ids.length > 0) bookingDraft.setStep(2);
+    else if (draft.step === 2) {
+      if (!slot) {
+        setErrors({ time: pick(ui.sheet.pickTime, locale) });
+        return;
+      }
+      setErrors({});
+      bookingDraft.setStep(3);
+    }
   }
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -111,224 +117,276 @@ export function BookingForm() {
     const fd = new FormData(e.currentTarget);
     const name = String(fd.get("name") ?? "").trim();
     const phone = String(fd.get("phone") ?? "").trim();
-    const next: Errors = {};
-    if (basket.ids.length === 0) next.service = pick(able.length === 0 && ids.length > 1 ? ui.form.errMaster : ui.form.errService, locale);
-    else if (able.length === 0) next.service = pick(ui.form.errMaster, locale);
-    if (!date || !slot?.masterId) next.time = pick(ui.form.errTime, locale);
-    if (name.length < MIN_NAME_LENGTH) next.name = pick(ui.form.errName, locale);
-    if (phone.replace(/\D/g, "").length < MIN_PHONE_DIGITS) next.phone = pick(ui.form.errPhone, locale);
-    setErrors(next);
-    if (Object.keys(next).length > 0 || !date || !slot?.masterId || !now) {
-      const first = formRef.current?.querySelector<HTMLElement>("[data-invalid=true]");
-      first?.focus();
+    const found: Errors = {};
+    if (!date || !slot?.masterId) found.time = pick(ui.sheet.pickTime, locale);
+    if (name.length < MIN_NAME_LENGTH) found.name = pick(ui.sheet.errName, locale);
+    if (phone.replace(/\D/g, "").length < MIN_PHONE_DIGITS) found.phone = pick(ui.sheet.errPhone, locale);
+    setErrors(found);
+    if (Object.keys(found).length > 0 || !date || !slot?.masterId || !now) {
+      e.currentTarget.querySelector<HTMLElement>("[data-invalid=true]")?.focus();
       return;
     }
-
-    const saved = demo.addBooking({ name, phone, serviceIds: basket.ids, masterId: slot.masterId, anyMaster: masterId === "any", date, time: slot.time, minutes: basket.minutes, total: basket.price, lookId: lookId ?? undefined });
+    const saved = demo.addBooking({ name, phone, serviceIds: basket.ids, masterId: slot.masterId, anyMaster: masterId === "any", date, time: slot.time, minutes: basket.minutes, total: basket.price, lookId: draft.lookId ?? undefined, perk: perk ?? undefined, packageId: basket.packageId ?? undefined });
     if (!saved) {
-      setErrors({ time: pick(ui.form.errBusy, locale) });
+      setErrors({ time: pick(ui.sheet.errBusy, locale) });
       setPickedTime(null);
+      bookingDraft.setStep(2);
       return;
     }
     const servicesText = basket.ids.map(nameOf).join(" + ");
-    const when = whenLabel(date, slot.time, now.iso, locale);
-    const text = fill(pick(ui.form.tgText, locale), { salon, services: servicesText, master: masterName(slot.masterId), when: `${formatDate(date, locale, { day: "numeric", month: "long" })}, ${slot.time}`, total: formatSum(basket.price, locale), name, phone });
+    const perkText = perk ? perks.find((p) => p.id === perk)?.name : "";
+    const text =
+      fill(pick(ui.sheet.tgText, locale), { salon, services: servicesText, master: masterName(slot.masterId), when: `${formatDate(date, locale, { day: "numeric", month: "long" })}, ${slot.time}`, total: formatSum(basket.price, locale), name, phone }) + (perkText ? ` ${perkText}.` : "");
     const url = `https://t.me/${telegram}?text=${encodeURIComponent(text)}`;
-    // В режиме telegram чат открываем сами; в демо — только кнопка в подтверждении (новая вкладка
-    // увела бы посетителя из демо). Если окно заблокировано, ссылка всё равно остаётся на экране.
+    // В режиме telegram чат открываем сами; в демо только кнопка в подтверждении (новая вкладка увела бы из демо).
     if (mode === "telegram") window.open(url, "_blank", "noopener");
-    setDone({ url, services: servicesText, master: masterName(slot.masterId), when, total: `${formatSum(basket.price, locale)} · ${formatMinutes(basket.minutes, locale)}` });
-    bookingDraft.clear();
+    setDone({ url, services: servicesText, master: masterName(slot.masterId), when: whenLabel(date, slot.time, now.iso, locale), total: `${formatSum(basket.price, locale)} · ${formatMinutes(basket.minutes, locale)}` });
   }
 
-  if (done) {
-    return (
-      <div className="sl-success" role="status">
-        <h3 ref={successRef} tabIndex={-1}>
-          {pick(ui.form.successTitle, locale)}
-        </h3>
-        <dl className="sl-success-card">
-          <div>
-            <dt>{pick(ui.form.summaryServices, locale)}</dt>
-            <dd>{done.services}</dd>
-          </div>
-          <div>
-            <dt>{pick(ui.form.summaryMaster, locale)}</dt>
-            <dd>{done.master}</dd>
-          </div>
-          <div>
-            <dt>{pick(ui.form.summaryWhen, locale)}</dt>
-            <dd>{done.when}</dd>
-          </div>
-          <div>
-            <dt>{pick(ui.form.summaryTotal, locale)}</dt>
-            <dd>{done.total}</dd>
-          </div>
-        </dl>
-        <p>{pick(ui.form.successText, locale)}</p>
-        {mode === "demo" && <p className="sl-note">{pick(ui.form.demoNote, locale)}</p>}
-        <a className="sl-btn" href={done.url} target="_blank" rel="noopener noreferrer">
-          {pick(ui.form.openTelegram, locale)}
-        </a>
-        <p className="sl-note">{pick(ui.form.openTelegramHint, locale)}</p>
-        <button
-          type="button"
-          className="sl-btn ghost"
-          onClick={() => {
-            setDone(null);
-            setPickedTime(null);
-          }}
-        >
-          {pick(ui.form.again, locale)}
-        </button>
-      </div>
-    );
-  }
-
-  const lookTitle = lookId ? looks.find((l) => l.id === lookId)?.title : null;
-  const basketText = basket.ids.length > 0 ? `${formatSum(basket.price, locale)} · ${formatMinutes(basket.minutes, locale)}` : pick(ui.form.basketEmpty, locale);
+  const titles: Record<Step, string> = { 1: pick(ui.sheet.step1, locale), 2: pick(ui.sheet.step2, locale), 3: pick(ui.sheet.step3, locale) };
+  const summaryNames = basket.ids.map(nameOf).join(" + ");
 
   return (
-    <form ref={formRef} className="sl-form" onSubmit={onSubmit} noValidate>
-      {lookTitle && <p className="sl-form-look">{fill(pick(ui.form.fromLook, locale), { look: lookTitle })}</p>}
+    <dialog ref={dialogRef} className="sl-sheet" aria-label={pick(ui.sheet.label, locale)} onClose={() => draft.open && bookingDraft.close()} onClick={(e) => e.target === dialogRef.current && close()}>
+      <div className="sl-sheet-box" data-style={style}>
+        <header className="sl-sheet-head">
+          <ol className="sl-steps" aria-label={pick(ui.sheet.steps, locale)}>
+            {STEPS.map((n) => (
+              <li key={n} data-state={done || n < draft.step ? "done" : n === draft.step ? "now" : "todo"} aria-current={!done && n === draft.step ? "step" : undefined}>
+                <i>{done || n < draft.step ? <Icon id="check" size={14} /> : n}</i>
+                <span>{titles[n]}</span>
+              </li>
+            ))}
+          </ol>
+          <button type="button" className="sl-sheet-x" onClick={close} aria-label={pick(ui.sheet.close, locale)}>
+            <Icon id="close" size={22} />
+          </button>
+        </header>
 
-      <fieldset className="sl-step">
-        <legend>
-          <i aria-hidden="true">1</i> {pick(ui.form.stepServices, locale)}
-        </legend>
-        {CATEGORIES.map((cat) => {
-          const list = visible.filter((s) => s.cat === cat);
-          if (list.length === 0) return null;
-          return (
-            <div key={cat} className="sl-chk-group">
-              <p>{pick(ui.services[cat], locale)}</p>
-              <div className="sl-chks">
-                {list.map((s, idx) => {
-                  const eff = effectiveService({ id: s.id, minutes: s.minutes, price: s.price }, ov);
-                  return (
-                    <label key={s.id} className="sl-chk">
-                      <input type="checkbox" checked={ids.includes(s.id)} onChange={() => toggle(s.id)} {...(cat === CATEGORIES[0] && idx === 0 ? { "data-invalid": errors.service ? "true" : undefined } : {})} />
-                      <span>
-                        <b>{s.name}</b>
-                        <small>
-                          {formatMinutes(eff.minutes, locale)} · {formatSum(eff.price, locale)}
-                        </small>
-                      </span>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-        <p className="sl-basket" role="status" aria-label={pick(ui.form.basketLabel, locale)}>
-          <span>{pick(ui.form.basket, locale)}</span> <b>{basketText}</b>
-        </p>
-        {basket.ids.length > 0 && able.length === 0 && <p className="sl-err">{pick(ui.form.noMaster, locale)}</p>}
-        {errors.service && (
-          <p className="sl-err" role="alert">
-            {errors.service}
-          </p>
-        )}
-      </fieldset>
-
-      <fieldset className="sl-step">
-        <legend>
-          <i aria-hidden="true">2</i> {pick(ui.form.stepMaster, locale)}
-        </legend>
-        <div className="sl-masters-pick">
-          <label className="sl-radio">
-            <input type="radio" name="master" checked={masterId === "any"} onChange={() => (setPickedMaster("any"), setPickedTime(null))} />
-            <span>
-              <b>{pick(ui.form.anyMaster, locale)}</b>
-              <small>{pick(ui.form.anyMasterHint, locale)}</small>
+        {done ? (
+          <div className="sl-sheet-body sl-success" role="status">
+            <span className="sl-success-ic">
+              <Icon id="check" size={34} />
             </span>
-          </label>
-          {able.map((m) => (
-            <label key={m.id} className="sl-radio">
-              <input type="radio" name="master" checked={masterId === m.id} disabled={masterDays(m, ov).length === 0} onChange={() => (setPickedMaster(m.id), setPickedTime(null))} />
-              <span>
-                <b>{masters.find((x) => x.id === m.id)?.name}</b>
-                <small>{masterDays(m, ov).length === 0 ? pick(ui.masters.dayOff, locale) : masters.find((x) => x.id === m.id)?.role}</small>
-              </span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
-
-      <fieldset className="sl-step">
-        <legend>
-          <i aria-hidden="true">3</i> {pick(ui.form.stepDay, locale)}
-        </legend>
-        <div className="sl-days">
-          {dates.map((d) => {
-            const note = dayNote(d);
-            const off = basket.ids.length > 0 && !(grids[d] ?? []).some((s) => s.status === "free");
-            return (
-              <button key={d} type="button" aria-pressed={d === date} disabled={off} onClick={() => (setPickedDate(d), setPickedTime(null))} aria-label={`${formatDate(d, locale, { weekday: "long", day: "numeric", month: "long" })}${note ? `, ${note}` : ""}`}>
-                <small>{formatDate(d, locale, { weekday: "short" })}</small>
-                <b>{dayOfMonth(d)}</b>
-                <em>{note || " "}</em>
+            <h2 ref={successRef} tabIndex={-1}>
+              {pick(ui.sheet.successTitle, locale)}
+            </h2>
+            <dl className="sl-success-card">
+              <div>
+                <dt>
+                  <Icon id="scissors" size={18} />
+                </dt>
+                <dd>{done.services}</dd>
+              </div>
+              <div>
+                <dt>
+                  <Icon id="user" size={18} />
+                </dt>
+                <dd>{done.master}</dd>
+              </div>
+              <div>
+                <dt>
+                  <Icon id="calendar" size={18} />
+                </dt>
+                <dd>{done.when}</dd>
+              </div>
+              <div>
+                <dt>{pick(ui.sheet.total, locale)}</dt>
+                <dd>{done.total}</dd>
+              </div>
+            </dl>
+            <p>{pick(ui.sheet.successText, locale)}</p>
+            {mode === "demo" && <p className="sl-note">{pick(ui.sheet.demoNote, locale)}</p>}
+            <div className="sl-success-act">
+              <a className="sl-btn" href={done.url} target="_blank" rel="noopener noreferrer">
+                {pick(ui.sheet.openTelegram, locale)}
+              </a>
+              <button
+                type="button"
+                className="sl-btn sl-btn-line"
+                onClick={() => {
+                  bookingDraft.reset();
+                  bookingDraft.open({ serviceIds: [], step: 1 });
+                }}
+              >
+                {pick(ui.sheet.again, locale)}
               </button>
-            );
-          })}
-          {dates.length === 0 && <p className="sl-note">{pick(ui.form.loadingSlots, locale)}</p>}
-        </div>
-      </fieldset>
-
-      <fieldset className="sl-step">
-        <legend>
-          <i aria-hidden="true">4</i> {pick(ui.form.stepTime, locale)}
-        </legend>
-        {date && slots.length > 0 ? (
-          <div className="sl-slots">
-            {slots.map((s) => {
-              const free = s.status === "free";
-              return (
-                <button key={s.time} type="button" disabled={!free} aria-pressed={free && s.time === slot?.time} data-state={s.status} aria-label={free ? s.time : `${s.time}, ${pick(ui.form.taken, locale)}`} onClick={() => setPickedTime(s.time)}>
-                  {s.time}
-                </button>
-              );
-            })}
+            </div>
           </div>
         ) : (
-          <p className="sl-note">{pick(dates.length === 0 ? ui.form.loadingSlots : ui.form.noSlots, locale)}</p>
-        )}
-        {errors.time && (
-          <p className="sl-err" role="alert">
-            {errors.time}
-          </p>
-        )}
-      </fieldset>
+          <form className="sl-sheet-form" onSubmit={onSubmit} noValidate>
+            <div className="sl-sheet-body">
+              <h2 ref={headRef} tabIndex={-1} className="sl-sheet-title">
+                {draft.step === 1 ? pick(ui.sheet.pickService, locale) : draft.step === 2 ? pick(ui.sheet.pickTime, locale) : titles[3]}
+              </h2>
 
-      <fieldset className="sl-step">
-        <legend>
-          <i aria-hidden="true">5</i> {pick(ui.form.stepContact, locale)}
-        </legend>
-        <div className="sl-row">
-          <div className="sl-field">
-            <label htmlFor="sl-name">{pick(ui.form.name, locale)}</label>
-            <input id="sl-name" name="name" type="text" autoComplete="name" aria-invalid={!!errors.name} data-invalid={errors.name ? "true" : undefined} aria-describedby={errors.name ? "sl-name-err" : undefined} />
-            {errors.name && (
-              <p className="sl-err" id="sl-name-err" role="alert">
-                {errors.name}
-              </p>
-            )}
-          </div>
-          <div className="sl-field">
-            <label htmlFor="sl-phone">{pick(ui.form.phone, locale)}</label>
-            <input id="sl-phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" placeholder="+998" aria-invalid={!!errors.phone} data-invalid={errors.phone ? "true" : undefined} aria-describedby={errors.phone ? "sl-phone-err" : undefined} />
-            {errors.phone && (
-              <p className="sl-err" id="sl-phone-err" role="alert">
-                {errors.phone}
-              </p>
-            )}
-          </div>
-        </div>
-        <button type="submit" className="sl-btn big">
-          {pick(ui.form.submit, locale)}
-        </button>
-      </fieldset>
-    </form>
+              {draft.step === 1 && <StepServices />}
+
+              {draft.step === 2 && (
+                <div className="sl-step-body">
+                  <MasterPick able={able.map((m) => m.id)} masterId={masterId} serviceIds={basket.ids} />
+                  <div className="sl-days" role="group" aria-label={pick(ui.sheet.day, locale)}>
+                    {dates.map((d) => {
+                      const day = grids[d] ?? [];
+                      const off = day.length === 0 ? pick(ui.sheet.dayOff, locale) : !day.some((s) => s.status === "free") ? pick(ui.sheet.noFree, locale) : now && d === now.iso ? pick(ui.sheet.todayShort, locale) : "";
+                      const disabled = basket.ids.length > 0 && !day.some((s) => s.status === "free");
+                      return (
+                        <button key={d} type="button" aria-pressed={d === date} disabled={disabled} onClick={() => (setPickedDate(d), setPickedTime(null))} aria-label={`${formatDate(d, locale, { weekday: "long", day: "numeric", month: "long" })}${off ? `, ${off}` : ""}`}>
+                          <small>{formatDate(d, locale, { weekday: "short" })}</small>
+                          <b>{dayOfMonth(d)}</b>
+                          <em>{off || " "}</em>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="sl-chips sl-chips-scroll" role="group" aria-label={pick(ui.sheet.partsLabel, locale)}>
+                    {(["all", ...DAY_PARTS] as const).map((p) => (
+                      <button key={p} type="button" className="sl-chip" aria-pressed={part === p} onClick={() => setPart(p)}>
+                        {pick(ui.sheet.parts[p], locale)}
+                      </button>
+                    ))}
+                  </div>
+                  {date && shownSlots.length > 0 ? (
+                    <div className="sl-slots" role="group" aria-label={pick(ui.sheet.time, locale)}>
+                      {shownSlots.map((s) => {
+                        const free = s.status === "free";
+                        return (
+                          <button key={s.time} type="button" disabled={!free} aria-pressed={free && s.time === slot?.time} data-state={s.status} aria-label={free ? s.time : `${s.time}, ${pick(ui.sheet.taken, locale)}`} onClick={() => (setPickedTime(s.time), setErrors({}))}>
+                            {s.time}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="sl-note">{pick(dates.length === 0 ? ui.sheet.loading : ui.sheet.noSlots, locale)}</p>
+                  )}
+                  {errors.time && (
+                    <p className="sl-err" role="alert">
+                      {errors.time}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {draft.step === 3 && (
+                <div className="sl-step-body">
+                  <div className="sl-recap">
+                    <span>
+                      <Icon id="calendar" size={18} />
+                      {date && slot ? whenLabel(date, slot.time, now?.iso ?? "", locale) : ""}
+                    </span>
+                    <span>
+                      <Icon id="user" size={18} />
+                      {masterName(slot?.masterId ?? null)}
+                    </span>
+                  </div>
+                  <div className="sl-field">
+                    <label htmlFor="sl-name">{pick(ui.sheet.name, locale)}</label>
+                    <input id="sl-name" name="name" type="text" autoComplete="name" aria-invalid={!!errors.name} data-invalid={errors.name ? "true" : undefined} aria-describedby={errors.name ? "sl-name-err" : undefined} />
+                    {errors.name && (
+                      <p className="sl-err" id="sl-name-err" role="alert">
+                        {errors.name}
+                      </p>
+                    )}
+                  </div>
+                  <div className="sl-field">
+                    <label htmlFor="sl-phone">{pick(ui.sheet.phone, locale)}</label>
+                    <input id="sl-phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" placeholder="+998" aria-invalid={!!errors.phone} data-invalid={errors.phone ? "true" : undefined} aria-describedby={errors.phone ? "sl-phone-err" : undefined} />
+                    {errors.phone && (
+                      <p className="sl-err" id="sl-phone-err" role="alert">
+                        {errors.phone}
+                      </p>
+                    )}
+                  </div>
+                  {perks.length > 0 && (
+                    <div className="sl-field">
+                      <span className="sl-label" id="sl-perk-l">
+                        {pick(ui.sheet.perk, locale)}
+                      </span>
+                      <div className="sl-chips" role="group" aria-labelledby="sl-perk-l">
+                        {perks.map((p) => (
+                          <button key={p.id} type="button" className="sl-chip" aria-pressed={perk === p.id} onClick={() => setPerk(perk === p.id ? null : p.id)}>
+                            <Icon id={p.icon} size={20} />
+                            {p.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <footer className="sl-sheet-foot">
+              <div className="sl-sum" role="status" aria-label={pick(ui.sheet.total, locale)}>
+                <span className="sl-sum-names">{basket.ids.length > 0 ? summaryNames : pick(ui.sheet.pickService, locale)}</span>
+                <span className="sl-sum-line">
+                  {basket.saved > 0 && <s>{formatSum(basket.full, locale)}</s>}
+                  <b>{basket.ids.length > 0 ? formatSum(basket.price, locale) : "—"}</b>
+                  {basket.ids.length > 0 && <span>{formatMinutes(basket.minutes, locale)}</span>}
+                  {basket.saved > 0 && <em>{fill(pick(ui.sheet.saved, locale), { sum: formatSum(basket.saved, locale) })}</em>}
+                </span>
+              </div>
+              <div className="sl-sheet-act">
+                {draft.step > 1 && (
+                  <button type="button" className="sl-btn sl-btn-line sl-back" onClick={() => bookingDraft.setStep((draft.step - 1) as Step)} aria-label={pick(ui.sheet.back, locale)}>
+                    <Icon id="arrow" size={20} className="sl-flip" />
+                  </button>
+                )}
+                {draft.step < 3 ? (
+                  <button type="button" className="sl-btn sl-next" disabled={basket.ids.length === 0} onClick={next}>
+                    {pick(ui.sheet.next, locale)}
+                    <Icon id="arrow" size={20} />
+                  </button>
+                ) : (
+                  <button type="submit" className="sl-btn sl-next">
+                    {pick(ui.sheet.submit, locale)}
+                  </button>
+                )}
+              </div>
+            </footer>
+          </form>
+        )}
+      </div>
+    </dialog>
+  );
+}
+
+/** Выбор мастера: аватары с «ближайшим окном». «Любой» подбирает первое свободное окно. */
+function MasterPick({ able, masterId, serviceIds }: { able: string[]; masterId: string; serviceIds: string[] }) {
+  const { locale, masters } = useSalon();
+  const ov = useOverrides();
+  return (
+    <ul className="sl-mpick sl-snap" role="radiogroup" aria-label={pick(ui.sheet.master, locale)}>
+      <MasterOption id="any" name={pick(ui.sheet.anyMaster, locale)} hint={pick(ui.sheet.anyMasterHint, locale)} photo={null} checked={masterId === "any"} serviceIds={serviceIds} />
+      {able.map((id) => {
+        const m = masters.find((x) => x.id === id);
+        if (!m) return null;
+        const off = masterDays({ id, serviceIds: m.serviceIds, days: [] }, ov).length === 0;
+        return <MasterOption key={id} id={id} name={m.name.split(" ")[0]} photo={m.photo} checked={masterId === id} disabled={off} serviceIds={serviceIds} />;
+      })}
+    </ul>
+  );
+}
+
+function MasterOption({ id, name, hint, photo, checked, disabled, serviceIds }: { id: string; name: string; hint?: string; photo: string | null; checked: boolean; disabled?: boolean; serviceIds: string[] }) {
+  const { locale } = useSalon();
+  const win = useNextWindowFor(id === "any" ? undefined : id, serviceIds);
+  const label = hint ?? (disabled ? pick(ui.masters.dayOff, locale) : win === undefined ? "—" : win ? win.label : pick(ui.masters.noSlot, locale));
+  return (
+    <li>
+      <button type="button" role="radio" aria-checked={checked} disabled={disabled} className="sl-mopt" onClick={() => (bookingDraft.setMaster(id === "any" ? null : id))}>
+        <span className="sl-mopt-av">
+          {photo ? (
+            // eslint-disable-next-line @next/next/no-img-element -- шаблон переносимый: без next/image
+            <img src={`/templates/salon/img/${photo}-480.webp`} width={96} height={96} alt="" loading="lazy" decoding="async" />
+          ) : (
+            <Icon id="user" size={26} />
+          )}
+        </span>
+        <b>{name}</b>
+        <small>{label}</small>
+      </button>
+    </li>
   );
 }

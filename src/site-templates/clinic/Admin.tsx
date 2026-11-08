@@ -10,6 +10,7 @@ import type { ClinicData } from "./data";
 import { fill } from "./format";
 import { buildSeedBookings } from "./seed";
 import { effectiveService, toScheduleData } from "./schedule";
+import { clinicUi } from "./ui";
 import { demo, useClinicState, type Booking, type BookingStatus, type DemoEvent, type EventType } from "./store";
 
 type Tab = "overview" | "bookings" | "services" | "doctors" | "promo";
@@ -57,7 +58,7 @@ export function ClinicAdmin({
     <div className="adm" data-tpl="clinic" lang={locale === "uz" ? "uz-Latn" : locale}>
       <link rel="stylesheet" href={ADMIN_CSS} precedence="default" />
       <link rel="preload" href="/templates/fonts/onest-latin.woff2" as="font" type="font/woff2" crossOrigin="" />
-      <link rel="preload" href="/templates/fonts/onest-cyrillic.woff2" as="font" type="font/woff2" crossOrigin="" />
+      {locale === "ru" && <link rel="preload" href="/templates/fonts/onest-cyrillic.woff2" as="font" type="font/woff2" crossOrigin="" />}
       <header className="adm-head">
         <div className="adm-title">
           <span className="adm-badge">{t(ui.demo.badge)}</span>
@@ -319,10 +320,23 @@ function BookingList({
               {svcName(b.serviceId)} · {docName(b.doctorId)}
               {b.anyDoctor && <i> ({t(ui.booking.anyDoctor)})</i>}
             </span>
-            {b.plan && (
-              <span className="adm-plan">
-                {t(ui.booking.planLabel)}: {b.plan}
-              </span>
+            {b.teeth && b.teeth.length > 0 ? (
+              <>
+                <span className="adm-teeth" role="list" aria-label={`${t(ui.booking.planLabel)}: ${t(clinicUi.jaw.teethCount).replace("{n}", String(b.teeth.length))}`}>
+                  {b.teeth.map((x) => (
+                    <span key={x.tooth} role="listitem">
+                      <b>{x.tooth}</b> {t(clinicUi.problems[x.problem])}
+                    </span>
+                  ))}
+                </span>
+                {b.plan && <span className="adm-plan">{b.plan.replace(/\s*\([^)]*\)\s*$/, "")}</span>}
+              </>
+            ) : (
+              b.plan && (
+                <span className="adm-plan">
+                  {t(ui.booking.planLabel)}: {b.plan}
+                </span>
+              )
             )}
             <a href={`tel:${b.phone.replace(/\s/g, "")}`}>{b.phone}</a>
           </div>

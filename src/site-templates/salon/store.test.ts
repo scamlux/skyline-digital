@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { tashkentNow } from "../kit/tashkent";
-import { salonDemo } from "./data";
+import { salonBusinesses } from "./data";
 import { buildSeedBookings } from "./seed";
 import { NO_OVERRIDES, slotsForDay, toScheduleData, type SalonOverrides } from "./schedule";
 
@@ -16,18 +16,23 @@ vi.stubGlobal("localStorage", {
 });
 
 type Store = typeof import("./store");
-let demo: Store["demo"];
+let demo: Store["salonStores"]["a"]["demo"];
+let demoB: Store["salonStores"]["b"]["demo"];
+let stores: Store["salonStores"];
 
 beforeAll(async () => {
-  ({ demo } = await import("./store"));
+  ({ salonStores: stores } = await import("./store"));
+  demo = stores.a.demo;
+  demoB = stores.b.demo;
 });
 
 beforeEach(() => {
   mem.clear();
   demo.reset();
+  demoB.reset();
 });
 
-const data = toScheduleData(salonDemo);
+const data = toScheduleData(salonBusinesses.a);
 // Вторник 2026-11-03, 08:00 по Ташкенту — все слоты дня ещё впереди.
 const NOW_TS = Date.UTC(2026, 10, 3, 3, 0);
 const NOW = tashkentNow(NOW_TS);
@@ -37,7 +42,7 @@ const guest = { name: "Тест", phone: "+998 90 000 00 00", serviceIds: ["fade
 
 const overridesOf = (): SalonOverrides => {
   const s = demo.get();
-  return { services: s.services, schedule: s.schedule };
+  return { services: s.services, schedule: s.schedule, packages: s.packages };
 };
 
 describe("salon demo store: записи", () => {
@@ -106,13 +111,41 @@ describe("salon demo store: цены и длительность", () => {
   });
 });
 
+describe("salon demo store: два бизнеса и пакеты", () => {
+  it("записи барбершопа и салона красоты не смешиваются: у каждого свой ключ и свои данные", () => {
+    demo.addBooking(guest);
+    expect(demo.get().bookings).toHaveLength(1);
+    expect(demoB.get().bookings).toHaveLength(0);
+    demoB.addBooking({ ...guest, name: "Салон", serviceIds: ["wcut"], masterId: "madina" });
+    expect(demoB.get().bookings.map((b) => b.name)).toEqual(["Салон"]);
+    expect(demo.get().bookings.map((b) => b.name)).toEqual(["Тест"]);
+    expect([...mem.keys()].sort()).toEqual(["skyline-demo-salon-a-v2", "skyline-demo-salon-b-v2"]);
+  });
+
+  it("setPackage ограничивает скидку 0–50 % и прячет пакет; запись хранит угощение и пакет", () => {
+    demo.setPackage("cut-beard", { pct: 99 });
+    expect(demo.get().packages["cut-beard"]).toEqual({ pct: 50 });
+    demo.setPackage("cut-beard", { pct: -3, hidden: true });
+    expect(demo.get().packages["cut-beard"]).toEqual({ pct: 0, hidden: true });
+    const b = demo.addBooking({ ...guest, perk: "coffee", packageId: "cut-beard" })!;
+    expect(demo.get().bookings[0]).toMatchObject({ id: b.id, perk: "coffee", packageId: "cut-beard" });
+  });
+
+  it("запоминает, какой бизнес смотрели последним", async () => {
+    const { rememberStyle, lastStyle } = await import("./store");
+    expect(lastStyle()).toBe("a");
+    rememberStyle("b");
+    expect(lastStyle()).toBe("b");
+  });
+});
+
 describe("salon demo store: график мастеров", () => {
   it("выходной мастера убирает его слоты на сайте", () => {
-    const q = { data, bookings: [] as never[], date: DAY, serviceIds: ["wcut"], masterId: "any" as const, now: NOW };
+    const q = { data, bookings: [] as never[], date: DAY, serviceIds: ["cut"], masterId: "rustam" as const, now: NOW };
     expect(slotsForDay({ ...q, ov: overridesOf() }).some((s) => s.status === "free")).toBe(true);
-    demo.setMasterDays("madina", [0, 2, 3, 4, 5, 6]); // вторник (1) убран
+    demo.setMasterDays("rustam", [0, 2, 3, 4, 5]); // вторник (1) убран
     expect(slotsForDay({ ...q, ov: overridesOf() })).toEqual([]);
-    demo.setMasterDays("madina", [0, 1, 2]);
+    demo.setMasterDays("rustam", [0, 1, 2]);
     expect(slotsForDay({ ...q, ov: overridesOf() }).some((s) => s.status === "free")).toBe(true);
   });
 
@@ -170,11 +203,12 @@ describe("salon demo store: seed и reset", () => {
 
 describe("демо-наполнение записей", () => {
   const seed = buildSeedBookings(data, NO_OVERRIDES, NOW_TS);
+  const seedWomen = () => buildSeedBookings(toScheduleData(salonBusinesses.b), NO_OVERRIDES, NOW_TS);
 
   it("записей достаточно, нет пересечений у одного мастера, всё внутри часов работы и на рабочих днях", () => {
     expect(seed.length).toBeGreaterThanOrEqual(10);
     for (const [i, a] of seed.entries()) {
-      const master = salonDemo.masters.find((m) => m.id === a.masterId)!;
+      const master = salonBusinesses.a.masters.find((m) => m.id === a.masterId)!;
       expect(a.serviceIds.every((id) => master.serviceIds.includes(id))).toBe(true);
       const start = Number(a.time.slice(0, 2)) * 60 + Number(a.time.slice(3));
       expect(start).toBeGreaterThanOrEqual(10 * 60);
@@ -183,6 +217,20 @@ describe("демо-наполнение записей", () => {
         if (a.masterId !== b.masterId || a.date !== b.date) continue;
         const bs = Number(b.time.slice(0, 2)) * 60 + Number(b.time.slice(3));
         expect(start < bs + b.minutes && bs < start + a.minutes).toBe(false);
+      }
+    }
+  });
+
+  it("демо-записи салона красоты тоже есть и не пересекаются у одного мастера", () => {
+    const w = seedWomen();
+    expect(w.length).toBeGreaterThanOrEqual(10);
+    for (const [i, a] of w.entries()) {
+      expect(salonBusinesses.b.masters.some((m) => m.id === a.masterId)).toBe(true);
+      for (const b of w.slice(i + 1)) {
+        if (a.masterId !== b.masterId || a.date !== b.date) continue;
+        const as = Number(a.time.slice(0, 2)) * 60 + Number(a.time.slice(3));
+        const bs = Number(b.time.slice(0, 2)) * 60 + Number(b.time.slice(3));
+        expect(as < bs + b.minutes && bs < as + a.minutes).toBe(false);
       }
     }
   });

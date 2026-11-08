@@ -8,12 +8,17 @@ import { ClinicAdmin } from "./clinic/Admin";
 import { clinicDemo } from "./clinic/data";
 import { SalonSite } from "./salon/Salon";
 import { SalonAdmin } from "./salon/Admin";
-import { salonDemo } from "./salon/data";
+import { salonBusinesses, salonDemo } from "./salon/data";
+import { CafeSite } from "./cafe/Cafe";
+import { CafeAdmin } from "./cafe/Admin";
+import { cafeDemo } from "./cafe/data";
 
 export interface TemplateStyle {
   id: StyleId;
   name: L;
   mood: L;
+  /** Короткая подпись кнопки стиля в панели демо вместо буквы A/B (например «Мужской» / «Женский»). */
+  label?: L;
 }
 
 export interface TemplateDef {
@@ -39,29 +44,31 @@ export const TEMPLATES: TemplateDef[] = [
     id: "restaurant",
     demoName: restaurantDemo.name,
     og: { image: "/templates/restaurant/img/og-1200.jpg", description: restaurantDemo.tagline },
-    title: { ru: "Ресторан и кафе", en: "Restaurant & café", uz: "Restoran va kafe" },
+    title: { ru: "Ресторан", en: "Restaurant", uz: "Restoran" },
     blurb: {
-      ru: "Меню как печатная карточка, бронь стола в Telegram, кнопки доставки.",
-      en: "A menu like a printed card, table booking on Telegram, delivery buttons.",
-      uz: "Bosma kartochkadek menyu, Telegramda stol bandi, yetkazib berish tugmalari.",
+      ru: "Меню с фото, набор «на компанию» с ценой, бронь стола в три шага, доставка.",
+      en: "A photo menu, a group set with a live price, table booking in three steps, delivery.",
+      uz: "Rasmli menyu, narxli «davra» toʻplami, uch bosqichda stol bandi, yetkazib berish.",
     },
     styles: [
       {
         id: "a",
         name: { ru: "Тёплая трапеза", en: "Warm table", uz: "Issiq dasturxon" },
+        label: { ru: "День", en: "Day", uz: "Kun" },
         mood: {
-          ru: "Керамическая бирюза, шафран, антиква. Уютно и по-домашнему.",
-          en: "Ceramic teal, saffron, a serif. Cosy and homely.",
-          uz: "Keramik firuza, zaʼfaron, antiqua. Qulay va uyday.",
+          ru: "Кремовая бумага, бирюза и шафран, антиква, фото в арке и пар над казаном. Уютный день.",
+          en: "Cream paper, teal and saffron, a serif, an arched photo and steam over the kazan. A cosy day.",
+          uz: "Qaymoq qogʻoz, firuza va zaʼfaron, antiqua, ark ichidagi surat va qozon ustida bugʻ. Iliq kun.",
         },
       },
       {
         id: "b",
         name: { ru: "Чистый вечер", en: "Clean evening", uz: "Sokin kech" },
+        label: { ru: "Вечер", en: "Evening", uz: "Kech" },
         mood: {
-          ru: "Графит и латунь, строгая типографика. Вечерний сервис.",
-          en: "Graphite and brass, strict typography. Evening service.",
-          uz: "Grafit va guruch, qatʼiy tipografika. Kechki xizmat.",
+          ru: "Графит и латунь, зал при свечах: тёплая виньетка и мерцающий свет. Вечерний сервис.",
+          en: "Graphite and brass, a candle-lit hall: a warm vignette and flickering light. Evening service.",
+          uz: "Grafit va guruch, shamlar yoritgan zal: iliq vinyetka va miltillovchi yorugʻlik. Kechki xizmat.",
         },
       },
     ],
@@ -74,27 +81,29 @@ export const TEMPLATES: TemplateDef[] = [
     og: { image: "/templates/clinic/img/og-1200.jpg", description: clinicDemo.tagline },
     title: { ru: "Клиника и стоматология", en: "Clinic & dentistry", uz: "Klinika va stomatologiya" },
     blurb: {
-      ru: "Запись к врачу по слотам, калькулятор лечения с вилкой цен, врачи и отзывы.",
-      en: "Slot-based booking, a treatment calculator with price ranges, doctors and reviews.",
-      uz: "Vaqt boʻyicha yozilish, narx oraligʻi bilan davolash kalkulyatori, shifokorlar va fikrlar.",
+      ru: "Плитки «Что беспокоит?», карта зубов с живой ценой, запись к врачу в три шага.",
+      en: "“What’s bothering you?” tiles, a tooth map with a live price, booking in three steps.",
+      uz: "«Nima bezovta qilyapti?» plitkalari, jonli narxli tishlar xaritasi, uch bosqichda yozilish.",
     },
     styles: [
       {
         id: "a",
-        name: { ru: "Свет", en: "Light", uz: "Yorugʻlik" },
+        name: { ru: "Белый кабинет", en: "White surgery", uz: "Oq kabinet" },
+        label: { ru: "Белый", en: "White", uz: "Oq" },
         mood: {
-          ru: "Воздух, мята и персик, живая аврора за заголовком. Светло и доверительно.",
-          en: "Airy mint and peach with a living aurora behind the headline. Bright and reassuring.",
-          uz: "Havodor yalpiz va shaftoli ranglari, sarlavha ortida jonli shafaq. Yorugʻ va ishonchli.",
+          ru: "Бумажно-белый и кобальт, крупные цифры, тонкая сетка и риски как на приборе. Точно и спокойно.",
+          en: "Paper white and cobalt, big numerals, a hairline grid and tick marks like an instrument. Precise and calm.",
+          uz: "Qogʻoz oqligi va kobalt, yirik raqamlar, ingichka toʻr va asbobdagidek chiziqchalar. Aniq va sokin.",
         },
       },
       {
         id: "b",
-        name: { ru: "Глубина", en: "Depth", uz: "Chuqurlik" },
+        name: { ru: "Ночная смена", en: "Night shift", uz: "Tungi smena" },
+        label: { ru: "Ночной", en: "Night", uz: "Tungi" },
         mood: {
-          ru: "Тёмный navy, бирюзовое свечение, свет следует за курсором. Технологично и дорого.",
-          en: "Deep navy, teal glow and a spotlight that follows the cursor. High-tech and premium.",
-          uz: "Toʻq navy, firuza yorugʻlik va kursor ortidan yuradigan nur. Zamonaviy va nufuzli.",
+          ru: "Графит и ink-blue, холодное свечение, челюсть как в окне 3D-сканера. Технологично и дорого.",
+          en: "Graphite and ink-blue, a cold glow, the jaw as in a 3D-scanner window. High-tech and premium.",
+          uz: "Grafit va ink-blue, sovuq yorugʻlik, jag 3D-skaner oynasidagidek. Zamonaviy va nufuzli.",
         },
       },
     ],
@@ -103,36 +112,74 @@ export const TEMPLATES: TemplateDef[] = [
   },
   {
     id: "salon",
-    demoName: salonDemo.name,
+    demoName: `${salonBusinesses.a.name} · ${salonBusinesses.b.name}`,
     og: { image: "/templates/salon/img/og-1200.jpg", description: salonDemo.tagline },
     title: { ru: "Салон и барбершоп", en: "Salon & barbershop", uz: "Salon va barbershop" },
     blurb: {
-      ru: "Живой лукбук, подбор образа за три вопроса, запись к мастеру с суммой и временем набора услуг.",
-      en: "A live lookbook, a three-question look finder, booking with a master and a live total for combined services.",
-      uz: "Jonli lukbuk, uchta savolda obraz tanlash, usta oldiga yozilish va xizmatlar jami summasi hamda vaqti.",
+      ru: "Два сайта: барбершоп для мужчин и салон красоты. Образы, пакеты, запись в три шага.",
+      en: "Two sites: a barbershop for men and a beauty salon. Looks, bundles, booking in three steps.",
+      uz: "Ikki sayt: erkaklar barbershopi va goʻzallik saloni. Obrazlar, paketlar, uch bosqichda yozilish.",
     },
     styles: [
       {
         id: "a",
-        name: { ru: "Ночь", en: "Night", uz: "Tun" },
+        name: { ru: "Мужской", en: "Men’s", uz: "Erkaklar" },
+        label: { ru: "Муж", en: "Men", uz: "Erkak" },
         mood: {
-          ru: "Почти чёрный, латунь, зерно плёнки и огромный заголовок поверх фото. Барбершоп.",
-          en: "Near-black with brass, film grain and a huge headline over the photo. A barbershop.",
-          uz: "Deyarli qora, guruch rang, plyonka donalari va rasm ustida ulkan sarlavha. Barbershop.",
+          ru: "USTARA: почти чёрный, латунь, жёсткие грани. Закрытый барбершоп для мужчин.",
+          en: "USTARA: near-black, brass, hard edges. A private barbershop for men.",
+          uz: "USTARA: deyarli qora, guruch, keskin chegaralar. Erkaklar uchun yopiq barbershop.",
         },
       },
       {
         id: "b",
-        name: { ru: "Пудра", en: "Powder", uz: "Pudra" },
+        name: { ru: "Женский", en: "Women’s", uz: "Ayollar" },
+        label: { ru: "Жен", en: "Women", uz: "Ayol" },
         mood: {
-          ru: "Сливочный и розовый, антиква и мягкие органичные формы. Салон красоты.",
-          en: "Cream and blush, a serif face and soft organic shapes. A beauty salon.",
-          uz: "Qaymoq va pushti ranglar, antiqua va yumshoq organik shakllar. Goʻzallik saloni.",
+          ru: "Nafis Beauty: сливочный и винный, антиква, мягкие формы. Салон красоты для неё.",
+          en: "Nafis Beauty: cream and wine, a serif face, soft shapes. A beauty salon for her.",
+          uz: "Nafis Beauty: qaymoq va sharob rangi, antiqua, yumshoq shakllar. Ayollar goʻzallik saloni.",
         },
       },
     ],
-    render: (p) => <SalonSite data={salonDemo} {...p} />,
-    renderAdmin: (p) => <SalonAdmin data={salonDemo} {...p} />,
+    render: (p) => <SalonSite data={salonBusinesses[p.style]} {...p} />,
+    renderAdmin: (p) => <SalonAdmin businesses={salonBusinesses} {...p} />,
+  },
+  {
+    id: "cafe",
+    demoName: cafeDemo.name,
+    // JPG лучше для превью в Telegram/WhatsApp.
+    og: { image: "/templates/cafe/img/og-1200.jpg", description: cafeDemo.tagline },
+    title: { ru: "Кафе и кофейня", en: "Café & coffee shop", uz: "Kafe va kofexona" },
+    blurb: {
+      ru: "Меню с фото, заказ навынос к нужному времени, карта «6-й кофе бесплатно».",
+      en: "A photo menu, order-ahead pickup at your time, a “6th coffee is free” card.",
+      uz: "Rasmli menyu, belgilangan vaqtga olib ketish, «6-kofe bepul» kartasi.",
+    },
+    styles: [
+      {
+        id: "a",
+        name: { ru: "Утро", en: "Morning", uz: "Tong" },
+        label: { ru: "Утро", en: "Morning", uz: "Tong" },
+        mood: {
+          ru: "Сливочный и терракота, миндаль и шалфей, круглые шрифты и наклейки. Тёплое утро.",
+          en: "Cream and terracotta, almond and sage, round type and stickers. A warm morning.",
+          uz: "Qaymoq va terrakota, bodom va yashil ranglar, yumaloq shrift va yorliqlar. Iliq tong.",
+        },
+      },
+      {
+        id: "b",
+        name: { ru: "Вечер", en: "Evening", uz: "Kech" },
+        label: { ru: "Вечер", en: "Evening", uz: "Kech" },
+        mood: {
+          ru: "Тёмный эспрессо, янтарное свечение, десерты и раф после шести. Вечерний уют.",
+          en: "Dark espresso, amber glow, desserts and raf after six. An evening hideout.",
+          uz: "Toʻq espresso, qahrabo nuri, oltidan keyin desert va raf. Kechki shinamlik.",
+        },
+      },
+    ],
+    render: (p) => <CafeSite data={cafeDemo} {...p} />,
+    renderAdmin: (p) => <CafeAdmin data={cafeDemo} {...p} />,
   },
 ];
 

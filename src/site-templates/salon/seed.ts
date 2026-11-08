@@ -2,26 +2,42 @@ import { addDays, tashkentNow, toMinutes, fromMinutes } from "../kit/tashkent";
 import { basketOf, LEAD_MINUTES, masterWorks, mastersFor, slotTimes, type SalonOverrides, type ScheduleData } from "./schedule";
 import type { BookingStatus, SeedBooking } from "./store";
 
-/** Гости демо-наполнения: имена и телефоны вымышленные. */
-const GUESTS = [
+/** Гости демо-наполнения барбершопа: имена и телефоны вымышленные. */
+export const GUESTS_MEN = [
   { name: "Азиз", phone: "+998 90 111 22 33" },
-  { name: "Мадина", phone: "+998 97 222 33 44" },
   { name: "Jasur", phone: "+998 93 333 44 55" },
-  { name: "Нилуфар", phone: "+998 94 444 55 66" },
   { name: "Bekzod", phone: "+998 99 555 66 77" },
   { name: "Тимур", phone: "+998 91 666 77 88" },
-  { name: "Севара", phone: "+998 95 777 88 99" },
   { name: "Farrux", phone: "+998 90 888 99 00" },
-  { name: "Гульнора", phone: "+998 97 123 45 67" },
   { name: "Sardor", phone: "+998 93 234 56 78" },
   { name: "Дилшод", phone: "+998 94 345 67 89" },
   { name: "Otabek", phone: "+998 99 456 78 90" },
-  { name: "Камила", phone: "+998 91 567 89 01" },
   { name: "Sherzod", phone: "+998 90 678 90 12" },
+  { name: "Рустам", phone: "+998 97 712 34 56" },
+  { name: "Анвар", phone: "+998 91 823 45 67" },
+  { name: "Ilhom", phone: "+998 95 934 56 78" },
+  { name: "Нодир", phone: "+998 94 145 67 89" },
+  { name: "Aziz", phone: "+998 90 256 78 90" },
 ];
 
-/** Наборы услуг демо-записей: мужской зал чаще, женский и борода реже. */
-const BASKETS = [["fade"], ["combo"], ["wcut", "wcare"], ["classic", "beard"], ["wstyle"], ["razor"], ["wcolor"], ["mcut", "beard"], ["fade", "mask"], ["wcut"], ["beard"], ["classic"], ["combo"], ["fade"]];
+/** Гости демо-наполнения салона красоты. */
+export const GUESTS_WOMEN = [
+  { name: "Мадина", phone: "+998 97 222 33 44" },
+  { name: "Нилуфар", phone: "+998 94 444 55 66" },
+  { name: "Севара", phone: "+998 95 777 88 99" },
+  { name: "Гульнора", phone: "+998 97 123 45 67" },
+  { name: "Камила", phone: "+998 91 567 89 01" },
+  { name: "Dilnoza", phone: "+998 90 311 22 33" },
+  { name: "Zarina", phone: "+998 93 422 33 44" },
+  { name: "Лола", phone: "+998 99 533 44 55" },
+  { name: "Feruza", phone: "+998 91 644 55 66" },
+  { name: "Малика", phone: "+998 94 755 66 77" },
+  { name: "Shahlo", phone: "+998 95 866 77 88" },
+  { name: "Нигора", phone: "+998 97 977 88 99" },
+  { name: "Sevinch", phone: "+998 90 188 99 00" },
+  { name: "Ойдин", phone: "+998 93 299 00 11" },
+];
+
 /** Смещения дат от сегодня: немного прошлого (пришли/не пришли), сегодня и ближайшие дни. */
 const OFFSETS = [-5, -4, -4, -3, -2, -2, -1, -1, 0, 0, 1, 1, 2, 3];
 const DAY_MS = 86_400_000;
@@ -38,7 +54,7 @@ const startTs = (date: string, time: string) => {
  * на рабочем дне мастера, целиком в часах работы, не пересекается с другой записью того же
  * мастера; сегодняшние и будущие — не в прошлом. Сумма считается по ценам на момент наполнения.
  */
-export function buildSeedBookings(data: ScheduleData, ov: SalonOverrides, nowTs: number = Date.now()): SeedBooking[] {
+export function buildSeedBookings(data: ScheduleData, ov: SalonOverrides, nowTs: number = Date.now(), guests: { name: string; phone: string }[] = GUESTS_MEN): SeedBooking[] {
   const now = tashkentNow(nowTs);
   const times = slotTimes(data);
   const close = toMinutes(data.hours.close);
@@ -46,7 +62,7 @@ export function buildSeedBookings(data: ScheduleData, ov: SalonOverrides, nowTs:
   const out: SeedBooking[] = [];
 
   OFFSETS.forEach((offset, i) => {
-    const basket = basketOf(data, ov, BASKETS[i % BASKETS.length]);
+    const basket = basketOf(data, ov, data.seedBaskets[i % data.seedBaskets.length]);
     if (basket.ids.length === 0) return;
     let date = addDays(now.iso, offset);
     for (let attempt = 0; attempt < 14; attempt++) {
@@ -62,7 +78,7 @@ export function buildSeedBookings(data: ScheduleData, ov: SalonOverrides, nowTs:
           const upcoming = date >= now.iso;
           const status: BookingStatus = upcoming ? (i % 3 === 0 ? "new" : "confirmed") : PAST_STATUSES[i % PAST_STATUSES.length];
           const at = new Date(Math.min(nowTs - (0.05 + ((i * 5) % 12) * 0.5) * DAY_MS, startTs(date, fromMinutes(from)) - 0.4 * DAY_MS)).toISOString();
-          out.push({ ...GUESTS[i % GUESTS.length], serviceIds: basket.ids, masterId: master.id, anyMaster: i % 4 === 1, date, time, minutes: basket.minutes, total: basket.price, status, at });
+          out.push({ ...guests[i % guests.length], serviceIds: basket.ids, masterId: master.id, anyMaster: i % 4 === 1, date, time, minutes: basket.minutes, total: basket.price, status, at });
           return;
         }
       }

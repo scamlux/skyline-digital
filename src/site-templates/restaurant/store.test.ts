@@ -95,4 +95,58 @@ describe("restaurant demo store", () => {
     expect(s.items).toEqual({});
     expect(s.seededAt).toBeTruthy();
   });
+
+  it("addLead хранит зону, повод и предзаказ", () => {
+    const lead = demo.addLead({ ...guest, zone: "tapchan", occasion: "birthday", wish: "Набор «Классика»: Плов ×4", wishSum: 234000 });
+    expect(demo.get().leads[0]).toMatchObject({ id: lead.id, zone: "tapchan", occasion: "birthday", wishSum: 234000 });
+  });
+
+  it("setSet сливает патчи и округляет скидку", () => {
+    demo.setSet("classic", { discount: 12.4 });
+    demo.setSet("classic", { off: ["tea"] });
+    demo.setSet("classic", { on: false });
+    expect(demo.get().sets.classic).toEqual({ discount: 12, off: ["tea"], on: false });
+  });
+
+  it("seed не трогает правки наборов", () => {
+    demo.setSet("grill", { discount: 5 });
+    demo.seed([guest]);
+    expect(demo.get().sets.grill).toEqual({ discount: 5 });
+  });
+});
+
+describe("restaurant store: чтение старых записей (v1 без наборов, зон и поводов)", () => {
+  it("старая запись читается: заявки без зоны, пустой when у демо-наполнения, нет sets", async () => {
+    const { normalizeState } = await import("./store");
+    const old = {
+      items: { plov: { price: 70000 } },
+      hours: { open: "09:00", close: "22:00" },
+      promo: { on: false },
+      leads: [
+        { id: "s0", at: "2026-10-30T10:00:00.000Z", name: "Дилноза", phone: "+998 90 111 22 33", when: "", guests: "4", status: "new", source: "seed" },
+        { id: "l1", at: "2026-10-31T10:00:00.000Z", name: "Акмаль", phone: "+998 97 222 33 44", when: "2026-11-01T19:00", guests: 2, status: "confirmed", source: "site" },
+      ],
+      events: [{ at: "2026-10-30T10:00:00.000Z", type: "view" }],
+      seededAt: "2026-10-30T10:00:00.000Z",
+    };
+    const s = normalizeState(old);
+    expect(s.sets).toEqual({});
+    expect(s.items.plov).toEqual({ price: 70000 });
+    expect(s.hours).toEqual({ open: "09:00", close: "22:00" });
+    expect(s.leads).toHaveLength(2);
+    expect(s.leads[0]).toMatchObject({ when: "", zone: undefined, occasion: undefined, wish: undefined });
+    expect(s.leads[1].guests).toBe("2");
+  });
+
+  it("мусор в хранилище не роняет: нечитаемые поля заменяются пустыми", async () => {
+    const { normalizeState } = await import("./store");
+    const s = normalizeState({ items: [], sets: "x", leads: [null, 5, { nope: 1 }, { id: "a", status: "bogus", zone: "roof" }], events: [{ type: "view" }, { at: "x", type: "boom" }], hours: { open: "9", close: "x" } });
+    expect(s.items).toEqual({});
+    expect(s.sets).toEqual({});
+    expect(s.leads).toHaveLength(1);
+    expect(s.leads[0]).toMatchObject({ status: "new", zone: undefined });
+    expect(s.events).toEqual([]);
+    expect(s.hours).toBeUndefined();
+    expect(normalizeState(null).leads).toEqual([]);
+  });
 });

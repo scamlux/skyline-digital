@@ -64,19 +64,19 @@ export default async function TemplatePage({ params }: { params: Promise<Params>
               key={s.id}
               href={localePath(locale, `/sites/${tpl.id}/${s.id}`)}
               aria-current={s.id === st.id ? "page" : undefined}
-              className={`inline-flex min-h-[44px] items-center rounded-full px-3 py-1 max-[480px]:min-h-[40px] max-[480px]:min-w-[40px] max-[480px]:justify-center max-[480px]:px-2 ${s.id === st.id ? "bg-day text-night" : "border border-line-night text-day hover:border-day"}`}
+              className={`inline-flex min-h-[44px] items-center rounded-full px-3 py-1 max-[480px]:min-h-[44px] max-[480px]:min-w-[44px] max-[480px]:justify-center max-[480px]:px-2 ${s.id === st.id ? "bg-day text-night" : "border border-line-night text-day hover:border-day"}`}
             >
               <span className="sr-only">{t(demoUi.style)} </span>
-              {s.id.toUpperCase()}<span className="hidden md:inline"> · {t(s.name)}</span>
+              {s.label ? t(s.label) : <>{s.id.toUpperCase()}<span className="hidden md:inline"> · {t(s.name)}</span></>}
             </a>
           ))}
           {tpl.renderAdmin && (
-            <a href={localePath(locale, `/sites/${tpl.id}/admin`)} className="ml-2 inline-flex min-h-[44px] items-center whitespace-nowrap rounded-full border border-line-night px-3 text-day hover:border-day max-[480px]:ml-0 max-[480px]:min-h-[40px] max-[480px]:px-2.5">
+            <a href={localePath(locale, `/sites/${tpl.id}/admin`)} className="ml-2 inline-flex min-h-[44px] items-center whitespace-nowrap rounded-full border border-line-night px-3 text-day hover:border-day max-[480px]:ml-0 max-[480px]:min-h-[44px] max-[480px]:px-2.5">
               <span className="max-[480px]:hidden">{t(demoUi.admin)}</span>
               <span className="min-[481px]:hidden">{t(demoUi.adminShort)}</span>
             </a>
           )}
-          <a href={localePath(locale, "/contact")} className="ml-2 inline-flex min-h-[44px] items-center whitespace-nowrap rounded-full bg-apricot px-4 font-medium text-night hover:opacity-90 max-[480px]:ml-0 max-[480px]:min-h-[40px] max-[480px]:px-3">
+          <a href={localePath(locale, "/contact")} className="ml-2 inline-flex min-h-[44px] items-center whitespace-nowrap rounded-full bg-apricot px-4 font-medium text-night hover:opacity-90 max-[480px]:ml-0 max-[480px]:min-h-[44px] max-[480px]:px-3">
             <span className="max-[480px]:hidden">{t(demoUi.order)}</span>
             <span className="min-[481px]:hidden">{t(demoUi.orderShort)}</span>
           </a>

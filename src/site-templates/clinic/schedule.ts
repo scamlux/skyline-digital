@@ -170,6 +170,69 @@ export function nextFreeSlot(data: ScheduleData, ov: ClinicOverrides, bookings: 
   return null;
 }
 
+/**
+ * Ближайшее свободное окно по конкретной услуге (и врачу, если задан): для плиток «Что беспокоит?»
+ * и карточек врачей. Та же сетка, что в записи, поэтому время всегда совпадает со свободным слотом.
+ */
+export function nextFreeSlotFor(
+  data: ScheduleData,
+  ov: ClinicOverrides,
+  bookings: BusySlot[],
+  now: TashkentNow,
+  q: { serviceId?: string; doctorId?: string | "any" },
+  days = 8,
+): FreeSlot | null {
+  const ids = q.serviceId ? [q.serviceId] : visibleServices(data, ov).map((s) => s.id);
+  for (let i = 0; i < days; i++) {
+    const date = addDays(now.iso, i);
+    for (const serviceId of ids) {
+      const slot = slotsForDay({ data, ov, bookings, date, serviceId, doctorId: q.doctorId ?? "any", now }).find((s) => s.status === "free");
+      if (slot?.doctorId) return { date, time: slot.time, doctorId: slot.doctorId };
+    }
+  }
+  return null;
+}
+
+/** Часть дня для фильтра времени: утро до 12:00, день до 16:00, вечер дальше. */
+export type DayPart = "morning" | "day" | "evening";
+export const DAY_PARTS: DayPart[] = ["morning", "day", "evening"];
+const MORNING_END = 12 * 60;
+const DAY_END = 16 * 60;
+
+export function dayPartOf(time: string): DayPart {
+  const m = toMinutes(time);
+  return m < MORNING_END ? "morning" : m < DAY_END ? "day" : "evening";
+}
+
+export interface RangeTotals {
+  min: number;
+  max: number;
+  /** Визитов от и до (округлено вверх). */
+  visitsMin: number;
+  visitsMax: number;
+}
+
+/**
+ * Вилка по одному из вариантов лечения («болит зуб»: пломба или каналы): от самого дешёвого
+ * до самого дорогого, цены — с учётом правок владельца. Скрытые услуги не участвуют; если
+ * скрыто всё — null.
+ */
+export function optionsRange(data: ScheduleData, ov: ClinicOverrides, serviceIds: string[]): RangeTotals | null {
+  const found = serviceIds.flatMap((id) => {
+    const base = data.services.find((s) => s.id === id);
+    if (!base) return [];
+    const svc = effectiveService(base, ov);
+    return svc.hidden ? [] : [svc];
+  });
+  if (found.length === 0) return null;
+  return {
+    min: Math.min(...found.map((s) => s.min)),
+    max: Math.max(...found.map((s) => s.max)),
+    visitsMin: Math.ceil(Math.min(...found.map((s) => s.visitsFirst))),
+    visitsMax: Math.ceil(Math.max(...found.map((s) => s.visitsFirst))),
+  };
+}
+
 /** Выбор калькулятора: услуга и количество единиц. */
 export interface PlanItem {
   id: string;

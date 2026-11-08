@@ -2,6 +2,7 @@
 
 import { createContext, useContext } from "react";
 import type { SalonCatalog } from "./catalog";
+import { salonStores, type SalonStore } from "./store";
 
 const Ctx = createContext<SalonCatalog | null>(null);
 
@@ -14,4 +15,11 @@ export function useSalon(): SalonCatalog {
   const c = useContext(Ctx);
   if (!c) throw new Error("SalonProvider не найден");
   return c;
+}
+
+/** Состояние и действия демо-хранилища ЭТОГО бизнеса (барбершоп и салон красоты не смешиваются). */
+export function useSalonStore(): { state: ReturnType<SalonStore["useState"]>; demo: SalonStore["demo"] } {
+  const { style } = useSalon();
+  const store = salonStores[style];
+  return { state: store.useState(), demo: store.demo };
 }

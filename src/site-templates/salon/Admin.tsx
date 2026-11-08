@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useHydrated, useMinuteClock } from "../kit/hooks";
 import { plural } from "../kit/plural";
 import { addDays, dayOfMonth, diffDays, formatDate, tashkentNow, weekdayOf } from "../kit/tashkent";
 import { formatSum, pick, type L, type Locale } from "../types";
 import { adminUi as ui, adminWords as words } from "./admin-ui";
 import type { SalonData } from "./data";
+import type { StyleId } from "../types";
 import { fill, formatMinutes } from "./format";
-import { buildSeedBookings } from "./seed";
-import { effectiveService, masterDays, toScheduleData } from "./schedule";
-import { demo, useSalonState, type Booking, type BookingStatus, type DemoEvent, type EventType } from "./store";
+import { buildSeedBookings, GUESTS_MEN, GUESTS_WOMEN } from "./seed";
+import { basketOf, effectiveService, masterDays, packagePct, toScheduleData } from "./schedule";
+import { lastStyle, salonStores, type Booking, type BookingStatus, type DemoEvent, type EventType, type SalonStore } from "./store";
 
 type Tab = "overview" | "bookings" | "services" | "masters" | "promo";
 const TABS: Tab[] = ["overview", "bookings", "services", "masters", "promo"];
@@ -24,21 +25,65 @@ const tag = (locale: Locale) => (locale === "uz" ? "uz-Latn-UZ" : locale === "en
  * Кабинет владельца салона (демо). Пять экранов — Обзор, Записи, Услуги и цены, Мастера и график,
  * Акция. Всё читает и пишет демо-хранилище; тот же интерфейс в боевом сайте идёт поверх базы.
  */
-export function SalonAdmin({ data, locale, siteHref, localeHrefs }: { data: SalonData; locale: Locale; siteHref: string; localeHrefs: Record<Locale, string> }) {
+/** Шум демо-событий у каждого бизнеса свой: просмотры и звонки в двух кабинетах не совпадают. */
+const SEED_SALT: Record<StyleId, number> = { a: 17, b: 29 };
+
+const StoreCtx = createContext<SalonStore>(salonStores.a);
+
+/** Хранилище того бизнеса, который сейчас открыт в кабинете. */
+function useAdminStore() {
+  const store = useContext(StoreCtx);
+  return { state: store.useState(), demo: store.demo };
+}
+
+interface AdminProps {
+  businesses: Record<StyleId, SalonData>;
+  locale: Locale;
+  siteHref: string;
+  localeHrefs: Record<Locale, string>;
+}
+
+/**
+ * Кабинет владельца (демо) для двух бизнесов сразу: наверху переключатель «Барбершоп / Салон
+ * красоты». У каждого свои записи, цены, мастера и акция; запись с /a попадает в барбершоп, с /b в
+ * салон. Открывается на том бизнесе, который смотрели последним.
+ */
+export function SalonAdmin({ businesses, locale, siteHref, localeHrefs }: AdminProps) {
+  const hydrated = useHydrated();
+  const [chosen, setChosen] = useState<StyleId | null>(null);
+  const style: StyleId = chosen ?? (hydrated ? lastStyle() : "a");
+  const t = (l: L) => pick(l, locale);
+  return (
+    <StoreCtx.Provider value={salonStores[style]}>
+      <BusinessAdmin key={style} data={businesses[style]} style={style} locale={locale} siteHref={siteHref.replace(/\/[ab]$/, `/${style}`)} localeHrefs={localeHrefs}>
+        <div className="adm-switch" role="group" aria-label={t(ui.switch.label)}>
+          {(["a", "b"] as StyleId[]).map((k) => (
+            <button key={k} type="button" aria-pressed={style === k} onClick={() => setChosen(k)}>
+              {t(ui.switch[k])}
+            </button>
+          ))}
+        </div>
+      </BusinessAdmin>
+    </StoreCtx.Provider>
+  );
+}
+
+function BusinessAdmin({ data, style, locale, siteHref, localeHrefs, children }: { data: SalonData; style: StyleId; locale: Locale; siteHref: string; localeHrefs: Record<Locale, string>; children: React.ReactNode }) {
   const t = (l: L) => pick(l, locale);
   const [tab, setTab] = useState<Tab>("overview");
-  const state = useSalonState();
+  const { state, demo } = useAdminStore();
   const hydrated = useHydrated();
   const clock = useMinuteClock();
   const sched = useMemo(() => toScheduleData(data), [data]);
-  const ov = useMemo(() => ({ services: state.services, schedule: state.schedule }), [state.services, state.schedule]);
+  const ov = useMemo(() => ({ services: state.services, schedule: state.schedule, packages: state.packages }), [state.services, state.schedule, state.packages]);
+  const guests = style === "b" ? GUESTS_WOMEN : GUESTS_MEN;
   const ready = hydrated && !!state.seededAt && clock > 0;
 
   // Пустой кабинет не показывает ничего — при первом открытии наполняем примерами. Записи с сайта
   // при этом остаются (seed сливает данные), а демо-записи ложатся на рабочие дни мастеров.
   useEffect(() => {
-    if (hydrated && !state.seededAt) demo.seed(buildSeedBookings(sched, ov));
-  }, [hydrated, state.seededAt, sched, ov]);
+    if (hydrated && !state.seededAt) demo.seed(buildSeedBookings(sched, ov, Date.now(), guests), SEED_SALT[style]);
+  }, [hydrated, state.seededAt, sched, ov, demo, guests, style]);
 
   const svcName = (id: string) => pick(data.services.find((s) => s.id === id)?.name ?? { ru: id, en: id, uz: id }, locale);
   const masterName = (id: string) => pick(data.masters.find((m) => m.id === id)?.name ?? { ru: id, en: id, uz: id }, locale);
@@ -46,7 +91,7 @@ export function SalonAdmin({ data, locale, siteHref, localeHrefs }: { data: Salo
   const names = { svc: svcName, master: masterName };
 
   return (
-    <div className="adm" data-tpl="salon" lang={locale === "uz" ? "uz-Latn" : locale}>
+    <div className="adm" data-tpl="salon" data-style={style} lang={locale === "uz" ? "uz-Latn" : locale}>
       <link rel="stylesheet" href={ADMIN_CSS} precedence="default" />
       <link rel="preload" href="/templates/fonts/onest-latin.woff2" as="font" type="font/woff2" crossOrigin="" />
       <link rel="preload" href="/templates/fonts/onest-cyrillic.woff2" as="font" type="font/woff2" crossOrigin="" />
@@ -69,6 +114,8 @@ export function SalonAdmin({ data, locale, siteHref, localeHrefs }: { data: Salo
         </div>
       </header>
 
+      <div className="adm-biz">{children}</div>
+
       <nav className="adm-tabs" aria-label={t(ui.tabsLabel)}>
         {TABS.map((k) => (
           <button key={k} type="button" aria-current={tab === k ? "page" : undefined} onClick={() => setTab(k)}>
@@ -90,7 +137,7 @@ export function SalonAdmin({ data, locale, siteHref, localeHrefs }: { data: Salo
       <footer className="adm-foot">
         <p>{t(ui.demo.text)}</p>
         <div>
-          <button type="button" className="adm-link" onClick={() => demo.seed(buildSeedBookings(sched, ov))}>
+          <button type="button" className="adm-link" onClick={() => demo.seed(buildSeedBookings(sched, ov, Date.now(), guests), SEED_SALT[style])}>
             {t(ui.demo.seed)}
           </button>
           <button type="button" className="adm-link" onClick={() => demo.reset()}>
@@ -279,6 +326,7 @@ const NEXT_ACTIONS: Record<BookingStatus, { label: L; to: BookingStatus }[]> = {
 
 function BookingList({ items, locale, names, compact, showDate }: { items: Booking[]; locale: Locale; names: Names; compact?: boolean; showDate?: boolean }) {
   const t = (l: L) => pick(l, locale);
+  const { demo } = useAdminStore();
   return (
     <ul className="adm-leads">
       {items.map((b) => (
@@ -320,8 +368,9 @@ function BookingList({ items, locale, names, compact, showDate }: { items: Booki
 
 function ServicesTab({ data, locale }: { data: SalonData; locale: Locale }) {
   const t = (l: L) => pick(l, locale);
-  const state = useSalonState();
-  const ov = { services: state.services, schedule: state.schedule };
+  const { state, demo } = useAdminStore();
+  const ov = { services: state.services, schedule: state.schedule, packages: state.packages };
+  const sched = useMemo(() => toScheduleData(data), [data]);
   return (
     <section aria-label={t(ui.tabs.services)}>
       <p className="adm-hint">{t(ui.services.hint)}</p>
@@ -333,7 +382,7 @@ function ServicesTab({ data, locale }: { data: SalonData; locale: Locale }) {
               <span className="adm-item-name">
                 {t(s.name)}
                 <small>
-                  {t(ui.services[s.cat])}
+                  {t(data.groups.find((g) => g.id === s.group)?.name ?? s.name)}
                   {e.hidden && ` · ${t(ui.services.hidden)}`}
                 </small>
               </span>
@@ -348,6 +397,33 @@ function ServicesTab({ data, locale }: { data: SalonData; locale: Locale }) {
           );
         })}
       </ul>
+        <h2 className="adm-h2 adm-h2-sub">{t(ui.services.packages)}</h2>
+        <p className="adm-hint">{t(ui.services.packagesHint)}</p>
+        <ul className="adm-items" data-kind="packages">
+          {data.packages.map((p) => {
+            const o = state.packages[p.id];
+            const hidden = o?.hidden === true;
+            const pct = packagePct(p, ov);
+            const b = basketOf(sched, ov, p.serviceIds);
+            return (
+              <li key={p.id} className="adm-item" data-hidden={hidden || undefined}>
+                <span className="adm-item-name">
+                  {t(p.name)}
+                  <small>
+                    {p.serviceIds.map((id) => t(data.services.find((x) => x.id === id)?.name ?? { ru: id, en: id, uz: id })).join(" + ")} · {formatSum(b.price, locale)}
+                    {hidden && ` · ${t(ui.services.hidden)}`}
+                  </small>
+                </span>
+                <div className="adm-range">
+                  <NumberEdit value={o?.pct ?? p.pct} format={(n) => `${t(ui.services.discount)} ${n}${t(ui.services.pct)}`} label={`${t(p.name)}: ${t(ui.services.discount)}`} saved={t(ui.services.saved)} onCommit={(n) => demo.setPackage(p.id, { pct: n })} />
+                </div>
+                <button type="button" className="adm-link" data-pct={pct} onClick={() => demo.setPackage(p.id, { hidden: !hidden })}>
+                  {hidden ? t(ui.services.show) : t(ui.services.hide)}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
     </section>
   );
 }
@@ -394,8 +470,8 @@ function NumberEdit({ value, format, label, saved, onCommit }: { value: number; 
 
 function MastersTab({ data, locale }: { data: SalonData; locale: Locale }) {
   const t = (l: L) => pick(l, locale);
-  const state = useSalonState();
-  const ov = { services: state.services, schedule: state.schedule };
+  const { state, demo } = useAdminStore();
+  const ov = { services: state.services, schedule: state.schedule, packages: state.packages };
   return (
     <section aria-label={t(ui.tabs.masters)}>
       <p className="adm-hint">{t(ui.masters.hint)}</p>
@@ -434,7 +510,7 @@ function MastersTab({ data, locale }: { data: SalonData; locale: Locale }) {
 
 function PromoTab({ data, locale }: { data: SalonData; locale: Locale }) {
   const t = (l: L) => pick(l, locale);
-  const state = useSalonState();
+  const { state, demo } = useAdminStore();
   return (
     <section aria-label={t(ui.tabs.promo)}>
       <h2 className="adm-h2">{t(ui.promo.title)}</h2>
