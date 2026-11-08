@@ -1,12 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { addDays, formatDate, tashkentNow } from "../kit/tashkent";
+import { tashkentNow } from "../kit/tashkent";
 import { useMinuteClock } from "../kit/hooks";
 import { pick, type Locale } from "../types";
 import { planDraft } from "./plan-store";
-import { formatRange } from "./format";
-import { nextFreeSlot, type ScheduleData } from "./schedule";
 import { demo, useClinicState, type EventType } from "./store";
 import { clinicUi as ui } from "./ui";
 
@@ -49,7 +47,7 @@ export function PromoBar({ text, locale }: { text: string; locale: Locale }) {
   const promo = useClinicState().promo;
   if (promo && !promo.on) return null;
   return (
-    <p className="tpl-promo" role="note">
+    <p className="cl-promo" role="note">
       {promo?.text?.[locale] ?? text}
     </p>
   );
@@ -84,108 +82,38 @@ export function TrackedLink({
   );
 }
 
+/** Кнопка «Записаться»: открывает окно записи с тем, что уже выбрано на странице. */
+export function BookButton({ locale, className }: { locale: Locale; className?: string }) {
+  return (
+    <button type="button" className={className} onClick={() => planDraft.open()}>
+      {pick(ui.book, locale)}
+    </button>
+  );
+}
+
 /**
- * Липкая панель на телефоне: «Позвонить / Telegram / Записаться».
- * Пока на экране блок записи — прячется: у формы своя кнопка, а панель закрывала бы её.
+ * Липкая панель на телефоне (зона большого пальца): «Позвонить / Telegram / Записаться».
+ * Прячется, пока на экране карта зубов — у неё своя кнопка, и пока открыта панель решения
+ * (это делает CSS через :has). В окне записи панель закрыта самим окном.
  */
 export function StickyBar({ phone, telegram, locale }: { phone: string; telegram: string; locale: Locale }) {
   const [hidden, setHidden] = useState(false);
   useEffect(() => {
-    const target = document.getElementById("book");
+    const target = document.getElementById("jaw");
     if (!target) return;
-    const io = new IntersectionObserver(([e]) => setHidden(e.isIntersecting), { threshold: 0.05 });
+    const io = new IntersectionObserver(([e]) => setHidden(e.isIntersecting), { threshold: 0.25 });
     io.observe(target);
     return () => io.disconnect();
   }, []);
   return (
-    <nav className="tpl-sticky" data-hidden={hidden || undefined} inert={hidden} aria-label={pick(ui.quickLabel, locale)}>
+    <nav className="cl-sticky" data-hidden={hidden || undefined} inert={hidden} aria-label={pick(ui.quickLabel, locale)}>
       <a href={`tel:${phone}`} onClick={() => demo.track("call")}>
         {pick(ui.call, locale)}
       </a>
       <a href={`https://t.me/${telegram}`} target="_blank" rel="noopener noreferrer" onClick={() => demo.track("telegram")}>
         {pick(ui.telegram, locale)}
       </a>
-      <a href="#book" className="primary">
-        {pick(ui.bookShort, locale)}
-      </a>
+      <BookButton locale={locale} className="primary" />
     </nav>
-  );
-}
-
-/**
- * Карточка услуги: серверная разметка (иконка, название, описание) приходит children,
- * цена и скрытие — из кабинета владельца. Клик по «Записаться» предвыбирает услугу в форме.
- */
-export function ServiceCard({
-  id,
-  base,
-  locale,
-  index,
-  children,
-}: {
-  id: string;
-  base: { min: number; max: number };
-  locale: Locale;
-  index: number;
-  children: React.ReactNode;
-}) {
-  const state = useClinicState();
-  const o = state.services[id];
-  if (o?.hidden) return null;
-  const min = Math.max(0, o?.min ?? base.min);
-  const max = Math.max(min, o?.max ?? base.max);
-  return (
-    <li data-reveal style={{ "--d": index } as React.CSSProperties}>
-      <div className="tpl-svc" data-tilt>
-        {children}
-        <p className="tpl-svc-price">{max === 0 ? pick(ui.services.free, locale) : formatRange(min, max, locale)}</p>
-        <a className="tpl-svc-book" href="#book" onClick={() => planDraft.send({ serviceId: id })}>
-          {pick(ui.services.book, locale)} <span aria-hidden="true">→</span>
-        </a>
-      </div>
-    </li>
-  );
-}
-
-/** Кнопка «записаться к врачу»: предвыбирает врача в форме. */
-export function DoctorBook({ doctorId, locale }: { doctorId: string; locale: Locale }) {
-  return (
-    <a className="tpl-link" href="#book" onClick={() => planDraft.send({ doctorId })}>
-      {pick(ui.doctors.book, locale)} →
-    </a>
-  );
-}
-
-/**
- * Карточка «Ближайшее окно» в hero. Окно считается той же функцией, что и сетка записи
- * (график врачей, занятые слоты, правки кабинета), поэтому время на карточке всегда
- * совпадает со свободным слотом в форме.
- */
-export function NextFreeCard({ sched, doctorNames, locale }: { sched: ScheduleData; doctorNames: Record<string, string>; locale: Locale }) {
-  const clock = useMinuteClock();
-  const state = useClinicState();
-  let value = "—";
-  let sub = "";
-  if (clock > 0) {
-    const now = tashkentNow(clock);
-    const slot = nextFreeSlot(sched, { services: state.services, schedule: state.schedule }, state.bookings, now);
-    if (!slot) value = pick(ui.float.noSlot, locale);
-    else {
-      const when =
-        slot.date === now.iso
-          ? pick(ui.float.today, locale)
-          : slot.date === addDays(now.iso, 1)
-            ? pick(ui.float.tomorrow, locale)
-            : formatDate(slot.date, locale, { weekday: "short", day: "numeric", month: "short" });
-      value = `${when}, ${slot.time}`;
-      sub = doctorNames[slot.doctorId] ?? "";
-    }
-  }
-  return (
-    <a className="tpl-glass tpl-glass-slot" href="#book" data-depth="1.1">
-      <small>{pick(ui.float.nextTitle, locale)}</small>
-      <b aria-live="polite">{value}</b>
-      <span>{sub}</span>
-    </a>
   );
 }

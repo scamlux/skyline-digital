@@ -1,22 +1,22 @@
 /*
- * Кабинет владельца для шаблона «Клиника» (демо). Всё под .adm; токены в стиле A (светлая мята).
+ * Кабинет владельца для шаблона «Клиника» (демо). Всё под .adm; токены в стиле A «Белый кабинет» (бумажно-белый, кобальт, острые углы).
  * Самодостаточный файл: ничего не берёт из остального сайта (ADR 0009).
  */
 .adm[data-tpl="clinic"] {
-  --bg: #f1f8f6;
+  --bg: #fbfbf8;
   --surface: #ffffff;
-  --ink: #0e2a2d;
-  --dim: #4b6467;
-  --line: rgba(14, 42, 45, 0.15);
-  --acc: #0a7568;
-  --acc-soft: rgba(10, 117, 104, 0.1);
-  --acc2: #ff9a72;
+  --ink: #0b0f1a;
+  --dim: #565d6e;
+  --line: rgba(11, 15, 26, 0.16);
+  --acc: #1f43e8;
+  --acc-soft: #eef1fd;
+  --acc2: #0b0f1a;
   --on-acc: #ffffff;
   --hot: #b3362e;
   --hot-soft: rgba(179, 54, 46, 0.1);
   --ok: #1f6b3d;
   --ok-soft: rgba(31, 107, 61, 0.12);
-  --r: 14px;
+  --r: 0px;
   --shadow: 0 1px 2px rgba(14, 42, 45, 0.06), 0 6px 18px -10px rgba(14, 42, 45, 0.2);
   --edge: max(16px, calc((100vw - 1080px) / 2));
   font-family: "Onest", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -141,7 +141,7 @@
   transition: background 0.15s, border-color 0.15s;
 }
 .adm-btn:hover {
-  background: #0b4a52;
+  background: #0b0f1a;
 }
 .adm-btn.ghost {
   background: transparent;
@@ -846,4 +846,49 @@
   .adm-item { grid-template-columns: minmax(0, 1fr); }
   .adm-lead { flex-wrap: wrap; }
   .adm-lead-side { width: 100%; }
+}
+
+/* ——— язык A «Белый кабинет»: острые углы, без теней и стекла, плотные цифры, чернильные рамки ——— */
+.adm[data-tpl="clinic"] { --shadow: none; }
+.adm[data-tpl="clinic"] .adm-head { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--bg); border-bottom: 1.5px solid var(--ink); }
+.adm[data-tpl="clinic"] :is(.adm-btn, .adm-open, .adm-lang, .adm-lang a, .adm-badge, .adm-days button, .adm-sample) { border-radius: 0; }
+.adm[data-tpl="clinic"] .adm-badge { background: var(--acc); color: #fff; letter-spacing: 0.04em; }
+.adm[data-tpl="clinic"] .adm-doc img { border-radius: 0; }
+.adm[data-tpl="clinic"] :is(.adm-stat, .adm-item, .adm-doc, .adm-lead, .adm-digest) { border-radius: 0; box-shadow: none; }
+.adm[data-tpl="clinic"] .adm-stat b { font-weight: 700; letter-spacing: -0.06em; font-variant-numeric: tabular-nums; }
+.adm[data-tpl="clinic"] .adm-h2 { letter-spacing: -0.035em; }
+.adm[data-tpl="clinic"] .adm-plan { border-radius: 0; background: var(--acc-soft); }
+.adm[data-tpl="clinic"] .adm-teeth { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0; }
+.adm[data-tpl="clinic"] .adm-teeth span { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 0 9px; font-size: 13px; font-weight: 600; color: var(--ink); border: 1.5px solid var(--acc); background: var(--surface); }
+.adm[data-tpl="clinic"] .adm-teeth b { font-variant-numeric: tabular-nums; color: var(--acc); }
+
+/* ——— мобильный аудит: зоны нажатия ≥ 44 px (язык ≥ 40) и текст ≥ 15 px ——— */
+.adm-lang a {
+  min-width: 40px;
+  min-height: 40px;
+  font-size: 14px;
+}
+.adm-link,
+.adm-item .adm-link,
+.adm-foot .adm-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 15px;
+}
+a[href^="tel:"] {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.adm-plan,
+.adm-hint,
+.adm-digest > p,
+.adm-digest pre,
+.adm-lead-main span,
+.adm-lead-main i {
+  font-size: 15px !important;
+}
+.adm-foot {
+  font-size: 15px;
 }

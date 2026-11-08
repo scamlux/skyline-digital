@@ -1,4 +1,4 @@
-import type { ServiceIcon } from "./data";
+import type { ServiceIcon, SymptomIcon } from "./data";
 
 /** Простые линейные иконки услуг (inline SVG, без запросов): наследуют цвет текста. */
 const PATHS: Record<ServiceIcon, string> = {
@@ -18,7 +18,38 @@ const PATHS: Record<ServiceIcon, string> = {
   whitening: "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z M12 2v3 M12 19v3 M2 12h3 M19 12h3 M4.9 4.9l2.1 2.1 M17 17l2.1 2.1 M4.9 19.1L7 17 M17 7l2.1-2.1",
   // скоба брекетов
   braces: "M3 12h18 M6 8.5h3v7H6z M10.5 8.5h3v7h-3z M15 8.5h3v7h-3z",
+  // зуб с заплаткой
+  refill: "M7 4c-2.2 0-4 1.8-4 4.2 0 2 .8 3.4 1.4 5.3.6 2 .8 6.5 2.4 6.5 1.4 0 1.4-4.2 3.2-4.2s1.8 4.2 3.2 4.2c1.6 0 1.8-4.5 2.4-6.5.6-1.9 1.4-3.3 1.4-5.3C21 5.8 19.2 4 17 4c-1.6 0-2.4.8-5 .8S8.6 4 7 4Z M9.5 8h5v3h-5z",
+  // зуб с крестом
+  extract: "M7 4c-2.2 0-4 1.8-4 4.2 0 2 .8 3.4 1.4 5.3.6 2 .8 6.5 2.4 6.5 1.4 0 1.4-4.2 3.2-4.2s1.8 4.2 3.2 4.2c1.6 0 1.8-4.5 2.4-6.5.6-1.9 1.4-3.3 1.4-5.3C21 5.8 19.2 4 17 4c-1.6 0-2.4.8-5 .8S8.6 4 7 4Z M9.5 7.5l5 5 M14.5 7.5l-5 5",
+  // колпачок
+  crown: "M4 8l3 3 5-6 5 6 3-3-1.5 10h-13L4 8Z M7 21h10",
+  // смайл
+  kids: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z M8.5 14c1 1.5 2.2 2.2 3.5 2.2s2.5-.7 3.5-2.2 M9 9.5v.01 M15 9.5v.01",
 };
+
+const TOOTH =
+  "M7 4c-2.2 0-4 1.8-4 4.2 0 2 .8 3.4 1.4 5.3.6 2 .8 6.5 2.4 6.5 1.4 0 1.4-4.2 3.2-4.2s1.8 4.2 3.2 4.2c1.6 0 1.8-4.5 2.4-6.5.6-1.9 1.4-3.3 1.4-5.3C21 5.8 19.2 4 17 4c-1.6 0-2.4.8-5 .8S8.6 4 7 4Z";
+
+/** Значки плиток «Что беспокоит?»: зуб и один знак — боль, блеск, ровный ряд, пустое место, лицо, галочка. */
+const SYMPTOM: Record<SymptomIcon, { tooth: boolean; dash?: boolean; extra: string }> = {
+  pain: { tooth: true, extra: "M12.8 6.5l-2.3 4h3.2l-2.3 4.2" },
+  whiten: { tooth: true, extra: "M12 8v5 M9.5 10.5h5" },
+  straight: { tooth: false, extra: "M5 5h4v9H5z M10 5h4v9h-4z M15 5h4v9h-4z M3 18h18" },
+  missing: { tooth: true, dash: true, extra: "M12 8.5v5 M9.5 11h5" },
+  kids: { tooth: false, extra: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z M8.5 14c1 1.5 2.2 2.2 3.5 2.2s2.5-.7 3.5-2.2 M9 9.5v.01 M15 9.5v.01" },
+  check: { tooth: true, extra: "M9 9.5l2 2 4-4" },
+};
+
+export function SymptomGlyph({ icon }: { icon: SymptomIcon }) {
+  const g = SYMPTOM[icon];
+  return (
+    <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+      {g.tooth && <path d={TOOTH} strokeDasharray={g.dash ? "2 2.2" : undefined} />}
+      <path d={g.extra} />
+    </svg>
+  );
+}
 
 export function ServiceGlyph({ icon }: { icon: ServiceIcon }) {
   return (

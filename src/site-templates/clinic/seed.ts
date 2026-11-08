@@ -57,7 +57,12 @@ export function buildSeedBookings(data: ScheduleData, ov: ClinicOverrides, nowTs
           const status: BookingStatus = upcoming ? (i % 3 === 0 ? "new" : "confirmed") : PAST_STATUSES[i % PAST_STATUSES.length];
           const p = PATIENTS[i % PATIENTS.length];
           const at = new Date(Math.min(nowTs - (0.05 + ((i * 5) % 12) * 0.5) * DAY_MS, startTs(date, time) - 0.4 * DAY_MS)).toISOString();
-          out.push({ ...p, serviceId: svc.id, doctorId: doc.id, anyDoctor: i % 4 === 1, date, time, status, at });
+          // Пара записей «с планом» из карты зубов: кабинет показывает зубы списком.
+          const withPlan =
+            i === 8 && upcoming
+              ? { plan: "Лечение кариеса ×2, Имплант", teeth: [{ tooth: 16, problem: "caries" as const }, { tooth: 26, problem: "caries" as const }, { tooth: 36, problem: "implant" as const }] }
+              : {};
+          out.push({ ...p, serviceId: svc.id, doctorId: doc.id, anyDoctor: i % 4 === 1, date, time, status, at, ...withPlan });
           return;
         }
       }

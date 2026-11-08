@@ -51,6 +51,19 @@ describe("clinic demo store: записи", () => {
     expect(s.events.filter((e) => e.type === "booking")).toHaveLength(1);
   });
 
+  it("запись с планом хранит зубы и проблемы: кабинет получает их структурой, а не только текстом", () => {
+    const teeth = [
+      { tooth: 16, problem: "caries" as const },
+      { tooth: 36, problem: "implant" as const },
+    ];
+    const b = demo.addBooking({ ...guest, plan: "16 · Кариес, 36 · Имплант", teeth });
+    expect(b?.teeth).toEqual(teeth);
+    expect(demo.get().bookings[0]).toMatchObject({ plan: "16 · Кариес, 36 · Имплант", teeth });
+    // Старая запись без зубов (как у прежних версий демо) читается без ошибок.
+    const old = demo.addBooking({ ...guest, time: "11:00" });
+    expect(old?.teeth).toBeUndefined();
+  });
+
   it("id записей уникальны даже в одну миллисекунду", () => {
     const a = demo.addBooking(guest);
     const b = demo.addBooking({ ...guest, time: "10:30" });

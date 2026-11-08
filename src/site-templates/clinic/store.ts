@@ -3,6 +3,7 @@
 import { createPersistedStore } from "../kit/persisted-store";
 import type { L } from "../types";
 import type { BusySlot } from "./schedule";
+import type { ToothPick } from "./teeth";
 
 /**
  * Демо-хранилище клиники: записи с сайта, события, правки владельца (цены, скрытые услуги,
@@ -24,8 +25,10 @@ export interface Booking extends BusySlot {
   serviceId: string;
   /** Пациент выбрал «любой врач» — кабинет подпишет это рядом с назначенным врачом. */
   anyDoctor: boolean;
-  /** Текст плана из калькулятора (если записались «с этим планом»). */
+  /** Текст плана (если записались «с этим планом»); у старых записей — только он. */
   plan?: string;
+  /** Зубы с проблемами из карты зубов: кабинет показывает их списком. */
+  teeth?: ToothPick[];
   status: BookingStatus;
   /** Откуда пришла запись: форма сайта или демо-наполнение. */
   source: "site" | "seed";
