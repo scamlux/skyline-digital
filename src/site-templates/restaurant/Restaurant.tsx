@@ -1,38 +1,50 @@
 /* eslint-disable @next/next/no-img-element -- шаблон переносимый (без next/image): адаптивные <img srcset> с готовыми webp */
+import { Carousel } from "../kit/carousel";
+import { MotionLayer } from "../kit/motion";
 import { LOCALES, pick, type Locale, type TemplateProps } from "../types";
-import { BookingForm, HoursText, ItemPrice, ItemRow, OpenStatus, PageView, PromoBar, StickyBar, TrackedLink } from "./client";
-import type { RestaurantData } from "./data";
+import { BookButton, HoursText, OpenStatus, PageView, PromoBar, StickyBar, TrackedLink } from "./client-bits";
+import type { DeliveryId, RestaurantData } from "./data";
+import { IconArrow, IconBag, IconClock, IconPhone, IconPin, IconScooter, IconSend, IconStar, Kazan } from "./icons";
+import { MenuSection } from "./Menu";
+import { LatePhoto as Photo } from "./late-photo";
+import { Steam, imgSet, imgSrc } from "./media";
+import { SetBuilder } from "./SetBuilder";
+import { LazyBookingSheet } from "./lazy-sheet";
 import { restaurantUi as ui } from "./ui";
 
 // CSS лежит в public/, а не импортируется: импортированный .css Turbopack добавляет во все
 // маршруты сайта (ADR 0007), а шаблону нужно оставаться переносимым (ADR 0009).
 const TEMPLATE_CSS = "/templates/restaurant.css";
-// Прелоадим только то, чем набран первый экран: у стиля A заголовки — Literata, у B всё — Onest.
-const FONT_PRELOAD = {
-  a: ["/templates/fonts/literata-latin.woff2", "/templates/fonts/literata-cyrillic.woff2"],
-  b: ["/templates/fonts/onest-latin.woff2", "/templates/fonts/onest-cyrillic.woff2"],
-} as const;
+// Текст и интерфейс набраны Onest в обоих стилях; заголовки A — Literata (у B тоже Onest). Прелоадим только то,
+// чем набран первый экран: для ru кириллицу заголовка и латиницу интерфейса (цифры, логотип), для en/uz — латиницу
+// (ʻ из uz лежит в латинском диапазоне). Literata не тянет лишнего: заголовок A кириллический, цифры и логотип — Onest.
+const fontPreload = (style: "a" | "b", locale: Locale) => {
+  const latin = (f: string) => `/templates/fonts/${f}-latin.woff2`;
+  const cyr = (f: string) => `/templates/fonts/${f}-cyrillic.woff2`;
+  const onest = locale === "ru" ? [latin("onest"), cyr("onest")] : [latin("onest")];
+  if (style === "b") return onest;
+  return [...onest, locale === "ru" ? cyr("literata") : latin("literata")];
+};
+
+/** Запасной src первого кадра: есть у обоих файлов (kazan и hero). */
+const HERO_SRC_WIDTH = 960;
+
+const DELIVERY_ICON = { uzum: IconBag, yandex: IconScooter } satisfies Record<DeliveryId, () => React.JSX.Element>;
 
 /**
- * Шаблон «Ресторан». Сервер-компонент без зависимостей от остального сайта:
- * данные и тексты — из props, стили — public/templates/restaurant.css.
- * Два стиля (a/b) — одна разметка, разные токены и несколько структурных правил в CSS.
+ * Шаблон «Ресторан». Серверный компонент для первого экрана и статичных блоков; меню, конструктор
+ * набора и окно брони — клиентские острова поверх демо-хранилища. Два стиля (a/b) — одна разметка,
+ * разные токены и несколько структурных правил в CSS.
  *
- * Правила качества (docs/business/NICHE-SITES-RESEARCH-2026-10.md §4): ≤ 8 секций,
- * меню текстом (не PDF), «Забронировать» в шапке и внизу, телефон и Telegram в одно касание,
- * цели ≥ 44px, 3–4 поля в форме, без всплывающих окон.
+ * Правила: заголовки до пяти слов, одна поясняющая строка на блок, фото и цифры вместо абзацев,
+ * цели ≥ 44px, «Забронировать стол» в первом экране и в липкой панели.
  */
 export function RestaurantSite({ data, locale, style, localeHrefs }: TemplateProps<RestaurantData>) {
   const t = (l: Parameters<typeof pick>[0]) => pick(l, locale);
-  const menuId = "menu";
-  // Ширины файлов в public/templates/restaurant/img (<имя>-<ширина>.webp). Нужные есть не у каждого кадра:
-  // 240 — миниатюры блюд и галерея, 720/800 — только hero.
-  type W = 240 | 480 | 720 | 800 | 960 | 1280;
-  const img = (base: string, w: W) => `/templates/restaurant/img/${base}-${w}.webp`;
-  const srcSet = (base: string, sizes: W[]) => sizes.map((w) => `${img(base, w)} ${w}w`).join(", ");
-  // Hero: в A — половина экрана на десктопе; в B — фон на всю ширину под тёмной вуалью,
-  // поэтому на телефоне хватает файла по ширине экрана (его кадрирует object-fit).
-  const heroSizes = style === "b" ? "100vw" : "(max-width: 760px) calc(100vw - 40px), 50vw";
+  const hero = data.hero[style];
+  const heroPhoto = data.photos.hero[style];
+  // A: фото в верхней части экрана на телефоне и половина экрана на десктопе; B: фон на всю ширину.
+  const heroSizes = style === "b" ? "100vw" : "(max-width: 860px) 55vw, 52vw";
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -45,232 +57,199 @@ export function RestaurantSite({ data, locale, style, localeHrefs }: TemplatePro
   };
 
   return (
-    <div className="tpl" data-tpl="restaurant" data-style={style} lang={locale === "uz" ? "uz-Latn" : locale}>
+    <div className="rs" data-tpl="restaurant" data-style={style} lang={locale === "uz" ? "uz-Latn" : locale}>
       <link rel="stylesheet" href={TEMPLATE_CSS} precedence="default" />
-      {FONT_PRELOAD[style].map((href) => (
+      {fontPreload(style, locale).map((href) => (
         <link key={href} rel="preload" href={href} as="font" type="font/woff2" crossOrigin="" />
       ))}
+      <link rel="preload" as="image" href={imgSrc(heroPhoto, HERO_SRC_WIDTH)} imageSrcSet={imgSet(heroPhoto)} imageSizes={heroSizes} fetchPriority="high" />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <header className="tpl-head">
-        <a href="#top" className="tpl-logo" aria-label={data.name}>
-          {data.name}
+      <header className="rs-head">
+        <a href="#top" className="rs-logo" aria-label={data.name}>
+          <Kazan />
+          <span>{data.name}</span>
         </a>
-        <nav className="tpl-nav" aria-label={t(ui.navLabel)}>
-          <a href={`#${menuId}`}>{t(ui.nav.menu)}</a>
-          <a href="#about">{t(ui.nav.about)}</a>
+        <nav className="rs-nav" aria-label={t(ui.navLabel)}>
+          <a href="#menu">{t(ui.nav.menu)}</a>
+          <a href="#company">{t(ui.nav.group)}</a>
           <a href="#contacts">{t(ui.nav.contacts)}</a>
         </nav>
-        <div className="tpl-head-r">
+        <div className="rs-head-r">
           <LangSwitch locale={locale} hrefs={localeHrefs} label={t(ui.langLabel)} />
-          <a className="tpl-btn sm" href="#book">
-            {t(ui.bookShort)}
-          </a>
+          <BookButton className="rs-btn sm head-book">{t(ui.bookShort)}</BookButton>
         </div>
       </header>
 
       <main id="top">
         <PageView />
-        <PromoBar text={t(data.promo)} locale={locale} />
-        <section className="tpl-hero">
-          <div className="tpl-hero-copy">
+        <section className="rs-hero" aria-labelledby="hero-title" data-pointer>
+          <div className="rs-hero-art">
+            <figure className="rs-hero-photo">
+              <img
+                src={imgSrc(heroPhoto, HERO_SRC_WIDTH)}
+                srcSet={imgSet(heroPhoto)}
+                sizes={heroSizes}
+                width={heroPhoto === "hero" ? 1280 : 960}
+                height={heroPhoto === "hero" ? 853 : 640}
+                alt=""
+                fetchPriority="high"
+                decoding="async"
+              />
+            </figure>
+            {style === "a" ? (
+              <Steam />
+            ) : (
+              <div className="rs-glows" aria-hidden="true">
+                <i className="g1" />
+                <i className="g2" />
+                <i className="g3" />
+              </div>
+            )}
+          </div>
+          <div className="rs-hero-copy">
             <OpenStatus open={data.hours.open} close={data.hours.close} locale={locale} />
-            <h1>{data.name}</h1>
-            <p className="tpl-tagline">{t(data.tagline)}</p>
-            <p className="tpl-intro">{t(data.intro)}</p>
-            <div className="tpl-cta">
-              <a className="tpl-btn" href="#book">
+            <h1 id="hero-title">{t(hero.title)}</h1>
+            <p className="rs-lead">{t(hero.lead)}</p>
+            <div className="rs-cta-row">
+              <BookButton className="rs-cta">
                 {t(ui.book)}
-              </a>
-              <a className="tpl-btn ghost" href={`#${menuId}`}>
+                <IconArrow />
+              </BookButton>
+              <a className="rs-ghost" href="#menu">
                 {t(ui.seeMenu)}
               </a>
             </div>
           </div>
-          <figure className="tpl-hero-photo">
-            <img
-              src={img(data.photos.hero, 960)}
-              srcSet={srcSet(data.photos.hero, [480, 720, 800, 960, 1280])}
-              sizes={heroSizes}
-              width={1280}
-              height={853}
-              alt=""
-              fetchPriority="high"
-              decoding="async"
-            />
-          </figure>
         </section>
 
-        <div className="tpl-orn" aria-hidden="true" />
+        <ul className="rs-facts" aria-label={t(ui.factsLabel)} data-reveal>
+          {data.facts.map((f) => (
+            <li key={f.value + f.photo}>
+              <Photo name={f.photo} src={480} widths={[240, 480]} sizes="(max-width: 640px) 34vw, 22vw" width={480} height={480} loading="lazy" />
+              <b>{f.value}</b>
+              <span>{t(f.label)}</span>
+            </li>
+          ))}
+        </ul>
 
-        <section className="tpl-sec" id={menuId} aria-labelledby="menu-title">
-          <div className="tpl-sec-head">
-            <h2 id="menu-title">{t(ui.menuTitle)}</h2>
-            <p>{t(ui.menuHint)}</p>
-          </div>
-          <nav className="tpl-chips" aria-label={t(ui.menuNavLabel)}>
-            {data.menu.map((c) => (
-              <a key={c.id} href={`#cat-${c.id}`}>
-                {t(c.title)}
-              </a>
-            ))}
-          </nav>
-          <div className="tpl-card">
-            {data.menu.map((c) => (
-              <section key={c.id} id={`cat-${c.id}`} className="tpl-cat" aria-labelledby={`cat-${c.id}-t`}>
-                <h3 id={`cat-${c.id}-t`}>{t(c.title)}</h3>
-                <ul>
-                  {c.items.map((it) => {
-                    return (
-                      <ItemRow key={it.id} id={it.id} available={it.available !== false}>
-                        {it.photo && (
-                          <img
-                            className="tpl-item-img"
-                            src={img(it.photo, 480)}
-                            srcSet={srcSet(it.photo, [240, 480])}
-                            sizes="(max-width: 760px) 88px, 112px"
-                            width={480}
-                            height={360}
-                            alt=""
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        )}
-                        <div className="tpl-item-top">
-                          <span className="tpl-item-name">{t(it.name)}</span>
-                          <span className="tpl-leader" aria-hidden="true" />
-                          <ItemPrice id={it.id} price={it.price} available={it.available !== false} unavailableLabel={t(ui.unavailable)} locale={locale} />
-                        </div>
-                        {it.desc && <p className="tpl-item-desc">{t(it.desc)}</p>}
-                        {(it.tags?.length ?? 0) > 0 && (
-                          <p className="tpl-tags">
-                            {it.tags!.map((tg) => (
-                              <span key={tg} data-tag={tg}>
-                                {t(ui.tags[tg])}
-                              </span>
-                            ))}
-                          </p>
-                        )}
-                      </ItemRow>
-                    );
-                  })}
-                </ul>
-              </section>
-            ))}
-          </div>
-        </section>
+        <PromoBar fallback={data.promo} locale={locale} />
+        <MenuSection menu={data.menu} locale={locale} />
+        <SetBuilder sets={data.sets} menu={data.menu} locale={locale} />
 
-        <section className="tpl-sec tpl-order" aria-labelledby="order-title">
-          <div className="tpl-sec-head">
-            <h2 id="order-title">{t(ui.deliveryTitle)}</h2>
-            <p>{t(ui.deliveryText)}</p>
+        <section className="rs-sec rs-delivery" aria-labelledby="delivery-title" data-reveal>
+          <div className="rs-sec-head">
+            <h2 id="delivery-title">{t(ui.delivery.title)}</h2>
+            <p>{t(ui.delivery.lead)}</p>
           </div>
-          <div className="tpl-cta">
-            <TrackedLink type="telegram" className="tpl-btn" href={`https://t.me/${data.telegram}`} external>
-              {t(ui.orderTelegram)}
-            </TrackedLink>
-            {data.delivery.map((d) => (
-              <a key={d.name} className="tpl-btn ghost" href={d.url} {...ext(d.url)}>
-                {d.name}
-              </a>
-            ))}
-          </div>
-        </section>
-
-        <section className="tpl-sec tpl-about" id="about" aria-labelledby="about-title">
-          <div className="tpl-about-copy">
-            <h2 id="about-title">{t(data.about.title)}</h2>
-            {data.about.paragraphs.map((p) => (
-              <p key={t(p)}>{t(p)}</p>
-            ))}
-          </div>
-          <div className="tpl-about-media">
-            <img
-              src={img(data.photos.about, 960)}
-              srcSet={srcSet(data.photos.about, [480, 960])}
-              sizes="(max-width: 760px) 100vw, 40vw"
-              width={960}
-              height={640}
-              alt=""
-              loading="lazy"
-              decoding="async"
-            />
-            <div className="tpl-gallery" aria-hidden="true">
-              {data.photos.gallery.map((g) => (
-                <img key={g} src={img(g, 480)} srcSet={srcSet(g, [240, 480, 960])} sizes="(max-width: 760px) 30vw, 13vw" width={480} height={480} alt="" loading="lazy" decoding="async" />
-              ))}
-            </div>
-          </div>
-          <dl className="tpl-facts">
-            {data.about.facts.map((f) => (
-              <div key={t(f.k)}>
-                <dt>{t(f.k)}</dt>
-                <dd>{t(f.v)}</dd>
-              </div>
-            ))}
-          </dl>
-        </section>
-
-        <section className="tpl-sec tpl-book" id="book" aria-labelledby="book-title">
-          <div className="tpl-book-copy">
-            <h2 id="book-title">{t(ui.form.title)}</h2>
-            <p>{t(ui.form.lead)}</p>
-          </div>
-          <BookingForm mode={data.booking.mode} telegram={data.telegram} restaurant={data.name} locale={locale} />
-        </section>
-
-        <section className="tpl-sec tpl-contacts" id="contacts" aria-labelledby="contacts-title">
-          <div className="tpl-sec-head">
-            <h2 id="contacts-title">{t(ui.contactsTitle)}</h2>
-          </div>
-          <div className="tpl-contacts-grid">
-            <div>
-              <h3>{t(ui.addressLabel)}</h3>
-              <p>{t(data.address)}</p>
-              <TrackedLink type="route" className="tpl-link" href={data.mapUrl} external={/^https?:/.test(data.mapUrl)}>
-                {t(ui.route)} →
+          <ul className="rs-tiles">
+            <li>
+              <TrackedLink type="telegram" className="rs-tile direct" href={`https://t.me/${data.telegram}`} external>
+                <span className="rs-tile-icon">
+                  <IconSend />
+                </span>
+                <b>Telegram</b>
+                <small>{t(ui.delivery.direct)}</small>
               </TrackedLink>
-            </div>
-            <div>
-              <h3>{t(ui.hoursTitle)}</h3>
-              <p>
-                {t(ui.hoursLabel)}
-                <br />
-                <HoursText open={data.hours.open} close={data.hours.close} />
-              </p>
-            </div>
-            <div>
-              <h3>{t(ui.call)}</h3>
-              <p>
-                <TrackedLink type="call" className="tpl-link big" href={`tel:${data.phone.e164}`}>
-                  {data.phone.display}
-                </TrackedLink>
-              </p>
-              <TrackedLink type="telegram" className="tpl-link" href={`https://t.me/${data.telegram}`} external>
-                @{data.telegram} →
-              </TrackedLink>
-            </div>
-            <div>
-              <h3>{t(ui.reviewsTitle)}</h3>
-              <p>{t(ui.reviewsText)}</p>
-              <p className="tpl-reviews">
-                {data.reviews.map((r) => (
-                  <a key={r.name} className="tpl-link" href={r.url} {...ext(r.url)}>
-                    {r.name} →
+            </li>
+            {data.delivery.map((d) => {
+              const Icon = DELIVERY_ICON[d.id];
+              return (
+                <li key={d.id}>
+                  <a className="rs-tile" href={d.url} {...ext(d.url)}>
+                    <span className="rs-tile-icon">
+                      <Icon />
+                    </span>
+                    <b>{d.name}</b>
+                    <small>{t(ui.delivery.app)}</small>
                   </a>
-                ))}
-              </p>
-            </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+
+        <section className="rs-sec rs-reviews" aria-labelledby="reviews-title" data-reveal>
+          <div className="rs-sec-head">
+            <h2 id="reviews-title">{t(ui.reviews.title)}</h2>
+            <p>
+              <span className="rs-demo-chip">{t(ui.reviews.demo)}</span>
+            </p>
+          </div>
+          <Carousel label={t(ui.reviews.label)} prevLabel={t(ui.reviews.prev)} nextLabel={t(ui.reviews.next)}>
+            {data.reviews.map((r) => (
+              <figure className="rs-review" key={r.name}>
+                <span className="rs-stars" aria-hidden="true">
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <IconStar key={i} />
+                  ))}
+                </span>
+                <blockquote>{t(r.text)}</blockquote>
+                <figcaption>
+                  <b>{r.name}</b>
+                  <small>{t(r.when)}</small>
+                </figcaption>
+              </figure>
+            ))}
+          </Carousel>
+        </section>
+
+        <section className="rs-sec rs-contacts" id="contacts" aria-labelledby="contacts-title" data-reveal>
+          <div className="rs-sec-head">
+            <h2 id="contacts-title">{t(ui.contacts.title)}</h2>
+          </div>
+          <div className="rs-contacts-grid">
+            <MapArt label={t(ui.contacts.mapLabel)} name={data.name} />
+            <ul className="rs-contact-list">
+              <li>
+                <IconPin />
+                <div>
+                  <b>{t(data.address)}</b>
+                  <TrackedLink type="route" className="rs-link" href={data.mapUrl} external={/^https?:/.test(data.mapUrl)}>
+                    {t(ui.route)} <IconArrow />
+                  </TrackedLink>
+                </div>
+              </li>
+              <li>
+                <IconClock />
+                <div>
+                  <b>
+                    <HoursText open={data.hours.open} close={data.hours.close} locale={locale} />
+                  </b>
+                  <OpenStatus open={data.hours.open} close={data.hours.close} locale={locale} className="rs-status inline" />
+                </div>
+              </li>
+              <li>
+                <IconPhone />
+                <div>
+                  <TrackedLink type="call" className="rs-link big" href={`tel:${data.phone.e164}`}>
+                    {data.phone.display}
+                  </TrackedLink>
+                </div>
+              </li>
+              <li>
+                <IconSend />
+                <div>
+                  <TrackedLink type="telegram" className="rs-link big" href={`https://t.me/${data.telegram}`} external>
+                    @{data.telegram}
+                  </TrackedLink>
+                </div>
+              </li>
+            </ul>
           </div>
         </section>
       </main>
 
-      <footer className="tpl-foot">
-        <span>© {data.name}</span>
+      <footer className="rs-foot">
+        <span>
+          © {data.name} · {t(ui.footerDemo)}
+        </span>
         <LangSwitch locale={locale} hrefs={localeHrefs} label={t(ui.langLabel)} />
       </footer>
 
       <StickyBar phone={data.phone.e164} telegram={data.telegram} locale={locale} />
+      <LazyBookingSheet name={data.name} telegram={data.telegram} hours={data.hours} mode={data.booking.mode} menu={data.menu} sets={data.sets} locale={locale} />
+      <MotionLayer />
     </div>
   );
 }
@@ -280,12 +259,33 @@ const ext = (url: string) => (/^https?:/.test(url) ? { target: "_blank", rel: "n
 
 function LangSwitch({ locale, hrefs, label }: { locale: Locale; hrefs: Record<Locale, string>; label: string }) {
   return (
-    <nav className="tpl-lang" aria-label={label}>
+    <nav className="rs-lang" aria-label={label}>
       {LOCALES.map((l) => (
         <a key={l} href={hrefs[l]} hrefLang={l} lang={l} aria-current={l === locale ? "true" : undefined}>
           {l.toUpperCase()}
         </a>
       ))}
     </nav>
+  );
+}
+
+/** Схема района: нарисованные улицы и булавка. Без внешних карт — ни трекеров, ни лишнего веса. */
+function MapArt({ label, name }: { label: string; name: string }) {
+  return (
+    <figure className="rs-map" role="img" aria-label={label}>
+      <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+        <rect width="400" height="300" fill="var(--map-bg)" />
+        <path d="M-10 210 L120 190 L200 120 L300 100 L420 40" stroke="var(--map-road)" strokeWidth="16" fill="none" strokeLinecap="round" />
+        <path d="M60 320 L110 200 L150 -10" stroke="var(--map-road)" strokeWidth="12" fill="none" strokeLinecap="round" />
+        <path d="M250 320 L270 190 L330 -10" stroke="var(--map-road)" strokeWidth="10" fill="none" strokeLinecap="round" />
+        <rect x="170" y="190" width="60" height="44" rx="10" fill="var(--map-park)" />
+        <rect x="300" y="200" width="70" height="60" rx="12" fill="var(--map-park)" />
+        <circle cx="206" cy="128" r="30" fill="var(--map-pin)" opacity="0.2" />
+      </svg>
+      <span className="rs-map-pin">
+        <IconPin />
+        <b>{name}</b>
+      </span>
+    </figure>
   );
 }

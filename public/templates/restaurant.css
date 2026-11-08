@@ -1,968 +1,511 @@
-/* ===== шрифты: Literata (A, заголовки) и Onest (тексты и B) — SIL OFL 1.1, лежат в public/ ===== */
-@font-face{font-family:"Literata";font-style:normal;font-weight:400 800;font-display:swap;src:url(/templates/fonts/literata-cyrillic-ext.woff2) format("woff2");unicode-range:U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F}
-@font-face{font-family:"Literata";font-style:normal;font-weight:400 800;font-display:swap;src:url(/templates/fonts/literata-cyrillic.woff2) format("woff2");unicode-range:U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116}
-@font-face{font-family:"Literata";font-style:normal;font-weight:400 800;font-display:swap;src:url(/templates/fonts/literata-latin-ext.woff2) format("woff2");unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF}
-@font-face{font-family:"Literata";font-style:normal;font-weight:400 800;font-display:swap;src:url(/templates/fonts/literata-latin.woff2) format("woff2");unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+/*
+ * Шаблон «Ресторан» (Dasturxon). Всё под .rs[data-tpl="restaurant"]; два стиля — токены в data-style.
+ * A «Тёплая трапеза»: кремовая бумага, бирюза и шафран; заголовки — антиква Literata, текст — Onest; фото в арке, пар над казаном.
+ * B «Чистый вечер»: графит и латунь, Onest, зал при свечах: виньетка и мерцающий свет.
+ * Самодостаточный файл: ничего не берёт из остального сайта (ADR 0009). Анимируются только
+ * transform и opacity; при prefers-reduced-motion страница остаётся статичной.
+ */
+@font-face { font-family: "Literata"; font-style: normal; font-weight: 400 800; font-display: swap; src: url(/templates/fonts/literata-cyrillic-ext.woff2) format("woff2"); unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F; }
+@font-face { font-family: "Literata Latin"; font-style: normal; font-weight: 400 800; font-display: swap; src: url(/templates/fonts/literata-latin-ext.woff2) format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+/* Literata разведена на два семейства: кириллица (Literata) и латиница (Literata Latin). Кириллический заголовок A (ru) не тянет латинский файл (−39 КБ до LCP); для en/uz заголовок набирается Literata Latin (см. --display ниже). */
+@font-face { font-family: "Literata Latin"; font-style: normal; font-weight: 400 800; font-display: swap; src: url(/templates/fonts/literata-latin.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Literata"; font-style: normal; font-weight: 400 800; font-display: swap; src: url(/templates/fonts/literata-cyrillic.woff2) format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
 @font-face { font-family: "Onest"; font-style: normal; font-weight: 400 800; font-display: swap; src: url(/templates/fonts/onest-cyrillic-ext.woff2) format("woff2"); unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F; }
 @font-face { font-family: "Onest"; font-style: normal; font-weight: 400 800; font-display: swap; src: url(/templates/fonts/onest-cyrillic.woff2) format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
 @font-face { font-family: "Onest"; font-style: normal; font-weight: 400 800; font-display: swap; src: url(/templates/fonts/onest-latin-ext.woff2) format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 @font-face { font-family: "Onest"; font-style: normal; font-weight: 400 800; font-display: swap; src: url(/templates/fonts/onest-latin.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 
-/*
- * Шаблон «Ресторан». Всё под [data-tpl="restaurant"]; два стиля — [data-style="a"|"b"].
- * Самодостаточный файл: ничего не берёт из остального сайта (ADR 0009).
- *
- * Токены:  --bg фон · --surface карточки · --ink текст · --dim приглушённый текст
- *          --line линии · --acc основной акцент · --acc2 второй акцент · --on-acc текст на акценте
- *          --hot острое/ошибка · --veg без мяса · --disp шрифт заголовков · --body основной шрифт
- */
-[data-tpl="restaurant"] {
-  --body: "Onest", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --edge: max(20px, calc((100vw - 1180px) / 2));
+/* ——— токены ——— */
+.rs[data-tpl="restaurant"] {
+  --edge: max(16px, calc((100vw - 1180px) / 2));
   --head-h: 64px;
-  font-family: var(--body);
-  background: var(--bg);
+  font-family: var(--font);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.5;
   color: var(--ink);
-  line-height: 1.55;
-  letter-spacing: -0.005em;
+  background: var(--bg);
   -webkit-font-smoothing: antialiased;
+  text-size-adjust: 100%;
   min-height: 100vh;
   overflow-x: clip;
-  padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+  position: relative;
 }
-@media (min-width: 761px) {
-  [data-tpl="restaurant"] {
-    padding-bottom: 0;
-  }
-}
-[data-tpl="restaurant"] *,
-[data-tpl="restaurant"] *::before,
-[data-tpl="restaurant"] *::after {
-  box-sizing: border-box;
-}
-[data-tpl="restaurant"][data-style="a"] {
-  --bg: #f1ede3;
+.rs[data-style="a"] {
+  --font: "Onest", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --display: "Literata", Georgia, "Times New Roman", serif;
+  --bg: #f4efe4;
   --surface: #fbf8f0;
+  --surface-2: #ebe4d3;
   --ink: #1d2a2b;
   --dim: #55615f;
-  --line: rgba(29, 42, 43, 0.18);
   --acc: #0e5a63;
-  --acc2: #d9962b;
+  --acc-deep: #0a444b;
   --on-acc: #ffffff;
+  --acc-soft: #d6e6e4;
+  --saffron: #d9962b;
   --hot: #a3303a;
   --veg: #2f6b3a;
-  --disp: "Literata", Georgia, "Times New Roman", serif;
+  --band: #0e5a63;
+  --on-band: #fdf9ee;
+  --on-band-dim: #cfe3e2;
+  --r: 22px;
+  --r-sm: 14px;
+  --pill: 999px;
+  --shadow: 0 10px 24px -16px rgba(29, 42, 43, 0.5);
+  --map-bg: #ebe4d3; --map-road: #fbf8f0; --map-park: #b9cba7; --map-pin: #0e5a63;
   color-scheme: light;
-  --r: 14px;
-  --head-bg: rgba(241, 237, 227, 0.88);
 }
-[data-tpl="restaurant"][data-style="b"] {
+.rs[data-style="a"][lang="en"], .rs[data-style="a"][lang^="uz"] { --display: "Literata Latin", Georgia, "Times New Roman", serif; }
+.rs[data-style="b"] {
+  --font: "Onest", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --display: "Onest", system-ui, -apple-system, "Segoe UI", sans-serif;
   --bg: #131417;
-  --surface: #1b1c21;
+  --surface: #1d1e23;
+  --surface-2: #2a2b31;
   --ink: #f1ede4;
-  --dim: #a09c92;
-  --line: rgba(241, 237, 228, 0.16);
+  --dim: #b3aea3;
   --acc: #c9a66b;
-  --acc2: #c9a66b;
+  --acc-deep: #b08d52;
   --on-acc: #17130c;
+  --acc-soft: #3a3225;
+  --saffron: #c9a66b;
   --hot: #ff9a8f;
   --veg: #8fc99a;
-  --disp: "Onest", system-ui, sans-serif;
+  --band: #1a1812;
+  --on-band: #f1ede4;
+  --on-band-dim: #b3aea3;
+  --r: 6px;
+  --r-sm: 4px;
+  --pill: 4px;
+  --shadow: 0 0 0 1px rgba(201, 166, 107, 0.18);
+  --map-bg: #1d1e23; --map-road: #2f3036; --map-park: #2b3a2e; --map-pin: #c9a66b;
   color-scheme: dark;
-  --r: 3px;
-  --head-bg: rgba(19, 20, 23, 0.86);
-}
-[data-tpl="restaurant"] a {
-  color: inherit;
-  text-decoration: none;
-}
-[data-tpl="restaurant"] h1,
-[data-tpl="restaurant"] h2,
-[data-tpl="restaurant"] h3 {
-  font-family: var(--disp);
-  margin: 0;
-  text-wrap: balance;
-}
-[data-tpl="restaurant"] p {
-  margin: 0;
-}
-[data-tpl="restaurant"] :focus-visible {
-  outline: 3px solid var(--acc2);
-  outline-offset: 3px;
-  border-radius: 4px;
-}
-@media (prefers-reduced-motion: no-preference) {
-  html:has([data-tpl="restaurant"]) {
-    scroll-behavior: smooth;
-  }
 }
 
-/* ——— шапка ——— */
-[data-tpl="restaurant"] .tpl-head {
-  position: sticky;
-  top: 0;
-  z-index: 30;
-  height: var(--head-h);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding-inline: var(--edge);
-  background: var(--head-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--line);
-}
-[data-tpl="restaurant"] .tpl-logo {
-  font-family: var(--disp);
-  font-weight: 700;
-  font-size: 22px;
-  letter-spacing: -0.02em;
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-}
-[data-tpl="restaurant"][data-style="b"] .tpl-logo {
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-size: 15px;
-}
-[data-tpl="restaurant"] .tpl-nav {
-  display: none;
-  gap: 4px;
-}
-@media (min-width: 761px) {
-  [data-tpl="restaurant"] .tpl-nav {
-    display: flex;
-  }
-}
-[data-tpl="restaurant"] .tpl-nav a {
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  padding-inline: 14px;
-  font-weight: 500;
-  font-size: 15px;
-  color: var(--dim);
-  transition: color 0.2s;
-}
-[data-tpl="restaurant"] .tpl-nav a:hover {
-  color: var(--ink);
-}
-[data-tpl="restaurant"] .tpl-head-r {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-[data-tpl="restaurant"] .tpl-lang {
-  display: flex;
-}
-[data-tpl="restaurant"] .tpl-lang a {
-  min-width: 44px;
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  color: var(--dim);
-}
-[data-tpl="restaurant"] .tpl-lang a[aria-current="true"] {
-  color: var(--ink);
-  text-decoration: underline;
-  text-underline-offset: 6px;
-  text-decoration-thickness: 2px;
-  text-decoration-color: var(--acc2);
-}
-/* На телефоне «Забронировать» уже в нижней панели — в шапке дубль не нужен и не помещается. */
-@media (max-width: 760px) {
-  [data-tpl="restaurant"] .tpl-head .tpl-btn {
-    display: none;
-  }
-}
+.rs *, .rs *::before, .rs *::after { box-sizing: border-box; }
+.rs :where(h1, h2, h3, p, ul, ol, figure, blockquote, dl, dd, dt) { margin: 0; }
+.rs :where(ul, ol) { padding: 0; list-style: none; }
+.rs :where(a) { color: inherit; text-decoration: none; }
+.rs :where(img, svg) { display: block; max-width: 100%; }
+.rs :where(button) { font: inherit; color: inherit; cursor: pointer; }
+.rs :focus-visible { outline: 3px solid var(--acc); outline-offset: 3px; border-radius: 6px; }
+.rs[data-style="b"] :focus-visible { outline-color: #ffd98f; }
+.rs ::selection { background: var(--acc); color: var(--on-acc); }
+.rs h1, .rs h2, .rs h3 { font-family: var(--display); }
+.rs[data-style="a"] :where(h1, h2) { font-weight: 700; letter-spacing: -0.02em; }
+.rs[data-style="b"] :where(h1, h2) { font-weight: 700; letter-spacing: -0.03em; }
 
 /* ——— кнопки ——— */
-[data-tpl="restaurant"] .tpl-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 48px;
-  padding: 0 26px;
-  border-radius: var(--r);
-  border: 1.5px solid var(--acc);
-  background: var(--acc);
-  color: var(--on-acc);
-  font: 600 16px/1 var(--body);
-  cursor: pointer;
-  transition: transform 0.2s, background 0.2s, color 0.2s, border-color 0.2s;
+.rs-cta, .rs-ghost, .rs-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 54px; padding: 0 22px; border: 0; border-radius: var(--pill);
+  font-family: var(--font); font-size: 17px; font-weight: 700; white-space: nowrap;
+  transition: transform 0.16s ease, background-color 0.16s ease, opacity 0.16s;
 }
-[data-tpl="restaurant"] .tpl-btn:hover {
-  transform: translateY(-1px);
-}
-[data-tpl="restaurant"] .tpl-btn.sm {
-  min-height: 44px;
-  padding: 0 18px;
-  font-size: 14.5px;
-}
-[data-tpl="restaurant"] .tpl-btn.ghost {
-  background: transparent;
-  color: var(--ink);
-  border-color: var(--line);
-}
-[data-tpl="restaurant"] .tpl-btn.ghost:hover {
-  border-color: var(--ink);
-}
-[data-tpl="restaurant"][data-style="b"] .tpl-btn {
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-size: 13.5px;
-}
+.rs-cta, .rs-btn { background: var(--acc); color: var(--on-acc); }
+.rs-cta:hover, .rs-btn:hover { transform: translateY(-2px); }
+.rs-cta:active, .rs-btn:active, .rs-ghost:active { transform: scale(0.97); }
+.rs-cta:disabled { opacity: 0.45; cursor: default; transform: none; }
+.rs-cta svg, .rs-ghost svg { width: 22px; height: 22px; flex: none; }
+.rs-ghost { background: var(--surface-2); color: var(--ink); }
+.rs-ghost:hover { transform: translateY(-2px); }
+.rs-btn.sm { min-height: 46px; padding: 0 18px; font-size: 15px; }
 
-/* ——— hero ——— */
-[data-tpl="restaurant"] .tpl-hero {
-  display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  align-items: center;
-  gap: clamp(24px, 5vw, 72px);
-  min-height: min(84vh, 760px);
-  padding: clamp(40px, 7vw, 96px) var(--edge);
-}
-[data-tpl="restaurant"] .tpl-hero h1 {
-  font-size: clamp(52px, 9.5vw, 128px);
-  font-weight: 700;
-  line-height: 0.95;
-  letter-spacing: -0.035em;
-  margin-top: 18px;
-}
-[data-tpl="restaurant"][data-style="a"] .tpl-hero h1 {
-  color: var(--acc);
-}
-[data-tpl="restaurant"] .tpl-tagline {
-  font-family: var(--disp);
-  font-size: clamp(20px, 2.4vw, 30px);
-  line-height: 1.25;
-  margin-top: 22px;
-  max-width: 24ch;
-}
-[data-tpl="restaurant"] .tpl-intro {
-  color: var(--dim);
-  font-size: clamp(16px, 1.5vw, 18px);
-  max-width: 46ch;
-  margin-top: 14px;
-}
-[data-tpl="restaurant"] .tpl-cta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 30px;
-}
-[data-tpl="restaurant"] .tpl-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  min-height: 34px;
-  padding: 0 14px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  font-size: 13.5px;
-  font-weight: 600;
-  background: var(--surface);
-}
-[data-tpl="restaurant"] .tpl-status i {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--dim);
-}
-[data-tpl="restaurant"] .tpl-status[data-state="open"] i {
-  background: #2e9b57;
-  box-shadow: 0 0 0 4px rgba(46, 155, 87, 0.22);
-}
+/* ——— шапка ——— */
+.rs-head { position: relative; z-index: 6; display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: var(--head-h); padding: 8px var(--edge); }
+.rs-logo { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-family: var(--font); font-size: 24px; font-weight: 800; letter-spacing: -0.03em; }
+.rs-logo svg { width: 30px; height: 30px; color: var(--acc); flex: none; }
+.rs-nav { display: none; gap: 4px; }
+.rs-nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: var(--pill); font-weight: 600; transition: background-color 0.15s; }
+.rs-nav a:hover { background: var(--surface-2); }
+.rs-head-r { display: flex; align-items: center; gap: 8px; }
+.rs-lang { display: flex; gap: 2px; padding: 3px; border-radius: var(--pill); background: var(--surface-2); }
+.rs-lang a { display: grid; place-items: center; min-width: 44px; min-height: 40px; padding: 0 6px; border-radius: var(--pill); font-size: 14px; font-weight: 700; color: var(--dim); }
+.rs-lang a[aria-current="true"] { background: var(--acc); color: var(--on-acc); }
+.head-book { display: none; }
 
-/* фото первого экрана; в стиле B — на всю ширину под текстом */
-[data-tpl="restaurant"] .tpl-hero-photo {
-  margin: 0;
-  width: 100%;
-  aspect-ratio: 3 / 2;
-  border-radius: calc(var(--r) + 10px);
-  overflow: hidden;
-  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.45);
-}
-[data-tpl="restaurant"] .tpl-hero-photo img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-[data-tpl="restaurant"][data-style="b"] .tpl-hero {
-  position: relative;
-  isolation: isolate;
-  min-height: min(92vh, 820px);
-}
-[data-tpl="restaurant"][data-style="b"] .tpl-hero-photo {
-  position: absolute;
-  inset: 0;
-  border-radius: 0;
-  aspect-ratio: auto;
-  z-index: -1;
-  box-shadow: none;
-}
-[data-tpl="restaurant"][data-style="b"] .tpl-hero-photo::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(19, 20, 23, 0.55), rgba(19, 20, 23, 0.82));
-}
-[data-tpl="restaurant"][data-style="b"] .tpl-hero-photo img {
-  filter: saturate(0.85);
-}
-/* промо-баннер под шапкой */
-[data-tpl="restaurant"] .tpl-promo {
-  padding: 10px var(--edge);
-  background: var(--acc2);
-  color: #1d1a12;
-  font-size: 14.5px;
-  font-weight: 600;
-  text-align: center;
-}
-[data-tpl="restaurant"][data-style="b"] .tpl-promo {
-  background: var(--acc);
-  color: var(--on-acc);
-}
-/* фото блюда слева от названия */
-[data-tpl="restaurant"] .tpl-item {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  column-gap: 14px;
-}
-[data-tpl="restaurant"] .tpl-item > :not(.tpl-item-img) {
-  grid-column: 2;
-}
-[data-tpl="restaurant"] .tpl-item-img {
-  grid-row: 1 / span 3;
-  width: 112px;
-  height: 84px;
-  object-fit: cover;
-  border-radius: calc(var(--r) - 2px);
-  background: var(--line);
-}
-@media (max-width: 760px) {
-  [data-tpl="restaurant"] .tpl-item-img {
-    width: 88px;
-    height: 66px;
-  }
-}
-[data-tpl="restaurant"] .tpl-item[data-out] .tpl-item-img {
-  filter: grayscale(1);
-  opacity: 0.55;
-}
-/* о нас: фото + три кадра */
-[data-tpl="restaurant"] .tpl-about-media img {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: calc(var(--r) + 6px);
-  object-fit: cover;
-}
-[data-tpl="restaurant"] .tpl-gallery {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-top: 10px;
-}
-[data-tpl="restaurant"] .tpl-gallery img {
-  aspect-ratio: 1;
-  border-radius: var(--r);
-}
-/* тарелка-иллюстрация (вариант без фото) */
-[data-tpl="restaurant"] .tpl-plate {
-  position: relative;
-  width: min(100%, 460px);
-  aspect-ratio: 1;
-  justify-self: center;
-}
-[data-tpl="restaurant"] .tpl-plate span {
-  position: absolute;
-  border-radius: 50%;
-}
-[data-tpl="restaurant"] .tpl-plate .r1 {
-  inset: 0;
-  background: var(--acc);
-  -webkit-mask: radial-gradient(circle closest-side, transparent 72%, #000 72.5%);
-  mask: radial-gradient(circle closest-side, transparent 72%, #000 72.5%);
-}
-[data-tpl="restaurant"] .tpl-plate .r2 {
-  inset: 4.5%;
-  background: repeating-conic-gradient(var(--acc2) 0 4deg, transparent 4deg 8deg);
-  -webkit-mask: radial-gradient(circle closest-side, transparent 80%, #000 80.5%, #000 93%, transparent 93.5%);
-  mask: radial-gradient(circle closest-side, transparent 80%, #000 80.5%, #000 93%, transparent 93.5%);
-}
-[data-tpl="restaurant"] .tpl-plate .r3 {
-  inset: 21%;
-  background:
-    repeating-radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.16) 0 1.5px, transparent 1.5px 6px),
-    radial-gradient(circle at 38% 34%, #f0cf7e, var(--acc2) 52%, #8a5a14);
-  box-shadow: inset 0 0 0 6px rgba(255, 255, 255, 0.28), 0 18px 40px -18px rgba(0, 0, 0, 0.45);
-}
-/* B: без тарелки — крупная типографика по центру, латунная линия */
-[data-tpl="restaurant"][data-style="b"] .tpl-hero {
-  grid-template-columns: 1fr;
-  text-align: center;
-  justify-items: center;
-  background: radial-gradient(60% 55% at 50% 30%, rgba(201, 166, 107, 0.14), transparent 70%);
-}
-[data-tpl="restaurant"][data-style="b"] .tpl-plate {
-  display: none;
-}
-[data-tpl="restaurant"][data-style="b"] .tpl-hero h1 {
-  font-weight: 800;
-  text-transform: uppercase;
-  font-size: clamp(44px, 10vw, 140px);
-  letter-spacing: -0.03em;
-}
-[data-tpl="restaurant"][data-style="b"] .tpl-hero h1::after {
-  content: "";
-  display: block;
-  width: 72px;
-  height: 2px;
-  background: var(--acc);
-  margin: 26px auto 0;
-}
-[data-tpl="restaurant"][data-style="b"] .tpl-tagline {
-  font-family: var(--body);
-  font-weight: 300;
-  max-width: 30ch;
-}
-[data-tpl="restaurant"][data-style="b"] .tpl-cta {
-  justify-content: center;
-}
-@media (max-width: 760px) {
-  [data-tpl="restaurant"] .tpl-hero {
-    grid-template-columns: 1fr;
-    min-height: 0;
-  }
-  [data-tpl="restaurant"][data-style="a"] .tpl-plate {
-    width: min(70%, 300px);
-    order: -1;
-    margin-bottom: 8px;
-  }
-  [data-tpl="restaurant"] .tpl-cta .tpl-btn {
-    flex: 1 1 100%;
-  }
-}
+/* ——— первый экран: общая часть ——— */
+.rs-hero { position: relative; display: flex; flex-direction: column; gap: 20px; padding: 4px var(--edge) 32px; }
+.rs-hero-art { position: relative; }
+.rs-hero-photo { position: relative; overflow: hidden; background: var(--surface-2); }
+.rs-hero-photo img { width: 100%; height: 100%; object-fit: cover; transform-origin: 50% 60%; }
+.rs-hero-copy { position: relative; z-index: 2; display: grid; gap: 14px; justify-items: start; }
+.rs-hero h1 { font-size: clamp(44px, 12.4vw, 64px); line-height: 1; text-wrap: balance; }
+.rs-lead { font-size: 18px; line-height: 1.4; color: var(--dim); max-width: 30ch; }
+.rs-cta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+.rs-status { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 14px 0 12px; border-radius: var(--pill); background: var(--surface-2); font-family: var(--font); font-size: 15px; font-weight: 600; }
+.rs-status i { width: 10px; height: 10px; border-radius: 50%; background: var(--dim); }
+.rs-status[data-state="open"] i { background: var(--veg); box-shadow: 0 0 0 4px color-mix(in srgb, var(--veg) 28%, transparent); }
+.rs-status[data-state="closed"] i { background: var(--hot); }
+.rs-status.inline { background: none; padding: 0; min-height: 0; color: var(--dim); }
 
-/* орнамент-разделитель */
-[data-tpl="restaurant"] .tpl-orn {
-  height: 14px;
-  background:
-    linear-gradient(135deg, var(--acc) 25%, transparent 25%) -7px 0 / 14px 14px,
-    linear-gradient(225deg, var(--acc) 25%, transparent 25%) -7px 0 / 14px 14px,
-    linear-gradient(315deg, var(--acc) 25%, transparent 25%) 0 0 / 14px 14px,
-    linear-gradient(45deg, var(--acc) 25%, transparent 25%) 0 0 / 14px 14px;
-  opacity: 0.85;
-}
-[data-tpl="restaurant"][data-style="b"] .tpl-orn {
-  height: 1px;
-  background: var(--line);
-  opacity: 1;
-}
+/* A: фото в арке, пар над казаном */
+.rs[data-style="a"] .rs-hero-art { padding-bottom: 14px; }
+.rs[data-style="a"] .rs-hero-art::before { content: ""; position: absolute; z-index: 0; inset: 22px -10px 0 18px; border-radius: 999px 999px 28px 28px; background: var(--acc-soft); }
+.rs[data-style="a"] .rs-hero-photo { z-index: 1; height: clamp(200px, 33svh, 380px); border-radius: 999px 999px 22px 22px; box-shadow: var(--shadow); }
+.rs-steam { position: absolute; z-index: 2; left: 31%; top: 6%; width: 38%; height: 58%; pointer-events: none; color: #fff8ec; }
+.rs-steam svg { position: absolute; bottom: 0; width: 26%; height: 82%; opacity: 0; filter: blur(5px); }
+.rs-steam .w1 { left: 4%; }
+.rs-steam .w2 { left: 36%; }
+.rs-steam .w3 { left: 68%; }
+
+/* B: зал при свечах — фото на весь экран, виньетка, мерцание */
+.rs[data-style="b"] .rs-head { position: absolute; inset: 0 0 auto 0; background: linear-gradient(180deg, rgba(10, 8, 6, 0.8), transparent); }
+.rs[data-style="b"] .rs-hero { padding: 0; gap: 0; isolation: isolate; justify-content: flex-end; min-height: calc(100svh - 52px); background: var(--bg); }
+.rs[data-style="b"] .rs-hero-art { position: absolute; inset: 0; z-index: 0; }
+.rs[data-style="b"] .rs-hero-photo { position: absolute; inset: 0; }
+.rs[data-style="b"] .rs-hero-photo img { object-position: 82% 50%; filter: brightness(0.95) saturate(1.1); }
+.rs[data-style="b"] .rs-hero-photo::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 85% 70% at 72% 30%, transparent 18%, rgba(12, 8, 4, 0.55) 70%, rgba(12, 8, 4, 0.85) 100%), linear-gradient(180deg, rgba(12, 8, 4, 0.5) 0%, transparent 22%, transparent 42%, var(--bg) 96%); }
+.rs[data-style="b"] .rs-hero-copy { padding: 0 var(--edge) 36px; }
+.rs[data-style="b"] .rs-hero h1 { text-shadow: 0 0 36px rgba(255, 170, 60, 0.35); }
+.rs[data-style="b"] .rs-lead { color: #e6dcc8; }
+.rs[data-style="b"] .rs-status { background: rgba(19, 20, 23, 0.72); }
+.rs-glows { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+.rs-glows i { position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(255, 164, 54, 0.75) 0%, rgba(255, 120, 30, 0.28) 38%, transparent 70%); opacity: 0.6; }
+.rs-glows .g1 { right: -8%; top: 4%; width: 62%; aspect-ratio: 1; }
+.rs-glows .g2 { left: 4%; top: 2%; width: 34%; aspect-ratio: 1; opacity: 0.45; }
+.rs-glows .g3 { left: 34%; top: 14%; width: 28%; aspect-ratio: 1; opacity: 0.4; }
+
+/* ——— цифры вместо абзацев ——— */
+.rs-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 8px var(--edge) 0; }
+.rs-facts li { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; gap: 0; min-height: 156px; padding: 12px; border-radius: var(--r-sm); background: var(--surface-2); color: #fff; }
+.rs-facts img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.rs-facts li::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10, 8, 4, 0.05) 28%, rgba(10, 8, 4, 0.78) 100%); }
+.rs-facts b, .rs-facts span { position: relative; z-index: 1; }
+.rs-facts b { font-family: var(--font); font-size: 34px; font-weight: 800; line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.rs-facts span { font-size: 15px; font-weight: 600; line-height: 1.2; }
 
 /* ——— секции ——— */
-[data-tpl="restaurant"] .tpl-sec {
-  padding: clamp(56px, 8vw, 104px) var(--edge);
-}
-[data-tpl="restaurant"] .tpl-sec-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px 32px;
-  margin-bottom: 28px;
-}
-[data-tpl="restaurant"] .tpl-sec h2 {
-  font-size: clamp(32px, 5vw, 60px);
-  font-weight: 700;
-  line-height: 1.02;
-  letter-spacing: -0.03em;
-}
-[data-tpl="restaurant"][data-style="b"] .tpl-sec h2 {
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: -0.015em;
-  font-size: clamp(28px, 4.4vw, 52px);
-}
-[data-tpl="restaurant"] .tpl-sec-head p {
-  color: var(--dim);
-  font-size: 15px;
-  max-width: 44ch;
-}
+.rs-sec { position: relative; padding: 56px var(--edge); }
+.rs-sec-head { display: grid; gap: 8px; margin-bottom: 22px; }
+.rs-sec-head h2 { font-size: clamp(32px, 8.6vw, 48px); line-height: 1.04; text-wrap: balance; }
+.rs-sec-head p { font-size: 17px; color: var(--dim); max-width: 46ch; }
+.rs-promo { margin: 22px var(--edge) 0; padding: 14px 20px; border-radius: var(--r-sm); background: var(--saffron); color: #1d1a10; font-family: var(--font); font-size: 17px; font-weight: 700; text-align: center; }
+.rs[data-style="b"] .rs-promo { background: var(--acc-soft); color: var(--acc); }
+.rs-empty { padding: 18px 0; color: var(--dim); font-size: 17px; }
+.rs-hint { font-size: 15px; color: var(--dim); }
 
 /* ——— меню ——— */
-[data-tpl="restaurant"] .tpl-chips {
-  position: sticky;
-  top: var(--head-h);
-  z-index: 20;
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  margin-inline: calc(var(--edge) * -1);
-  padding: 10px var(--edge);
-  background: var(--bg);
-  border-bottom: 1px solid var(--line);
-  scrollbar-width: none;
-}
-[data-tpl="restaurant"] .tpl-chips::-webkit-scrollbar {
-  display: none;
-}
-[data-tpl="restaurant"] .tpl-chips a {
-  flex: none;
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  padding: 0 18px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  font-size: 15px;
-  font-weight: 600;
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
-}
-[data-tpl="restaurant"] .tpl-chips a:hover {
-  background: var(--acc);
-  border-color: var(--acc);
-  color: var(--on-acc);
-}
-[data-tpl="restaurant"][data-style="b"] .tpl-chips a {
-  border-radius: var(--r);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 12.5px;
-}
-/* карточка меню — как печатное меню: категории колонками, блюдо ····· цена */
-[data-tpl="restaurant"] .tpl-card {
-  margin-top: 28px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: calc(var(--r) + 6px);
-  padding: clamp(22px, 4vw, 48px);
-}
-@media (min-width: 900px) {
-  [data-tpl="restaurant"][data-style="a"] .tpl-card {
-    column-count: 2;
-    column-gap: 64px;
-    column-rule: 1px solid var(--line);
-  }
-}
-[data-tpl="restaurant"] .tpl-cat {
-  break-inside: avoid;
-  scroll-margin-top: calc(var(--head-h) + 70px);
-  padding-bottom: 8px;
-}
-[data-tpl="restaurant"] .tpl-cat + .tpl-cat {
-  margin-top: 34px;
-}
-[data-tpl="restaurant"] .tpl-cat h3 {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--acc);
-  padding-bottom: 12px;
-  margin-bottom: 6px;
-  border-bottom: 2px solid var(--acc2);
-}
-[data-tpl="restaurant"][data-style="b"] .tpl-cat h3 {
-  font-size: 12.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  border-bottom: 1px solid var(--acc);
-}
-[data-tpl="restaurant"] .tpl-cat ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-[data-tpl="restaurant"] .tpl-item {
-  padding: 16px 0;
-}
-[data-tpl="restaurant"] .tpl-item + .tpl-item {
-  border-top: 1px solid var(--line);
-}
-[data-tpl="restaurant"] .tpl-item-top {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-}
-[data-tpl="restaurant"] .tpl-item-name {
-  min-width: 0;
-  font-weight: 600;
-  font-size: 18px;
-  line-height: 1.25;
-  overflow-wrap: break-word;
-}
-[data-tpl="restaurant"] .tpl-leader {
-  flex: 1;
-  min-width: 14px;
-  border-bottom: 2px dotted color-mix(in srgb, var(--ink) 38%, transparent);
-  transform: translateY(-4px);
-}
-[data-tpl="restaurant"] .tpl-item-price {
-  font-weight: 700;
-  font-size: 17px;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-  flex: none;
-}
-[data-tpl="restaurant"] .tpl-item-desc {
-  color: var(--dim);
-  font-size: 15px;
-  margin-top: 4px;
-  max-width: 52ch;
-}
-[data-tpl="restaurant"] .tpl-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 8px;
-}
-[data-tpl="restaurant"] .tpl-tags span {
-  font-size: 12px;
-  font-weight: 600;
-  padding: 3px 10px;
-  border-radius: 999px;
-  border: 1px solid currentColor;
-}
-[data-tpl="restaurant"] .tpl-tags [data-tag="spicy"] {
-  color: var(--hot);
-}
-[data-tpl="restaurant"] .tpl-tags [data-tag="veg"] {
-  color: var(--veg);
-}
-[data-tpl="restaurant"] .tpl-tags [data-tag="hit"] {
-  color: var(--ink);
-  background: color-mix(in srgb, var(--acc2) 38%, transparent);
-  border-color: transparent;
-}
-[data-tpl="restaurant"] .tpl-item[data-out] .tpl-item-name {
-  text-decoration: line-through;
-  text-decoration-thickness: 1.5px;
-  color: var(--dim);
-}
-[data-tpl="restaurant"] .tpl-item[data-out] .tpl-leader {
-  border-bottom-style: none;
-}
-[data-tpl="restaurant"] .tpl-item[data-out] .tpl-item-price {
-  font-weight: 600;
-  font-size: 13.5px;
-  color: var(--hot);
-}
+.rs-menu { padding-top: 44px; }
+.rs-filters { display: flex; align-items: center; gap: 8px; margin: 0 calc(var(--edge) * -1) 20px; padding: 4px var(--edge); overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; scroll-snap-type: x proximity; }
+.rs-filters::-webkit-scrollbar { display: none; }
+.rs-filters button { flex: none; display: inline-flex; align-items: center; gap: 6px; scroll-snap-align: start; min-height: 46px; padding: 0 20px; border: 0; border-radius: var(--pill); background: var(--surface-2); font-family: var(--font); font-size: 16px; font-weight: 700; transition: background-color 0.15s, color 0.15s, transform 0.15s; }
+.rs-filters button svg { width: 18px; height: 18px; }
+.rs-filters button:active { transform: scale(0.96); }
+.rs-filters button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.rs[data-style="b"] .rs-filters button[aria-pressed="true"] { background: var(--acc); color: var(--on-acc); }
+.rs-filters .tag[data-tag="spicy"] svg { color: var(--hot); }
+.rs-filters .tag[data-tag="veg"] svg { color: var(--veg); }
+.rs-filters .tag[aria-pressed="true"] svg { color: inherit; }
+.rs-filter-gap { flex: none; width: 10px; }
 
-/* узкий экран: название не ломается по буквам — цена уходит на строку ниже, фото меньше */
-@media (max-width: 420px) {
-  [data-tpl="restaurant"] .tpl-item-top {
-    flex-wrap: wrap;
-    gap: 2px 10px;
-  }
-  [data-tpl="restaurant"] .tpl-item-name {
-    flex: 1 1 100%;
-  }
-  [data-tpl="restaurant"] .tpl-leader {
-    display: none;
-  }
-  [data-tpl="restaurant"] .tpl-item-img {
-    width: 84px;
-    height: 64px;
-  }
-}
+.rs-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.rs-dish { display: flex; flex-direction: column; overflow: hidden; border-radius: var(--r); background: var(--surface); box-shadow: var(--shadow); transition: transform 0.2s ease; }
+.rs-dish:hover { transform: translateY(-3px); }
+.rs-dish-ph { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--surface-2); }
+.rs-dish-ph img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+.rs-dish:hover .rs-dish-ph img { transform: scale(1.05); }
+.rs-dish-tags { position: absolute; left: 8px; top: 8px; display: flex; flex-wrap: wrap; gap: 4px; max-width: calc(100% - 16px); }
+.rs-dish-tags span { display: inline-flex; align-items: center; gap: 4px; padding: 4px 9px 4px 7px; border-radius: var(--pill); background: var(--surface); color: var(--ink); font-size: 13px; font-weight: 700; line-height: 1.1; }
+.rs-dish-tags svg { width: 14px; height: 14px; }
+.rs-dish-tags [data-tag="hit"] svg { color: var(--saffron); }
+.rs-dish-tags [data-tag="spicy"] svg { color: var(--hot); }
+.rs-dish-tags [data-tag="veg"] svg { color: var(--veg); }
+.rs-dish-out { position: absolute; inset: auto 8px 8px 8px; padding: 6px 10px; border-radius: var(--pill); background: var(--ink); color: var(--bg); font-size: 14px; font-weight: 700; text-align: center; }
+.rs-dish[data-out] .rs-dish-ph img { filter: grayscale(0.9) opacity(0.55); }
+.rs-dish[data-out] h3, .rs-dish[data-out] .rs-dish-price { color: var(--dim); }
+.rs-dish-book { position: absolute; right: 8px; bottom: 8px; display: grid; place-items: center; width: 46px; height: 46px; padding: 0; border: 0; border-radius: 50%; background: var(--acc); color: var(--on-acc); box-shadow: 0 6px 14px -6px rgba(0, 0, 0, 0.6); transition: transform 0.15s; }
+.rs-dish-book:hover { transform: scale(1.08); }
+.rs-dish-book:active { transform: scale(0.92); }
+.rs-dish-book svg { width: 24px; height: 24px; }
+.rs-dish-body { display: grid; gap: 2px; padding: 10px 12px 14px; }
+.rs-dish-body h3 { font-size: 17px; font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; }
+.rs-dish-price { font-size: 16px; font-weight: 700; color: var(--acc); font-variant-numeric: tabular-nums; }
+.rs[data-style="b"] .rs-dish-price { color: var(--acc); }
+.rs-dish-desc { display: none; font-size: 15px; line-height: 1.4; color: var(--dim); }
 
-/* ——— заказ, о нас ——— */
-[data-tpl="restaurant"] .tpl-order {
-  background: var(--acc);
-  color: var(--on-acc);
-}
-[data-tpl="restaurant"][data-style="b"] .tpl-order {
-  background: var(--surface);
-  color: var(--ink);
-  border-block: 1px solid var(--line);
-}
-[data-tpl="restaurant"] .tpl-order .tpl-sec-head p {
-  color: inherit;
-  opacity: 0.85;
-}
-[data-tpl="restaurant"] .tpl-order .tpl-btn {
-  background: var(--on-acc);
-  color: var(--acc);
-  border-color: var(--on-acc);
-}
-[data-tpl="restaurant"] .tpl-order .tpl-btn.ghost {
-  background: transparent;
-  color: inherit;
-  border-color: color-mix(in srgb, currentColor 45%, transparent);
-}
-[data-tpl="restaurant"][data-style="b"] .tpl-order .tpl-btn {
-  background: var(--acc);
-  color: var(--on-acc);
-  border-color: var(--acc);
-}
-[data-tpl="restaurant"][data-style="b"] .tpl-order .tpl-btn.ghost {
-  background: transparent;
-  color: var(--ink);
-  border-color: var(--line);
-}
-[data-tpl="restaurant"] .tpl-about {
-  display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  grid-template-areas: "copy media" "facts media";
-  gap: clamp(28px, 6vw, 88px);
-  align-items: start;
-}
-[data-tpl="restaurant"] .tpl-about-copy {
-  grid-area: copy;
-}
-[data-tpl="restaurant"] .tpl-about-media {
-  grid-area: media;
-}
-[data-tpl="restaurant"] .tpl-facts {
-  grid-area: facts;
-}
-[data-tpl="restaurant"] .tpl-about-copy p {
-  font-size: clamp(17px, 1.7vw, 20px);
-  color: var(--dim);
-  max-width: 52ch;
-  margin-top: 18px;
-}
-[data-tpl="restaurant"] .tpl-about-copy p:first-of-type {
-  color: var(--ink);
-}
-[data-tpl="restaurant"] .tpl-facts {
-  margin: 0;
-  display: grid;
-  border-top: 1px solid var(--line);
-}
-[data-tpl="restaurant"] .tpl-facts div {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 18px 0;
-  border-bottom: 1px solid var(--line);
-}
-[data-tpl="restaurant"] .tpl-facts dt {
-  color: var(--dim);
-  font-size: 14px;
-}
-[data-tpl="restaurant"] .tpl-facts dd {
-  margin: 0;
-  font-weight: 600;
-  text-align: right;
-}
-@media (max-width: 760px) {
-  [data-tpl="restaurant"] .tpl-about {
-    grid-template-columns: 1fr;
-    grid-template-areas: "copy" "media" "facts";
-  }
-}
+/* ——— набор на компанию ——— */
+.rs-setb { background: var(--band); color: var(--on-band); }
+.rs-setb .rs-sec-head p { color: var(--on-band-dim); }
+.rs-setb-grid { display: grid; gap: 22px; padding: 16px; border-radius: var(--r); background: var(--surface); color: var(--ink); }
+.rs-setb-pick { display: grid; gap: 18px; align-content: start; }
+.rs-guests { display: grid; gap: 12px; }
+.rs-guests-label { font-family: var(--display); font-size: 18px; font-weight: 700; }
+.rs-stepper { display: inline-flex; align-items: center; gap: 4px; }
+.rs-stepper button { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: var(--surface-2); transition: transform 0.12s, opacity 0.15s; }
+.rs-stepper button:active { transform: scale(0.9); }
+.rs-stepper button:disabled { opacity: 0.35; cursor: default; }
+.rs-stepper svg { width: 20px; height: 20px; }
+.rs-stepper > b { min-width: 26px; text-align: center; font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.rs-stepper.big { gap: 12px; }
+.rs-stepper.big button { width: 56px; height: 56px; background: var(--acc); color: var(--on-acc); }
+.rs-stepper.big output { min-width: 150px; display: flex; align-items: baseline; justify-content: center; gap: 8px; }
+.rs-stepper.big output b { font-family: var(--font); font-size: 48px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.rs-stepper.big output small { font-size: 17px; color: var(--dim); font-weight: 600; }
+.rs-quick { display: flex; flex-wrap: wrap; gap: 8px; }
+.rs-quick button { min-width: 52px; min-height: 46px; padding: 0 14px; border: 0; border-radius: var(--pill); background: var(--surface-2); font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.rs-quick button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.rs[data-style="b"] .rs-quick button[aria-pressed="true"] { background: var(--acc); color: var(--on-acc); }
+.rs-setcards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.rs-setcard { display: grid; align-content: start; gap: 4px; padding: 6px 6px 10px; border: 0; border-radius: var(--r-sm); background: var(--surface-2); text-align: left; transition: transform 0.15s; }
+.rs-setcard:active { transform: scale(0.97); }
+.rs-setcard[aria-checked="true"] { background: var(--acc-soft); outline: 3px solid var(--acc); outline-offset: -3px; }
+.rs-setcard-ph { display: block; aspect-ratio: 1; overflow: hidden; border-radius: calc(var(--r-sm) - 4px); background: var(--surface); }
+.rs-setcard-ph img { width: 100%; height: 100%; object-fit: cover; }
+.rs-setcard b { padding: 0 4px; font-family: var(--display); font-size: 15px; font-weight: 700; line-height: 1.15; }
+.rs-setcard small { padding: 0 4px; font-size: 14px; line-height: 1.2; color: var(--dim); }
+.rs-setb-sum { display: grid; gap: 14px; align-content: start; }
+.rs-lines { display: grid; gap: 8px; }
+.rs-line { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; align-items: center; gap: 10px; }
+.rs-line-ph { width: 52px; height: 52px; overflow: hidden; border-radius: var(--r-sm); background: var(--surface-2); }
+.rs-line-ph img { width: 100%; height: 100%; object-fit: cover; }
+.rs-line-main { display: grid; gap: 0; min-width: 0; }
+.rs-line-main b { font-size: 16px; font-weight: 700; line-height: 1.2; }
+.rs-line-main small { font-size: 15px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.rs-total { display: grid; gap: 4px; padding-top: 12px; border-top: 2px solid var(--surface-2); }
+.rs-total > div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-size: 16px; }
+.rs-total dd { font-variant-numeric: tabular-nums; font-weight: 700; }
+.rs-total .off dd { color: var(--veg); }
+.rs-total .all { font-family: var(--font); font-size: 20px; font-weight: 700; }
+.rs-total .all dd { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; }
+.rs-setb-sum .rs-cta { width: 100%; min-height: 58px; }
 
-/* ——— бронь ——— */
-[data-tpl="restaurant"] .tpl-book {
-  display: grid;
-  grid-template-columns: 0.9fr 1.1fr;
-  gap: clamp(28px, 6vw, 88px);
-  align-items: start;
-  background: var(--surface);
-  border-block: 1px solid var(--line);
-}
-[data-tpl="restaurant"] .tpl-book-copy p {
-  color: var(--dim);
-  font-size: 17px;
-  margin-top: 16px;
-  max-width: 36ch;
-}
-@media (max-width: 760px) {
-  [data-tpl="restaurant"] .tpl-book {
-    grid-template-columns: 1fr;
-  }
-}
-[data-tpl="restaurant"] .tpl-form {
-  display: grid;
-  gap: 16px;
-}
-[data-tpl="restaurant"] .tpl-row {
-  display: grid;
-  grid-template-columns: 1fr 120px;
-  gap: 16px;
-}
-@media (max-width: 420px) {
-  [data-tpl="restaurant"] .tpl-row {
-    grid-template-columns: 1fr;
-  }
-}
-[data-tpl="restaurant"] .tpl-field {
-  display: grid;
-  gap: 6px;
-  min-width: 0;
-}
-[data-tpl="restaurant"] .tpl-field label {
-  font-size: 14px;
-  font-weight: 600;
-}
-[data-tpl="restaurant"] .tpl-field input,
-[data-tpl="restaurant"] .tpl-field select {
-  width: 100%;
-  min-height: 52px;
-  padding: 0 14px;
-  font: 500 16px var(--body);
-  color: var(--ink);
-  background: var(--bg);
-  border: 1.5px solid var(--line);
-  border-radius: var(--r);
-}
-[data-tpl="restaurant"] .tpl-field input:hover,
-[data-tpl="restaurant"] .tpl-field select:hover {
-  border-color: var(--dim);
-}
-[data-tpl="restaurant"] .tpl-field input[aria-invalid="true"] {
-  border-color: var(--hot);
-}
-[data-tpl="restaurant"] .tpl-err {
-  color: var(--hot);
-  font-size: 14px;
-  font-weight: 600;
-}
-[data-tpl="restaurant"] .tpl-note {
-  color: var(--dim);
-  font-size: 13.5px;
-}
-[data-tpl="restaurant"] .tpl-form .tpl-btn {
-  width: 100%;
-}
-[data-tpl="restaurant"] .tpl-success {
-  display: grid;
-  gap: 12px;
-  padding: 28px;
-  border: 1.5px solid var(--acc);
-  border-radius: calc(var(--r) + 4px);
-  background: var(--bg);
-}
-[data-tpl="restaurant"] .tpl-success h3 {
-  font-size: 26px;
-  color: var(--acc);
-}
-[data-tpl="restaurant"][data-style="b"] .tpl-success h3 {
-  color: var(--ink);
-}
-[data-tpl="restaurant"] .tpl-success .tpl-btn {
-  justify-self: start;
-}
+/* ——— доставка ——— */
+.rs-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.rs-tile { display: grid; justify-items: center; align-content: center; gap: 6px; min-height: 148px; padding: 14px 8px; border-radius: var(--r); background: var(--surface); box-shadow: var(--shadow); text-align: center; transition: transform 0.16s; }
+.rs-tile:hover { transform: translateY(-3px); }
+.rs-tile-icon { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: var(--acc-soft); color: var(--acc); }
+.rs-tile-icon svg { width: 28px; height: 28px; }
+.rs-tile b { font-family: var(--font); font-size: 16px; font-weight: 700; line-height: 1.15; }
+.rs-tile small { font-size: 14px; color: var(--dim); line-height: 1.2; }
+.rs-tile.direct { background: var(--acc); color: var(--on-acc); }
+.rs-tile.direct .rs-tile-icon { background: var(--on-acc); color: var(--acc); }
+.rs-tile.direct small { color: color-mix(in srgb, var(--on-acc) 82%, transparent); }
+
+/* ——— карусель (kit) ——— */
+.rs .tpl-carousel-track { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin: 0 calc(var(--edge) * -1); padding: 6px var(--edge) 12px; scroll-padding-inline: var(--edge); overscroll-behavior-x: contain; }
+.rs .tpl-carousel-track::-webkit-scrollbar { display: none; }
+.rs .tpl-carousel-nav { display: none; gap: 10px; margin-top: 6px; }
+.rs .tpl-carousel-nav button { display: grid; place-items: center; width: 52px; height: 52px; border: 0; border-radius: 50%; background: var(--ink); color: var(--bg); font-size: 22px; font-weight: 700; transition: transform 0.15s; }
+.rs[data-style="b"] .tpl-carousel-nav button { background: var(--acc); color: var(--on-acc); }
+.rs .tpl-carousel-nav button:hover:not(:disabled) { transform: scale(1.08); }
+.rs .tpl-carousel-nav button:disabled { opacity: 0.3; cursor: default; }
+
+/* ——— отзывы ——— */
+.rs-reviews { background: var(--surface-2); }
+.rs[data-style="b"] .rs-reviews { background: var(--band); }
+.rs-review { flex: 0 0 min(82vw, 340px); scroll-snap-align: start; display: grid; align-content: start; gap: 12px; padding: 20px; border-radius: var(--r); background: var(--surface); box-shadow: var(--shadow); }
+.rs-stars { display: flex; gap: 3px; color: var(--saffron); }
+.rs-stars svg { width: 20px; height: 20px; }
+.rs-review blockquote { font-family: var(--font); font-size: 19px; font-weight: 600; line-height: 1.3; }
+.rs-review figcaption { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.rs-review figcaption small { font-size: 15px; color: var(--dim); }
+.rs-demo-chip { display: inline-block; padding: 4px 12px; border-radius: var(--pill); background: var(--surface); font-size: 15px; font-weight: 600; color: var(--dim); }
 
 /* ——— контакты ——— */
-[data-tpl="restaurant"] .tpl-contacts-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 32px 28px;
+.rs-contacts-grid { display: grid; gap: 16px; }
+.rs-map { position: relative; overflow: hidden; border-radius: var(--r); aspect-ratio: 4 / 3; background: var(--map-bg); }
+.rs-map svg { width: 100%; height: 100%; }
+.rs-map-pin { position: absolute; left: 51.5%; top: 42%; transform: translate(-50%, -100%); display: flex; flex-direction: column-reverse; align-items: center; gap: 2px; }
+.rs-map-pin svg { width: 44px; height: 44px; color: var(--map-pin); filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.3)); }
+.rs-map-pin b { padding: 4px 12px; border-radius: var(--pill); background: var(--ink); color: var(--bg); font-size: 15px; font-weight: 700; }
+.rs-contact-list { display: grid; gap: 10px; align-content: start; }
+.rs-contact-list li { display: flex; align-items: center; gap: 14px; min-height: 76px; padding: 12px 16px; border-radius: var(--r-sm); background: var(--surface); box-shadow: var(--shadow); }
+.rs-contact-list li > svg { flex: none; width: 48px; height: 48px; padding: 12px; border-radius: 50%; background: var(--acc-soft); color: var(--acc); }
+.rs-contact-list li > div { display: grid; gap: 2px; min-width: 0; }
+.rs-contact-list b { font-size: 17px; font-weight: 700; line-height: 1.25; }
+.rs-link { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; color: var(--acc); font-weight: 700; }
+.rs-link.big { color: var(--ink); font-size: 20px; letter-spacing: -0.01em; }
+.rs-link svg { width: 18px; height: 18px; }
+.rs-link:hover { text-decoration: underline; text-underline-offset: 4px; }
+
+.rs-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding: 28px var(--edge) calc(104px + env(safe-area-inset-bottom, 0px)); font-size: 15px; color: var(--dim); }
+
+/* ——— липкая панель (зона большого пальца) ——— */
+.rs-sticky { position: fixed; z-index: 20; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: 1fr 1fr 1.7fr; gap: 8px; padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px)); background: var(--surface); box-shadow: 0 -10px 24px -14px rgba(0, 0, 0, 0.5); transition: transform 0.3s ease; }
+.rs-sticky[data-hidden] { transform: translateY(130%); }
+.rs-sticky a, .rs-sticky button { display: grid; place-items: center; min-height: 52px; border: 0; border-radius: var(--pill); background: var(--surface-2); font-family: var(--font); font-size: 16px; font-weight: 700; }
+.rs-sticky .primary { background: var(--acc); color: var(--on-acc); }
+.rs-sticky a:active, .rs-sticky button:active { transform: scale(0.96); }
+
+/* ——— окно брони ——— */
+:root:has(.rs-sheet[open]) { overflow: hidden; }
+.rs-sheet { padding: 0; border: 0; color: var(--ink); background: var(--surface); font-family: var(--font); font-size: 16px; font-weight: 500; line-height: 1.5; max-width: none; max-height: none; overflow: hidden; }
+.rs-sheet::backdrop { background: rgba(10, 8, 4, 0.62); }
+.rs-sheet[open] { display: flex; flex-direction: column; position: fixed; inset: 0; margin: 0; width: 100%; height: 100dvh; animation: rs-sheet-up 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.rs-sheet-body { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; padding: 0 16px; }
+.rs-sheet-head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: calc(8px + env(safe-area-inset-top, 0px)) 0 4px; }
+.rs-sheet-head h2, .rs-done h2 { font-size: 26px; line-height: 1.1; outline: none; }
+.rs-x { flex: none; display: grid; place-items: center; width: 48px; height: 48px; padding: 0; border: 0; border-radius: 50%; background: var(--surface-2); color: var(--ink); }
+.rs-x svg { width: 22px; height: 22px; }
+.rs-progress { flex: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 6px 0 12px; }
+.rs-progress li { display: grid; gap: 6px; font-size: 14px; font-weight: 700; color: var(--dim); }
+.rs-progress li::before { content: ""; height: 7px; border-radius: 9px; background: var(--surface-2); transition: background-color 0.3s; }
+.rs-progress li[data-state="done"]::before, .rs-progress li[data-state="now"]::before { background: var(--acc); }
+.rs-progress li[data-state="now"] { color: var(--ink); }
+.rs-summary { flex: none; display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 8px; }
+.rs-summary span { padding: 5px 12px; border-radius: var(--pill); background: var(--acc-soft); color: var(--ink); font-size: 15px; font-weight: 700; }
+.rs-wish { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; padding: 6px 6px 6px 14px; border-radius: var(--r-sm); background: var(--surface-2); }
+.rs-wish span { display: grid; gap: 0; min-width: 0; }
+.rs-wish small { font-size: 13px; color: var(--dim); font-weight: 600; }
+.rs-wish b { font-size: 16px; font-weight: 700; line-height: 1.2; }
+.rs-wish em { font-style: normal; font-size: 15px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.rs-wish button { flex: none; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: var(--surface); }
+.rs-wish button svg { width: 18px; height: 18px; }
+.rs-sheet-main { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 12px; padding: 4px 2px 16px; }
+.rs-sheet-main > * { flex: none; }
+.rs-q { margin-top: 6px; font-family: var(--display); font-size: 20px; font-weight: 700; line-height: 1.2; }
+.rs-q small { font-size: 15px; font-weight: 500; color: var(--dim); }
+.rs-chips { display: grid; gap: 8px; }
+.rs-chips button, .rs-dates button, .rs-parts button, .rs-slots button { border: 0; background: var(--surface-2); font-family: var(--font); font-weight: 700; transition: background-color 0.15s, color 0.15s, transform 0.12s; }
+.rs-chips button:active, .rs-dates button:active, .rs-parts button:active, .rs-slots button:active { transform: scale(0.96); }
+.rs-chips button[aria-checked="true"], .rs-dates button[aria-checked="true"], .rs-parts button[aria-pressed="true"], .rs-slots button[aria-checked="true"] { background: var(--ink); color: var(--bg); }
+.rs[data-style="b"] .rs-chips button[aria-checked="true"], .rs[data-style="b"] .rs-dates button[aria-checked="true"], .rs[data-style="b"] .rs-parts button[aria-pressed="true"], .rs[data-style="b"] .rs-slots button[aria-checked="true"] { background: var(--acc); color: var(--on-acc); }
+.rs-chips button:disabled, .rs-parts button:disabled, .rs-slots button:disabled { opacity: 0.4; cursor: default; }
+.rs-chips.party { grid-template-columns: repeat(4, 1fr); }
+.rs-chips.party button { min-height: 72px; border-radius: var(--r-sm); font-size: 24px; font-variant-numeric: tabular-nums; }
+.rs-chips.occasion { grid-template-columns: repeat(3, 1fr); }
+.rs-chips.occasion button { display: grid; justify-items: center; align-content: center; gap: 4px; min-height: 88px; padding: 8px 6px; border-radius: var(--r-sm); font-size: 15px; line-height: 1.15; }
+.rs-chips.occasion svg { width: 26px; height: 26px; }
+.rs-dates { display: flex; gap: 8px; margin: 0 -2px; padding: 2px; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x proximity; }
+.rs-dates::-webkit-scrollbar { display: none; }
+.rs-dates button { flex: none; scroll-snap-align: start; display: grid; justify-items: center; gap: 0; min-width: 84px; min-height: 64px; padding: 6px 12px; border-radius: var(--r-sm); line-height: 1.2; }
+.rs-dates small { font-size: 14px; font-weight: 600; opacity: 0.8; text-transform: capitalize; }
+.rs-dates b { font-size: 16px; font-weight: 800; }
+.rs-chips.zone { grid-template-columns: repeat(3, 1fr); }
+.rs-chips.zone button { display: grid; justify-items: center; align-content: center; gap: 4px; min-height: 84px; padding: 8px 4px; border-radius: var(--r-sm); font-size: 16px; line-height: 1.15; }
+.rs-chips.zone svg { width: 26px; height: 26px; }
+.rs-chips.zone button > span { display: grid; justify-items: center; }
+.rs-chips.zone small { font-size: 14px; font-weight: 500; opacity: 0.8; }
+.rs-parts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.rs-parts button { min-height: 48px; border-radius: var(--pill); font-size: 16px; }
+.rs-slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.rs-slots button { min-height: 50px; border-radius: var(--r-sm); font-size: 17px; font-variant-numeric: tabular-nums; }
+.rs-slots button[data-status="taken"] { text-decoration: line-through; }
+.rs-error { padding: 12px 16px; border-radius: var(--r-sm); background: color-mix(in srgb, var(--hot) 18%, var(--surface)); font-weight: 600; }
+.rs-form { display: grid; gap: 14px; }
+.rs-form label { display: grid; gap: 6px; font-size: 16px; font-weight: 700; }
+.rs-form input { min-height: 56px; padding: 0 18px; border: 2px solid transparent; border-radius: var(--r-sm); background: var(--surface-2); color: var(--ink); font: inherit; font-size: 18px; font-weight: 600; }
+.rs-form input::placeholder { color: var(--dim); opacity: 0.8; }
+.rs-form input:focus { outline: none; border-color: var(--acc); background: var(--surface); }
+.rs-form input[aria-invalid="true"] { border-color: var(--hot); }
+.rs-form em { font-style: normal; font-size: 15px; font-weight: 600; color: var(--hot); }
+.rs-note { font-size: 15px; color: var(--dim); }
+.rs-sheet-foot { flex: none; display: flex; gap: 10px; padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px)); background: var(--surface); }
+.rs-sheet-foot .rs-cta { flex: 1; min-height: 58px; }
+.rs-sheet-foot .rs-ghost { min-height: 58px; padding: 0 22px; }
+.rs-done { display: grid; align-content: center; justify-items: center; gap: 14px; flex: 1; padding: 20px 0; text-align: center; overflow-y: auto; }
+.rs-done-mark { display: grid; place-items: center; width: 84px; height: 84px; border-radius: 50%; background: var(--acc); color: var(--on-acc); }
+.rs-done-mark svg { width: 44px; height: 44px; }
+.rs-done-when { font-family: var(--display); font-size: 24px; font-weight: 700; }
+.rs-done-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.rs-done-chips span { padding: 5px 14px; border-radius: var(--pill); background: var(--acc-soft); font-weight: 700; }
+.rs-done-wish { max-width: 34ch; font-size: 16px; color: var(--dim); }
+.rs-done .rs-cta, .rs-done .rs-ghost { width: 100%; max-width: 380px; }
+.rs [tabindex="-1"]:focus, .rs [tabindex="-1"]:focus-visible { outline: none; }
+@keyframes rs-sheet-up { from { transform: translate3d(0, 36px, 0); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes rs-sheet-left { from { transform: translate3d(40px, 0, 0); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* ——— появление секций (kit/motion) ——— */
+.rs .rv { opacity: 0; transform: translate3d(0, 26px, 0); }
+.rs .rv-in { opacity: 1; transform: none; transition: opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1); }
+
+/* ——— живое: стартует после первой отрисовки (data-live), стоит на паузе вне экрана ——— */
+@keyframes rs-kenburns { from { transform: scale(1.02) translate3d(0, 0, 0); } to { transform: scale(1.13) translate3d(-1.5%, -1.2%, 0); } }
+@keyframes rs-steam { 0% { opacity: 0; transform: translate3d(0, 24px, 0) scale(0.8); } 30% { opacity: 0.55; } 100% { opacity: 0; transform: translate3d(8px, -70px, 0) scale(1.25); } }
+@keyframes rs-flicker { 0%, 100% { opacity: 0.55; transform: scale(1); } 18% { opacity: 0.9; transform: scale(1.04); } 31% { opacity: 0.62; } 47% { opacity: 1; transform: scale(1.06); } 63% { opacity: 0.7; } 82% { opacity: 0.88; transform: scale(1.02); } }
+.rs[data-live] .rs-hero-photo img { animation: rs-kenburns 26s ease-in-out infinite alternate; }
+.rs[data-live] .rs-steam svg { animation: rs-steam 4.4s ease-out infinite; }
+.rs[data-live] .rs-steam .w2 { animation-delay: 1.5s; }
+.rs[data-live] .rs-steam .w3 { animation-delay: 3s; }
+.rs[data-live] .rs-glows i { animation: rs-flicker 3.6s ease-in-out infinite; }
+.rs[data-live] .rs-glows .g2 { animation-duration: 4.7s; animation-delay: -1.2s; }
+.rs[data-live] .rs-glows .g3 { animation-duration: 5.3s; animation-delay: -2.4s; }
+.rs[data-live][data-paused="1"] *, .rs[data-live] [data-off="1"] * { animation-play-state: paused !important; }
+
+/* ——— планшет ——— */
+@media (min-width: 560px) {
+  .head-book { display: inline-flex; }
+  .rs-facts li { min-height: 190px; }
+  .rs-facts b { font-size: 44px; }
+  .rs-chips.party button { min-height: 80px; }
+  .rs-slots { grid-template-columns: repeat(5, 1fr); }
 }
-@media (max-width: 960px) {
-  [data-tpl="restaurant"] .tpl-contacts-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-@media (max-width: 520px) {
-  [data-tpl="restaurant"] .tpl-contacts-grid {
-    grid-template-columns: 1fr;
-  }
-}
-[data-tpl="restaurant"] .tpl-contacts-grid h3 {
-  font-family: var(--body);
-  font-size: 12.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--dim);
-  margin-bottom: 10px;
-}
-[data-tpl="restaurant"] .tpl-contacts-grid p {
-  font-size: 17px;
-}
-[data-tpl="restaurant"] .tpl-link {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  font-weight: 600;
-  color: var(--acc);
-  text-underline-offset: 4px;
-}
-[data-tpl="restaurant"][data-style="b"] .tpl-link {
-  color: var(--acc);
-}
-[data-tpl="restaurant"] .tpl-link:hover {
-  text-decoration: underline;
-}
-[data-tpl="restaurant"] .tpl-link.big {
-  font-size: 22px;
-  font-variant-numeric: tabular-nums;
-}
-[data-tpl="restaurant"] .tpl-reviews {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 18px;
-  margin-top: 4px;
+@media (min-width: 640px) {
+  .rs-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .rs-dish-desc { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .rs-setb-grid { padding: 24px; }
+  .rs-tiles { gap: 16px; }
 }
 
-/* ——— подвал и липкая панель ——— */
-[data-tpl="restaurant"] .tpl-foot {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px 24px;
-  padding: 24px var(--edge);
-  border-top: 1px solid var(--line);
-  color: var(--dim);
-  font-size: 14px;
+/* ——— десктоп ——— */
+@media (min-width: 861px) {
+  .rs { --head-h: 84px; }
+  .rs-nav { display: flex; }
+  .rs-sec { padding-block: 96px; }
+  .rs-sec-head { margin-bottom: 36px; }
+  .rs-filters { margin-inline: 0; padding-inline: 0; flex-wrap: wrap; overflow: visible; }
+
+  .rs-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); align-items: center; gap: 56px; padding-top: 18px; padding-bottom: 72px; min-height: min(calc(100svh - 150px), 760px); }
+  .rs-hero-art { order: 2; }
+  .rs-hero-copy { order: 1; gap: 20px; }
+  .rs-hero h1 { font-size: clamp(64px, 6.2vw, 100px); }
+  .rs-lead { font-size: 22px; max-width: 26ch; }
+  .rs[data-style="a"] .rs-hero-photo { height: auto; aspect-ratio: 4 / 4.6; max-height: 72svh; margin-inline: auto; }
+  .rs[data-style="a"] .rs-hero-art::before { inset: 28px -18px 0 30px; }
+  .rs[data-style="a"] .rs-steam { left: 33%; top: 10%; }
+
+  .rs[data-style="b"] .rs-hero { display: flex; min-height: min(calc(100svh - 56px), 860px); padding: 0; justify-content: flex-end; align-items: flex-start; }
+  .rs[data-style="b"] .rs-hero-art { order: 0; }
+  .rs[data-style="b"] .rs-hero-copy { padding-bottom: 110px; max-width: 760px; }
+  .rs[data-style="b"] .rs-hero-photo img { object-position: 60% 40%; }
+  .rs[data-style="b"] .rs-hero-photo::after { background: radial-gradient(ellipse 70% 80% at 76% 28%, transparent 22%, rgba(12, 8, 4, 0.5) 72%, rgba(12, 8, 4, 0.85) 100%), linear-gradient(90deg, rgba(12, 8, 4, 0.9) 0%, rgba(12, 8, 4, 0.45) 46%, rgba(12, 8, 4, 0.05) 100%), linear-gradient(180deg, transparent 70%, var(--bg) 100%); }
+  .rs-glows .g1 { right: 4%; top: 0; width: 42%; }
+
+  .rs-facts { gap: 16px; }
+  .rs-facts li { min-height: 260px; padding: 20px; border-radius: var(--r); }
+  .rs-facts b { font-size: 64px; }
+  .rs-facts span { font-size: 18px; }
+
+  .rs-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px; }
+  .rs-dish-body { padding: 12px 16px 18px; }
+  .rs-dish-body h3 { font-size: 19px; }
+
+  .rs-setb-grid { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr); gap: 48px; padding: 36px; }
+  .rs-stepper.big output b { font-size: 60px; }
+  .rs-setcard b { font-size: 17px; }
+  .rs-tile { min-height: 200px; }
+  .rs-tile-icon { width: 68px; height: 68px; }
+  .rs-tile-icon svg { width: 32px; height: 32px; }
+  .rs-tile b { font-size: 20px; }
+
+  .rs .tpl-carousel-nav { display: flex; }
+  .rs-contacts-grid { grid-template-columns: 1.2fr 1fr; gap: 28px; align-items: stretch; }
+  .rs-map { aspect-ratio: auto; min-height: 420px; }
+  .rs-foot { padding-bottom: 40px; }
+  .rs-sticky { display: none; }
+
+  .rs-sheet[open] { inset: 0 0 0 auto; width: 520px; border-radius: var(--r) 0 0 var(--r); animation-name: rs-sheet-left; }
+  .rs-sheet-body { padding-inline: 28px; }
+  .rs-sheet-head { padding-top: 22px; }
 }
-[data-tpl="restaurant"] .tpl-sticky {
-  display: none;
+@media (max-width: 380px) {
+  .rs-logo { font-size: 22px; }
+  .rs-chips.party button { font-size: 22px; }
+  .rs-chips.occasion button { font-size: 14px; }
+  .rs-stepper.big output { min-width: 120px; }
+  .rs-stepper.big output b { font-size: 42px; }
 }
-@media (max-width: 760px) {
-  [data-tpl="restaurant"] .tpl-sticky {
-    position: fixed;
-    inset: auto 0 0 0;
-    z-index: 40;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1.3fr;
-    gap: 8px;
-    padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
-    background: var(--head-bg);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border-top: 1px solid var(--line);
-  }
-  [data-tpl="restaurant"] .tpl-sticky a {
-    min-height: 52px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 1.5px solid var(--line);
-    border-radius: var(--r);
-    font-weight: 600;
-    font-size: 15px;
-  }
-  [data-tpl="restaurant"] .tpl-sticky {
-    transition: transform 0.25s, visibility 0s;
-  }
-  [data-tpl="restaurant"] .tpl-sticky[data-hidden] {
-    transform: translateY(110%);
-    pointer-events: none;
-    visibility: hidden;
-    transition: transform 0.25s, visibility 0s 0.25s;
-  }
-  [data-tpl="restaurant"] .tpl-sticky a.primary {
-    background: var(--acc);
-    border-color: var(--acc);
-    color: var(--on-acc);
-  }
-}
+
+/* секции ниже первого экрана рисуются по мере приближения: их картинки не борются с hero за канал */
+.rs-menu, .rs-setb, .rs-delivery, .rs-reviews, .rs-contacts { content-visibility: auto; contain-intrinsic-size: auto 760px; }
+
+/* ——— без анимации, если пользователь просил ——— */
 @media (prefers-reduced-motion: reduce) {
-  [data-tpl="restaurant"] * {
-    transition: none !important;
-  }
+  .rs *, .rs *::before, .rs *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  .rs .rv { opacity: 1; transform: none; }
+  .rs-steam svg { opacity: 0.4; }
+  .rs-glows i { opacity: 0.6; }
+  .rs-sheet[open] { animation: none; }
 }
