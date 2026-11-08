@@ -20,9 +20,16 @@ export interface MasterCore {
 
 export interface LookCore {
   id: string;
-  audience: "men" | "women";
   serviceIds: string[];
   masterId: string;
+}
+
+/** Пакет: набор услуг со скидкой, которая применяется сама, когда в записи есть все его услуги. */
+export interface PackageCore {
+  id: string;
+  serviceIds: string[];
+  /** Скидка по умолчанию, %. */
+  pct: number;
 }
 
 export interface ScheduleData {
@@ -31,16 +38,33 @@ export interface ScheduleData {
   services: ServiceCore[];
   masters: MasterCore[];
   looks: LookCore[];
+  packages: PackageCore[];
+  /** Результаты подбора образа: ключ «<ответ1>.<ответ2>». */
+  quizResults: Record<string, { lookId: string; serviceIds: string[] }>;
+  /** Наборы услуг для демо-записей кабинета. */
+  seedBaskets: string[][];
 }
 
 /** Срез SalonData для расчётов: без текстов. */
-export function toScheduleData(data: ScheduleData): ScheduleData {
+export function toScheduleData(data: {
+  hours: ScheduleData["hours"];
+  slotMinutes: number;
+  services: ServiceCore[];
+  masters: MasterCore[];
+  looks: LookCore[];
+  packages: PackageCore[];
+  quiz: { results: ScheduleData["quizResults"] };
+  seedBaskets: string[][];
+}): ScheduleData {
   return {
     hours: data.hours,
     slotMinutes: data.slotMinutes,
     services: data.services.map((s) => ({ id: s.id, minutes: s.minutes, price: s.price })),
     masters: data.masters.map((m) => ({ id: m.id, serviceIds: m.serviceIds, days: m.days })),
-    looks: data.looks.map((l) => ({ id: l.id, audience: l.audience, serviceIds: l.serviceIds, masterId: l.masterId })),
+    looks: data.looks.map((l) => ({ id: l.id, serviceIds: l.serviceIds, masterId: l.masterId })),
+    packages: data.packages.map((p) => ({ id: p.id, serviceIds: p.serviceIds, pct: p.pct })),
+    quizResults: data.quiz.results,
+    seedBaskets: data.seedBaskets,
   };
 }
 
@@ -50,10 +74,17 @@ export interface ServiceOverride {
   hidden?: boolean;
 }
 
-/** Правки владельца: услуги (цена, длительность, скрытие) и рабочие дни мастеров. */
+export interface PackageOverride {
+  /** Скидка, % (0–50). */
+  pct?: number;
+  hidden?: boolean;
+}
+
+/** Правки владельца: услуги (цена, длительность, скрытие), пакеты и рабочие дни мастеров. */
 export interface SalonOverrides {
   services: Record<string, ServiceOverride>;
   schedule: Record<string, number[]>;
+  packages?: Record<string, PackageOverride>;
 }
 
 export const NO_OVERRIDES: SalonOverrides = { services: {}, schedule: {} };
@@ -113,24 +144,82 @@ export interface Basket {
   /** Выбранные услуги без скрытых и несуществующих. */
   ids: string[];
   minutes: number;
+  /** Итог к оплате, с учётом пакета. */
   price: number;
+  /** Сумма услуг без скидки. */
+  full: number;
+  /** Сколько сэкономлено по пакету, сум. */
+  saved: number;
+  /** Применённый пакет (самый выгодный из полностью собранных). */
+  packageId: string | null;
 }
 
-/** Сумма и время набора услуг с учётом правок владельца. */
+/** Шаг округления скидки: цены кратны тысяче, чтобы суммы читались. */
+const DISCOUNT_STEP = 1000;
+export const MAX_DISCOUNT_PCT = 50;
+
+/** Эффективная скидка пакета с учётом правок; скрытый пакет не действует. */
+export function packagePct(pkg: PackageCore, ov: SalonOverrides): number {
+  const o = ov.packages?.[pkg.id];
+  if (o?.hidden) return 0;
+  return Math.min(MAX_DISCOUNT_PCT, Math.max(0, Math.round(o?.pct ?? pkg.pct)));
+}
+
+const discountOf = (sum: number, pct: number) => Math.round((sum * pct) / 100 / DISCOUNT_STEP) * DISCOUNT_STEP;
+
+/** Сумма, время и скидка набора услуг с учётом правок владельца. Единственное место, где считается цена. */
 export function basketOf(data: ScheduleData, ov: SalonOverrides, ids: string[]): Basket {
   let minutes = 0;
-  let price = 0;
+  let full = 0;
   const kept: string[] = [];
+  const priceOf = new Map<string, number>();
   for (const id of ids) {
     const base = data.services.find((s) => s.id === id);
     if (!base || kept.includes(id)) continue;
     const svc = effectiveService(base, ov);
     if (svc.hidden) continue;
     kept.push(id);
+    priceOf.set(id, svc.price);
     minutes += svc.minutes;
-    price += svc.price;
+    full += svc.price;
   }
-  return { ids: kept, minutes, price };
+  let saved = 0;
+  let packageId: string | null = null;
+  for (const pkg of data.packages) {
+    const pct = packagePct(pkg, ov);
+    if (pct <= 0 || !pkg.serviceIds.every((id) => kept.includes(id))) continue;
+    const cut = discountOf(pkg.serviceIds.reduce((sum, id) => sum + (priceOf.get(id) ?? 0), 0), pct);
+    if (cut > saved) {
+      saved = cut;
+      packageId = pkg.id;
+    }
+  }
+  return { ids: kept, minutes, price: full - saved, full, saved, packageId };
+}
+
+/** Цена и время пакета целиком (для карточки пакета). Скрытый или пустой пакет — null. */
+export function packageBasket(data: ScheduleData, ov: SalonOverrides, pkg: PackageCore): Basket | null {
+  if (ov.packages?.[pkg.id]?.hidden) return null;
+  const b = basketOf(data, ov, pkg.serviceIds);
+  return b.ids.length === pkg.serviceIds.length ? b : null;
+}
+
+/** Часть дня для фильтра сетки: утро до 12:00, день до 17:00, дальше вечер. */
+export type DayPart = "morning" | "day" | "evening";
+export const DAY_PARTS: DayPart[] = ["morning", "day", "evening"];
+const NOON = 12 * 60;
+const EVENING_FROM = 17 * 60;
+export function partOfDay(time: string): DayPart {
+  const m = toMinutes(time);
+  return m < NOON ? "morning" : m < EVENING_FROM ? "day" : "evening";
+}
+
+/**
+ * Можно ли добавить услугу к выбранным: найдётся ли мастер (если мастер уже выбран, то именно он),
+ * который ведёт всё вместе. Нужно, чтобы выбор не упирался в «нет мастера».
+ */
+export function canCombine(data: ScheduleData, ids: string[], candidate: string, masterId?: string): boolean {
+  return mastersFor(data, [...ids, candidate]).some((m) => !masterId || masterId === "any" || m.id === masterId);
 }
 
 /** Детерминированный хэш (FNV-1a): «чужие» записи одинаковы у всех посетителей. */

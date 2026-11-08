@@ -1,92 +1,77 @@
 /* eslint-disable @next/next/no-img-element -- шаблон переносимый (без next/image): адаптивные <img srcset> с готовыми webp */
-import { Fragment } from "react";
-import { Carousel } from "../kit/carousel";
 import { MotionLayer } from "../kit/motion";
-import { LOCALES, pick, type L, type Locale, type TemplateProps } from "../types";
-import { BookingForm } from "./Booking";
+import { LOCALES, pick, type L, type Locale, type StyleId, type TemplateProps } from "../types";
+import { BookingSheet } from "./Booking";
 import { buildCatalog } from "./catalog";
-import { MasterCards, NextWindowCard, OpenStatus, PageView, PromoBar, StickyBar, TrackedLink } from "./client-bits";
+import { ActionBar, BookButton, CtaWatcher, MasterCards, NextWindowChip, OpenStatus, PageView, PromoStrip, TrackedLink } from "./client-bits";
 import { SalonProvider } from "./context";
-import type { SalonData } from "./data";
+import type { SalonData, SectionCopy } from "./data";
+import { Icon } from "./icons";
 import { Lookbook } from "./Lookbook";
 import { Quiz } from "./Quiz";
-import { ServicesList } from "./Services";
-import { splitHeadline } from "./format";
+import { ServicesPicker } from "./Services";
 import { salonUi as ui } from "./ui";
 
 // CSS лежит в public/, а не импортируется: импортированный .css Turbopack добавляет во все
 // маршруты сайта (ADR 0007), а шаблону нужно оставаться переносимым (ADR 0009).
 const TEMPLATE_CSS = "/templates/salon.css";
+const IMG = "/templates/salon/img";
+
 /**
- * Шрифты первого экрана. A — Onest, B — Literata целиком (и заголовки, и текст): один шрифт вместо двух
- * экономит ~50 КБ на первом экране, где они конкурируют с фото hero (LCP). Preload — оба файла семейства:
- * пробелы и знаки препинания берутся из латинского файла даже в русском тексте.
+ * Шрифт заголовка первого экрана: A — Oswald (плотный, узкий), B — Cormorant (антиква). Текст
+ * hero набран им, поэтому грузим его заранее; Onest для основного текста подтянется сам.
  */
-const FONT_PRELOAD = (style: "a" | "b", locale: Locale): string[] => {
-  const family = style === "a" ? "onest" : "literata";
-  const scripts = locale === "ru" ? ["cyrillic", "latin"] : ["latin"];
+const FONT_PRELOAD = (style: StyleId, locale: Locale): string[] => {
+  const family = style === "a" ? "oswald" : "cormorant";
+  // Заголовок hero набран одним алфавитом: кириллица для ru, латиница для en/uz. Второй файл первому экрану не нужен.
+  const scripts = locale === "ru" ? ["cyrillic"] : ["latin"];
   return scripts.map((sc) => `/templates/fonts/${family}-${sc}.woff2`);
 };
 
-const IMG = "/templates/salon/img";
-
-type W = 480 | 640 | 960 | 1280;
+type W = 480 | 640 | 960 | 1280 | 1600;
 const img = (base: string, w: W) => `${IMG}/${base}-${w}.webp`;
 const srcSet = (base: string, widths: W[]) => widths.map((w) => `${img(base, w)} ${w}w`).join(", ");
 
-/**
- * Слова → буквы с индексом для поочерёдного появления (текст виден сразу, анимируется только transform).
- * Пробел между словами стоит ВНЕ inline-block слова: внутри него он схлопывался бы («безспешки»).
- */
-function Letters({ text, offset }: { text: string; offset: number }) {
-  let i = offset;
+/** Секция: номер (виден только в стиле A), заголовок до пяти слов и одна короткая строка. */
+function Section({ id, n, copy, locale, className, children }: { id: string; n: number; copy: SectionCopy; locale: Locale; className?: string; children: React.ReactNode }) {
+  const t = (l: L) => pick(l, locale);
   return (
-    <>
-      {splitHeadline(text).map((word, w) => (
-        <Fragment key={w}>
-          {w > 0 && " "}
-          <span className="sl-word" aria-hidden="true">
-            {word.map((ch, k) => (
-              <span key={k} className="sl-ch" style={{ "--i": i++ } as React.CSSProperties}>
-                {ch}
-              </span>
-            ))}
-          </span>
-        </Fragment>
-      ))}
-    </>
+    <section className={`sl-sec${className ? ` ${className}` : ""}`} id={id} aria-labelledby={`${id}-title`}>
+      <header className="sl-sec-head" data-reveal>
+        <span className="sl-num" aria-hidden="true">
+          {String(n).padStart(2, "0")}
+        </span>
+        <h2 id={`${id}-title`}>{t(copy.title)}</h2>
+        <p>{t(copy.line)}</p>
+      </header>
+      {children}
+    </section>
   );
 }
 
 /**
- * Шаблон «Салон / барбершоп». Сервер-компонент без зависимостей от остального сайта: данные и
- * тексты — из props, стили — public/templates/salon.css. Два стиля — одна разметка:
- * A «Ночь» (барбершоп: тёмный, латунь, зерно, фото на весь экран с медленным наездом, огромный
- * заголовок) и B «Пудра» (салон: кремовый, антиква, органичные формы, мягкий свет).
+ * Шаблон «Салон». Сервер-компонент без зависимостей от остального сайта: данные и тексты из props,
+ * стили public/templates/salon.css. Это два разных сайта на одной разметке:
+ * A «USTARA Barbershop» (тёмный, латунь, жёсткие грани, нумерованные секции, мужской клуб) и
+ * B «Nafis Beauty» (светлый, сливочный, антиква, мягкие формы, женский салон).
  *
- * Скорость: контент первого экрана никогда не прячется (LCP — заголовок или фото hero с preload),
- * анимируются только transform/opacity и стартуют после первой отрисовки (data-live), ставятся на
- * паузу вне экрана и в фоновой вкладке; без canvas и WebGL; при prefers-reduced-motion страница
- * статична.
+ * Скорость: контент первого экрана никогда не прячется (LCP заголовок или фото hero с preload),
+ * анимируются только transform/opacity, живые анимации стартуют после первой отрисовки (data-live),
+ * ставятся на паузу вне экрана и в фоновой вкладке; без canvas и WebGL; при prefers-reduced-motion
+ * страница статична.
  */
 export function SalonSite({ data, locale, style, localeHrefs }: TemplateProps<SalonData>) {
   const t = (l: L) => pick(l, locale);
   const catalog = buildCatalog(data, locale);
-  // A — барбер на весь экран (3:2); B — «длинные волны» из лукбука (4:5) в органической маске.
-  const hero = style === "a" ? { base: data.photos.hero, widths: [480, 960, 1280] as W[], w: 1280, h: 853 } : { base: data.photos.heroB, widths: [480, 640, 960] as W[], w: 960, h: 1200 };
-  const heroSizes = style === "a" ? "100vw" : "(max-width: 860px) 300px, 540px";
-  const [line1, line2] = data.hero[style];
-  const heroLabel = `${t(line1)} ${t(line2)}`;
-  const decSep = locale === "en" ? "." : ",";
-  const group = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-  const statText = (v: number, decimals: number | undefined, plus: boolean | undefined) => {
-    const [i, frac] = v.toFixed(decimals ?? 0).split(".");
-    return `${group(Number(i))}${frac ? decSep + frac : ""}${plus ? "+" : ""}`;
-  };
+  const hero = data.hero.photo;
+  const heroWidths = hero.widths as W[];
+  const heroDefault = (heroWidths.includes(640) ? 640 : 960) as W;
+  const heroSizes = style === "a" ? "100vw" : "(max-width: 860px) 80vw, 520px";
+  const heroLabel = `${t(data.hero.line1)} ${t(data.hero.line2)}`;
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "BarberShop",
+    "@type": data.kind,
     name: data.name,
     telephone: data.phone.e164,
     address: t(data.address),
@@ -99,218 +84,114 @@ export function SalonSite({ data, locale, style, localeHrefs }: TemplateProps<Sa
       {FONT_PRELOAD(style, locale).map((href) => (
         <link key={href} rel="preload" href={href} as="font" type="font/woff2" crossOrigin="" />
       ))}
-      <link rel="preload" as="image" href={img(hero.base, hero.widths.includes(640) ? 640 : 960)} imageSrcSet={srcSet(hero.base, hero.widths)} imageSizes={heroSizes} fetchPriority="high" />
+      <link rel="preload" as="image" href={img(hero.base, heroDefault)} imageSrcSet={srcSet(hero.base, heroWidths)} imageSizes={heroSizes} fetchPriority="high" />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <SalonProvider catalog={catalog}>
         <header className="sl-head">
           <a href="#top" className="sl-logo" aria-label={data.name}>
-            <svg viewBox="0 0 32 32" width="26" height="26" aria-hidden="true" focusable="false">
-              <path d="M4.5 21.8 20.6 4.3a2.2 2.2 0 0 1 3.2-.1l1.5 1.5a2.2 2.2 0 0 1 0 3.1L9.6 24.9z" fill="currentColor" />
-              <path d="M3.5 28.5l.9-5.4 4.5 4.5z" fill="currentColor" opacity=".7" />
-            </svg>
-            {data.name}
+            <span className="sl-logo-main">{data.brand.main}</span>
+            <span className="sl-logo-sub">{data.brand.sub}</span>
           </a>
           <nav className="sl-nav" aria-label={t(ui.navLabel)}>
             <a href="#looks">{t(ui.nav.looks)}</a>
-            <a href="#quiz">{t(ui.nav.quiz)}</a>
             <a href="#services">{t(ui.nav.services)}</a>
             <a href="#masters">{t(ui.nav.masters)}</a>
-            <a href="#reviews">{t(ui.nav.reviews)}</a>
             <a href="#contacts">{t(ui.nav.contacts)}</a>
           </nav>
           <div className="sl-head-r">
             <LangSwitch locale={locale} hrefs={localeHrefs} label={t(ui.langLabel)} />
-            <a className="sl-btn sm" href="#book">
-              {t(ui.bookShort)}
-            </a>
+            <BookButton className="sl-btn sl-head-book" />
           </div>
         </header>
 
         <main id="top">
           <PageView />
-          <PromoBar text={t(data.promo)} locale={locale} />
-
-          <section className="sl-hero" data-pointer data-pausable>
-            <div className="sl-fx" aria-hidden="true">
-              {style === "a" ? (
-                <>
-                  <i className="sl-glow" />
-                  <i className="sl-grain" />
-                </>
-              ) : (
-                <>
-                  <i className="sl-blob b1" />
-                  <i className="sl-blob b2" />
-                  <i className="sl-blob b3" />
-                  <i className="sl-ring" />
-                </>
-              )}
-            </div>
-            <div className="sl-hero-visual">
-              <figure className="sl-hero-photo">
-                <img src={img(hero.base, hero.widths.includes(640) ? 640 : 960)} srcSet={srcSet(hero.base, hero.widths)} sizes={heroSizes} width={hero.w} height={hero.h} alt="" fetchPriority="high" decoding="async" />
-              </figure>
-              <a className="sl-badge" href="#book" aria-label={t(ui.badge.label)}>
-                <svg viewBox="0 0 120 120" aria-hidden="true" focusable="false">
-                  <defs>
-                    <path id="sl-circle" d="M60 60m-46 0a46 46 0 1 1 92 0a46 46 0 1 1-92 0" />
-                  </defs>
-                  <text>
-                    <textPath href="#sl-circle" textLength="286" lengthAdjust="spacing">
-                      {t(ui.badge.text)}
-                    </textPath>
-                  </text>
-                </svg>
-                <span className="sl-badge-arrow" aria-hidden="true">
-                  ↗
-                </span>
-              </a>
-            </div>
+          <CtaWatcher />
+          <section className="sl-hero" aria-labelledby="hero-title" data-pointer data-pausable>
+            <figure className="sl-hero-photo">
+              <img src={img(hero.base, heroDefault)} srcSet={srcSet(hero.base, heroWidths)} sizes={heroSizes} width={hero.w} height={hero.h} alt="" fetchPriority="high" decoding="async" />
+            </figure>
             <div className="sl-hero-copy">
               <OpenStatus open={data.hours.open} close={data.hours.close} locale={locale} />
-              <h1 aria-label={heroLabel}>
-                <span className="sl-line l1">
-                  <Letters text={t(line1)} offset={0} />
-                </span>{" "}
-                <span className="sl-line l2">
-                  <Letters text={t(line2)} offset={Array.from(t(line1)).length} />
-                </span>
+              <h1 id="hero-title" aria-label={heroLabel}>
+                <span className="sl-line l1">{t(data.hero.line1)}</span> <span className="sl-line l2">{t(data.hero.line2)}</span>
               </h1>
-              <p className="sl-tagline">{t(data.tagline)}</p>
-              <p className="sl-intro">{t(data.intro)}</p>
+              <p className="sl-hero-line">{t(data.hero.line)}</p>
               <div className="sl-cta">
-                <a className="sl-btn" href="#book">
-                  {t(ui.book)}
-                </a>
-                <a className="sl-btn ghost" href="#quiz">
-                  {t(ui.quizCta)}
-                </a>
+                <BookButton id="hero-cta" className="sl-btn sl-btn-big" />
+                <NextWindowChip />
               </div>
-            </div>
-            <div className="sl-floats">
-              <div className="sl-chip sl-chip-rating">
-                <small>★★★★★</small>
-                <b>4,9 · {t(ui.float.rating)}</b>
-              </div>
-              <NextWindowCard />
-            </div>
-          </section>
-
-          <div className="sl-marquee" data-pausable role="group" aria-label={t(ui.marqueeLabel)}>
-            <div className="sl-marquee-track">
-              <ul>
-                {data.marquee.map((x) => (
-                  <li key={x.ru}>{t(x)}</li>
-                ))}
-              </ul>
-              <ul aria-hidden="true">
-                {data.marquee.map((x) => (
-                  <li key={x.ru}>{t(x)}</li>
+              <ul className="sl-perks">
+                {data.place.chips.slice(0, 3).map((c) => (
+                  <li key={c.label.ru}>
+                    <Icon id={c.icon} size={18} />
+                    {t(c.label)}
+                  </li>
                 ))}
               </ul>
             </div>
-          </div>
-
-          <section className="sl-stats" aria-label={t(ui.statsNote)} data-reveal>
-            <dl>
-              {data.stats.map((s) => (
-                <div key={s.id}>
-                  <dt>{t(s.label)}</dt>
-                  <dd data-count={s.value} data-dec={s.decimals ?? 0} data-dec-sep={decSep}>
-                    {statText(s.value, s.decimals, s.plus)}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-            <p>{t(ui.statsNote)}</p>
           </section>
 
-          <section className="sl-sec" id="looks" aria-labelledby="looks-title">
-            <div className="sl-sec-head" data-reveal>
-              <h2 id="looks-title">{t(ui.looks.title)}</h2>
-              <p>{t(ui.looks.hint)}</p>
-            </div>
+          <PromoStrip text={t(data.promo)} locale={locale} />
+
+          <Section id="looks" n={1} copy={data.copy.looks} locale={locale} className="sl-sec-wide">
             <Lookbook />
-          </section>
+          </Section>
 
-          <section className="sl-sec sl-quiz-sec" id="quiz" aria-labelledby="quiz-title">
-            <div className="sl-sec-head" data-reveal>
-              <h2 id="quiz-title">{t(ui.quiz.title)}</h2>
-              <p>{t(ui.quiz.lead)}</p>
-            </div>
-            <div className="sl-quiz-wrap">
-              <Quiz />
-              <div className="sl-quiz-deco" aria-hidden="true">
-                {data.looks.filter((_, i) => i % 2 === 0).map((l, i) => (
-                  <img key={l.id} src={`${IMG}/${l.photo}-240.webp`} width={240} height={300} alt="" loading="lazy" decoding="async" style={{ "--k": i } as React.CSSProperties} />
-                ))}
-              </div>
-            </div>
-          </section>
+          <Section id="services" n={2} copy={data.copy.services} locale={locale}>
+            <ServicesPicker />
+            <p className="sl-demo-note">{t(ui.demoTag)}</p>
+          </Section>
 
-          <section className="sl-sec" id="services" aria-labelledby="services-title">
-            <div className="sl-sec-head" data-reveal>
-              <h2 id="services-title">{t(ui.services.title)}</h2>
-              <p>{t(ui.services.hint)}</p>
-            </div>
-            <ServicesList />
-          </section>
+          <Section id="quiz" n={3} copy={data.copy.quiz} locale={locale} className="sl-quiz-sec">
+            <Quiz />
+          </Section>
 
-          <section className="sl-sec" id="masters" aria-labelledby="masters-title">
-            <div className="sl-sec-head" data-reveal>
-              <h2 id="masters-title">{t(ui.masters.title)}</h2>
-              <p>{t(ui.masters.hint)}</p>
-            </div>
+          <Section id="masters" n={4} copy={data.copy.masters} locale={locale} className="sl-sec-wide">
             <MasterCards />
-          </section>
+          </Section>
 
-          <section className="sl-sec sl-reviews" id="reviews" aria-labelledby="reviews-title">
-            <div className="sl-sec-head" data-reveal>
-              <h2 id="reviews-title">{t(ui.reviews.title)}</h2>
-              <p>{t(ui.reviews.note)}</p>
+          <Section id="place" n={5} copy={data.copy.place} locale={locale} className="sl-place-sec">
+            <div className="sl-place" data-ratio={data.place.photo.ratio} data-reveal>
+              <img
+                src={img(data.place.photo.base, data.place.photo.widths.includes(960) ? 960 : (data.place.photo.widths[0] as W))}
+                srcSet={srcSet(data.place.photo.base, data.place.photo.widths as W[])}
+                sizes={data.place.photo.ratio === "wide" ? "100vw" : "(max-width: 860px) 86vw, 480px"}
+                width={data.place.photo.w}
+                height={data.place.photo.h}
+                alt={t(data.place.alt)}
+                loading="lazy"
+                decoding="async"
+              />
+              <ul className="sl-place-chips">
+                {data.place.chips.map((c) => (
+                  <li key={c.label.ru}>
+                    <Icon id={c.icon} size={22} />
+                    <span>{t(c.label)}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <Carousel label={t(ui.reviews.label)} prevLabel={t(ui.reviews.prev)} nextLabel={t(ui.reviews.next)}>
+          </Section>
+
+          <Section id="reviews" n={6} copy={data.copy.reviews} locale={locale}>
+            <ul className="sl-reviews sl-snap" aria-label={t(ui.reviews.label)}>
               {data.reviews.map((r) => (
-                <figure key={r.name} className="sl-review">
+                <li key={r.name} className="sl-review">
                   <p className="sl-stars" role="img" aria-label={t(ui.reviews.stars)}>
                     ★★★★★
                   </p>
                   <blockquote>{t(r.text)}</blockquote>
-                  <figcaption>
+                  <p className="sl-review-who">
                     <b>{r.name}</b> · {t(r.service)}
-                  </figcaption>
-                </figure>
+                  </p>
+                </li>
               ))}
-            </Carousel>
-          </section>
+            </ul>
+          </Section>
 
-          <section className="sl-sec sl-about" aria-labelledby="about-title">
-            <div className="sl-about-copy" data-reveal>
-              <h2 id="about-title">{t(data.about.title)}</h2>
-              {data.about.paragraphs.map((p) => (
-                <p key={p.ru}>{t(p)}</p>
-              ))}
-              <dl className="sl-facts">
-                {data.about.facts.map((f) => (
-                  <div key={f.k.ru}>
-                    <dt>{t(f.k)}</dt>
-                    <dd>{t(f.v)}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-            <div className="sl-about-media" data-reveal>
-              <img src={img(data.photos.interior, 960)} srcSet={srcSet(data.photos.interior, [480, 960])} sizes="(max-width: 860px) 46vw, 300px" width={960} height={960} alt={t(ui.photoAlt.interior)} loading="lazy" decoding="async" />
-              <img src={img(data.photos.hero, 480)} srcSet={srcSet(data.photos.hero, [480, 960])} sizes="(max-width: 860px) 46vw, 300px" width={960} height={640} alt={t(ui.photoAlt.hero)} loading="lazy" decoding="async" />
-            </div>
-          </section>
-
-          <section className="sl-sec sl-faq" aria-labelledby="faq-title">
-            <div className="sl-sec-head" data-reveal>
-              <h2 id="faq-title">{t(ui.faq.title)}</h2>
-            </div>
-            <div className="sl-faq-wrap">
+          <Section id="faq" n={7} copy={data.copy.faq} locale={locale} className="sl-faq">
             <div className="sl-faq-list" data-reveal>
               {data.faq.map((x) => (
                 <details key={x.q.ru} name="faq">
@@ -319,57 +200,46 @@ export function SalonSite({ data, locale, style, localeHrefs }: TemplateProps<Sa
                 </details>
               ))}
             </div>
-            <aside className="sl-faq-help" data-reveal>
-              <h3>{t(ui.faq.helpTitle)}</h3>
-              <p>{t(ui.faq.helpText)}</p>
-              <TrackedLink type="telegram" className="sl-btn ghost" href={`https://t.me/${data.telegram}`} external>
-                {t(ui.faq.helpCta)}
-              </TrackedLink>
-            </aside>
-            </div>
+          </Section>
+
+          <section className="sl-final" aria-labelledby="cta-title" data-reveal>
+            <h2 id="cta-title">{t(data.copy.cta.title)}</h2>
+            <p>{t(data.copy.cta.line)}</p>
+            <BookButton className="sl-btn sl-btn-big" />
           </section>
 
-          <section className="sl-sec sl-book" id="book" aria-labelledby="book-title">
-            <div className="sl-book-copy" data-reveal>
-              <h2 id="book-title">{t(ui.form.title)}</h2>
-              <p>{t(ui.form.lead)}</p>
-              <img className="sl-book-copy-photo" src={img(data.photos.tools, 480)} srcSet={srcSet(data.photos.tools, [480, 960])} sizes="360px" width={960} height={960} alt="" loading="lazy" decoding="async" />
-            </div>
-            <BookingForm />
-          </section>
-
-          <section className="sl-sec sl-contacts" id="contacts" aria-labelledby="contacts-title">
-            <div className="sl-sec-head" data-reveal>
-              <h2 id="contacts-title">{t(ui.contactsTitle)}</h2>
-            </div>
+          <Section id="contacts" n={8} copy={data.copy.contacts} locale={locale}>
             <div className="sl-contacts-grid" data-reveal>
-              <div className="sl-contacts-list">
-                <div>
-                  <h3>{t(ui.addressLabel)}</h3>
-                  <p>{t(data.address)}</p>
-                  <TrackedLink type="route" className="sl-link" href={data.mapUrl} external={/^https?:/.test(data.mapUrl)}>
-                    {t(ui.route)} →
-                  </TrackedLink>
-                </div>
-                <div>
-                  <h3>{t(ui.hoursTitle)}</h3>
-                  <p>{t(ui.hoursValue).replace("{a}", data.hours.open).replace("{b}", data.hours.close)}</p>
-                </div>
-                <div>
-                  <h3>{t(ui.call)}</h3>
-                  <p>
-                    <TrackedLink type="call" className="sl-link big" href={`tel:${data.phone.e164}`}>
-                      {data.phone.display}
+              <ul className="sl-contacts-list">
+                <li>
+                  <Icon id="pin" size={22} />
+                  <div>
+                    <p>{t(data.address)}</p>
+                    <TrackedLink type="route" className="sl-link" href={data.mapUrl} external={/^https?:/.test(data.mapUrl)}>
+                      {t(ui.contacts.route)} →
                     </TrackedLink>
-                  </p>
+                  </div>
+                </li>
+                <li>
+                  <Icon id="clock" size={22} />
+                  <p>{t(ui.contacts.hoursValue).replace("{a}", data.hours.open).replace("{b}", data.hours.close)}</p>
+                </li>
+                <li>
+                  <Icon id="phone" size={22} />
+                  <TrackedLink type="call" className="sl-link big" href={`tel:${data.phone.e164}`}>
+                    {data.phone.display}
+                  </TrackedLink>
+                </li>
+                <li>
+                  <Icon id="telegram" size={22} />
                   <TrackedLink type="telegram" className="sl-link" href={`https://t.me/${data.telegram}`} external>
                     @{data.telegram} →
                   </TrackedLink>
-                </div>
-              </div>
-              <MapCard label={t(ui.mapLabel)} />
+                </li>
+              </ul>
+              <MapCard label={t(ui.contacts.map)} />
             </div>
-          </section>
+          </Section>
           <MotionLayer />
         </main>
 
@@ -377,8 +247,8 @@ export function SalonSite({ data, locale, style, localeHrefs }: TemplateProps<Sa
           <span>© {data.name}</span>
           <LangSwitch locale={locale} hrefs={localeHrefs} label={t(ui.langLabel)} />
         </footer>
-
-        <StickyBar phone={data.phone.e164} telegram={data.telegram} locale={locale} />
+        <BookingSheet />
+        <ActionBar phone={data.phone.e164} telegram={data.telegram} locale={locale} />
       </SalonProvider>
     </div>
   );

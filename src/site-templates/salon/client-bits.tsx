@@ -1,21 +1,24 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useMinuteClock } from "../kit/hooks";
 import { plural } from "../kit/plural";
 import { tashkentNow, toMinutes } from "../kit/tashkent";
 import { pick, type Locale } from "../types";
-import { useSalon } from "./context";
-import { bookingDraft, goToBooking } from "./draft-store";
-import { whenLabel } from "./format";
+import { useSalon, useSalonStore } from "./context";
+import { bookingDraft } from "./draft-store";
+import { fill, whenLabel } from "./format";
+import { Icon } from "./icons";
 import { nextFreeSlot, type SalonOverrides } from "./schedule";
-import { demo, useSalonState, type EventType } from "./store";
+import { rememberStyle, type EventType } from "./store";
 import { salonUi as ui } from "./ui";
+
+const IMG = "/templates/salon/img";
 
 /** Правки владельца из хранилища одним стабильным объектом. */
 export function useOverrides(): SalonOverrides {
-  const state = useSalonState();
-  return useMemo(() => ({ services: state.services, schedule: state.schedule }), [state.services, state.schedule]);
+  const { state } = useSalonStore();
+  return useMemo(() => ({ services: state.services, schedule: state.schedule, packages: state.packages }), [state.services, state.schedule, state.packages]);
 }
 
 /**
@@ -42,9 +45,10 @@ export function OpenStatus({ open, close, locale }: { open: string; close: strin
   );
 }
 
-/** Баннер-акция: текст и включение — из кабинета; по умолчанию показан текст из данных. */
-export function PromoBar({ text, locale }: { text: string; locale: Locale }) {
-  const promo = useSalonState().promo;
+/** Строка-акция под первым экраном: текст и включение — из кабинета; по умолчанию текст из данных. */
+export function PromoStrip({ text, locale }: { text: string; locale: Locale }) {
+  const { state } = useSalonStore();
+  const promo = state.promo;
   if (promo && !promo.on) return null;
   return (
     <p className="sl-promo" role="note">
@@ -53,16 +57,20 @@ export function PromoBar({ text, locale }: { text: string; locale: Locale }) {
   );
 }
 
-/** Один просмотр страницы = одно событие «view» (для счётчика в кабинете). */
+/** Один просмотр страницы = одно событие «view»; запоминает бизнес, чтобы кабинет открылся на нём. */
 export function PageView() {
+  const { style } = useSalon();
+  const { demo } = useSalonStore();
   useEffect(() => {
+    rememberStyle(style);
     demo.track("view");
-  }, []);
+  }, [style, demo]);
   return null;
 }
 
 /** Ссылка-действие (позвонить, Telegram, маршрут): клик фиксируется в демо-кабинете. */
 export function TrackedLink({ type, className, href, children, external }: { type: EventType; className?: string; href: string; children: React.ReactNode; external?: boolean }) {
+  const { demo } = useSalonStore();
   return (
     <a className={className} href={href} onClick={() => demo.track(type)} {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
       {children}
@@ -70,30 +78,60 @@ export function TrackedLink({ type, className, href, children, external }: { typ
   );
 }
 
-/**
- * Липкая панель на телефоне: «Позвонить / Telegram / Записаться». Пока на экране блок записи —
- * прячется: у формы своя кнопка, а панель закрывала бы её.
- */
-export function StickyBar({ phone, telegram, locale }: { phone: string; telegram: string; locale: Locale }) {
-  const [hidden, setHidden] = useState(false);
-  useEffect(() => {
-    const target = document.getElementById("book");
-    if (!target) return;
-    const io = new IntersectionObserver(([e]) => setHidden(e.isIntersecting), { threshold: 0.05 });
-    io.observe(target);
-    return () => io.disconnect();
-  }, []);
+/** Кнопка «Записаться»: открывает шторку записи. Единственное главное действие сайта. */
+export function BookButton({ className, id, label, preset }: { className?: string; id?: string; label?: string; preset?: Parameters<typeof bookingDraft.open>[0] }) {
+  const { locale } = useSalon();
   return (
-    <nav className="sl-sticky" data-hidden={hidden || undefined} inert={hidden} aria-label={pick(ui.quickLabel, locale)}>
-      <a href={`tel:${phone}`} onClick={() => demo.track("call")}>
-        {pick(ui.call, locale)}
+    <button type="button" id={id} className={className ?? "sl-btn"} onClick={() => bookingDraft.open(preset)}>
+      {label ?? pick(ui.book, locale)}
+    </button>
+  );
+}
+
+/**
+ * Следит за главной кнопкой hero и финальной кнопкой и ставит на корень data-hero-cta, пока любая из них на экране.
+ * Пока атрибут есть, кнопка в шапке и нижняя панель скрыты: в одном экране одна «Записаться».
+ */
+export function CtaWatcher() {
+  useEffect(() => {
+    const targets = Array.from(document.querySelectorAll<HTMLElement>("#hero-cta, .sl-final .sl-btn"));
+    const root = targets[0]?.closest<HTMLElement>("[data-tpl]");
+    if (!root) return;
+    const visible = new Set<Element>();
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) visible.add(e.target);
+        else visible.delete(e.target);
+      }
+      if (visible.size > 0) root.dataset.heroCta = "1";
+      else delete root.dataset.heroCta;
+    });
+    targets.forEach((t) => io.observe(t));
+    return () => {
+      io.disconnect();
+      delete root.dataset.heroCta;
+    };
+  }, []);
+  return null;
+}
+
+/**
+ * Нижняя панель большого пальца на телефоне: «Позвонить / Telegram / Записаться». Прячется,
+ * пока на экране кнопка hero (одна «Записаться» на экран), и когда открыта шторка записи.
+ */
+export function ActionBar({ phone, telegram, locale }: { phone: string; telegram: string; locale: Locale }) {
+  const { demo } = useSalonStore();
+  return (
+    <nav className="sl-bar" aria-label={pick(ui.quickLabel, locale)}>
+      <a className="sl-bar-ic" href={`tel:${phone}`} onClick={() => demo.track("call")} aria-label={pick(ui.call, locale)}>
+        <Icon id="phone" size={22} />
       </a>
-      <a href={`https://t.me/${telegram}`} target="_blank" rel="noopener noreferrer" onClick={() => demo.track("telegram")}>
-        {pick(ui.telegram, locale)}
+      <a className="sl-bar-ic" href={`https://t.me/${telegram}`} target="_blank" rel="noopener noreferrer" onClick={() => demo.track("telegram")} aria-label={pick(ui.telegram, locale)}>
+        <Icon id="telegram" size={22} />
       </a>
-      <a href="#book" className="primary">
-        {pick(ui.bookShort, locale)}
-      </a>
+      <button type="button" className="sl-btn sl-bar-book" onClick={() => bookingDraft.open()}>
+        {pick(ui.book, locale)}
+      </button>
     </nav>
   );
 }
@@ -101,7 +139,7 @@ export function StickyBar({ phone, telegram, locale }: { phone: string; telegram
 /** Окно мастера (или любого мастера) строкой «Сегодня, 14:30»; undefined до гидрации, null — окон нет. */
 export function useNextWindowFor(masterId?: string, serviceIds?: string[]): { label: string; masterId: string | null } | null | undefined {
   const clock = useMinuteClock();
-  const state = useSalonState();
+  const { state } = useSalonStore();
   const { sched, locale } = useSalon();
   const ov = useOverrides();
   const key = serviceIds?.join(",");
@@ -113,67 +151,56 @@ export function useNextWindowFor(masterId?: string, serviceIds?: string[]): { la
   }, [clock, sched, ov, state.bookings, masterId, key, locale]);
 }
 
-const useNextWindow = (masterId?: string) => useNextWindowFor(masterId);
-
-/** Плавающая карточка в hero: ближайшее окно любого мастера. */
-export function NextWindowCard() {
-  const { locale, masters } = useSalon();
-  const win = useNextWindow();
-  const value = win === undefined ? "—" : win ? win.label : pick(ui.float.noSlot, locale);
-  const who = win ? masters.find((m) => m.id === win.masterId)?.name : "";
+/** Чип в hero: ближайшее окно любого мастера; нажатие открывает запись. */
+export function NextWindowChip() {
+  const { locale } = useSalon();
+  const win = useNextWindowFor();
+  const value = win === undefined ? "—" : win ? win.label : pick(ui.next.none, locale);
   return (
-    <a className="sl-chip sl-chip-slot" href="#book">
-      <small>{pick(ui.float.nextTitle, locale)}</small>
-      <b aria-live="polite">{value}</b>
-      <span>{who}</span>
-    </a>
+    <button type="button" className="sl-chip-slot" onClick={() => bookingDraft.open()}>
+      <Icon id="clock" size={18} />
+      <span>
+        <small>{pick(ui.next.title, locale)}</small>
+        <b aria-live="polite">{value}</b>
+      </span>
+    </button>
   );
 }
 
-/** Секция «Мастера»: фото, специальность, опыт и «ближайшее окно» по расписанию. */
+/** Секция «Мастера»: горизонтальная лента с аватарами, опытом и «ближайшим окном» по расписанию. */
 export function MasterCards() {
   const { masters, locale } = useSalon();
   return (
-    <ul className="sl-masters">
-      {masters.map((m, i) => (
-        <MasterCard key={m.id} index={i} master={m} locale={locale} />
+    <ul className="sl-masters sl-snap" aria-label={pick(ui.masters.label, locale)}>
+      {masters.map((m) => (
+        <MasterCard key={m.id} master={m} locale={locale} />
       ))}
     </ul>
   );
 }
 
-function MasterCard({ master, locale, index }: { master: ReturnType<typeof useSalon>["masters"][number]; locale: Locale; index: number }) {
-  const win = useNextWindow(master.id);
-  const value = win === undefined ? "—" : win ? win.label : pick(ui.masters.noSlot, locale);
+function MasterCard({ master, locale }: { master: ReturnType<typeof useSalon>["masters"][number]; locale: Locale }) {
+  const ov = useOverrides();
+  const off = (ov.schedule[master.id] ?? [1]).length === 0;
+  const win = useNextWindowFor(master.id);
+  const value = off ? pick(ui.masters.dayOff, locale) : win === undefined ? "—" : win ? win.label : pick(ui.masters.noSlot, locale);
   return (
-    <li data-reveal style={{ "--d": index } as React.CSSProperties}>
-      <div className="sl-master" data-tilt>
+    <li className="sl-master" data-off={off || undefined}>
       {/* eslint-disable-next-line @next/next/no-img-element -- шаблон переносимый: без next/image */}
-      <img src={`/templates/salon/img/${master.photo}-480.webp`} srcSet={`/templates/salon/img/${master.photo}-480.webp 480w, /templates/salon/img/${master.photo}-960.webp 960w`} sizes="(max-width: 860px) 72vw, 360px" width={960} height={1200} alt={master.name} loading="lazy" decoding="async" />
+      <img src={`${IMG}/${master.photo}-480.webp`} srcSet={`${IMG}/${master.photo}-480.webp 480w, ${IMG}/${master.photo}-960.webp 960w`} sizes="(max-width: 860px) 62vw, 300px" width={960} height={1200} alt={master.name} loading="lazy" decoding="async" />
       <div className="sl-master-body">
         <h3>{master.name}</h3>
         <p className="sl-master-role">{master.role}</p>
-        <p className="sl-master-years">
-          <b>{master.years}</b> {plural(locale, master.years, ui.years[locale])}
-        </p>
+        <p className="sl-master-years">{fill("{n} {w}", { n: master.years, w: plural(locale, master.years, ui.years[locale]) })}</p>
         <p className="sl-master-next">
-          <small>{pick(ui.masters.nextTitle, locale)}</small>
+          <Icon id="clock" size={16} />
           <b aria-live="polite">{value}</b>
         </p>
-        <a
-          className="sl-link"
-          href="#book"
-          onClick={(e) => {
-            e.preventDefault();
-            bookingDraft.send({ masterId: master.id, serviceIds: master.serviceIds.slice(0, 1) });
-            goToBooking();
-          }}
-        >
-          {pick(ui.masters.book, locale)} →
-        </a>
-      </div>
+        <button type="button" className="sl-btn sl-btn-line" disabled={off} onClick={() => bookingDraft.open({ masterId: master.id, serviceIds: [], step: 1 })}>
+          {pick(ui.book, locale)}
+          <span className="sr-only"> — {master.name}</span>
+        </button>
       </div>
     </li>
   );
 }
-

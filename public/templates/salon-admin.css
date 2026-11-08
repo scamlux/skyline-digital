@@ -851,3 +851,79 @@
   .adm-lead { flex-wrap: wrap; }
   .adm-lead-side { width: 100%; }
 }
+
+/* ——— переключатель бизнеса: «Барбершоп / Салон красоты» ——— */
+.adm[data-tpl="salon"][data-style="b"] {
+  --acc: #6e1f3a;
+  --acc-soft: rgba(110, 31, 58, 0.1);
+  --acc2: #8c2c4d;
+  --bg: #f8f2ea;
+}
+.adm[data-tpl="salon"][data-style="a"] {
+  --acc: #7a5410;
+  --acc2: #c9a35a;
+}
+.adm-biz {
+  padding: 14px var(--edge) 0;
+}
+.adm-switch {
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  width: min(100%, 420px);
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.adm-switch button {
+  min-height: 48px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  font: inherit;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--dim);
+  cursor: pointer;
+}
+.adm-switch button[aria-pressed="true"] {
+  background: var(--acc);
+  color: var(--on-acc);
+}
+.adm[data-tpl="salon"] .adm-h2-sub {
+  margin-top: 28px !important;
+}
+.adm[data-tpl="salon"] .adm-items[data-kind="packages"] .adm-item-name small {
+  max-width: 46ch;
+}
+.adm-lang a {
+  min-width: 40px;
+  min-height: 40px;
+  font-size: 14px;
+}
+.adm-link,
+.adm-item .adm-link,
+.adm-foot .adm-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 15px;
+}
+a[href^="tel:"] {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.adm-plan,
+.adm-hint,
+.adm-digest > p,
+.adm-digest pre,
+.adm-lead-main span,
+.adm-lead-main i {
+  font-size: 15px !important;
+}
+.adm-foot {
+  font-size: 15px;
+}
