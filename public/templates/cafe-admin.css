@@ -211,3 +211,7 @@
 @media (prefers-reduced-motion: reduce) {
   .adm *, .adm *::before, .adm *::after { transition: none !important; animation: none !important; }
 }
+
+/* ——— кнопка «Получить в Telegram» под превью сводки ——— */
+.adm .adm-btn.adm-tg { color: var(--on-acc); gap: 8px; min-height: 48px; text-decoration: none; justify-self: start; align-self: start; width: fit-content; max-width: 100%; white-space: normal; text-align: center; }
+.adm .adm-btn.adm-tg:hover { color: var(--on-acc); text-decoration: none; }

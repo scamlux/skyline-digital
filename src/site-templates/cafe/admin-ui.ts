@@ -79,9 +79,13 @@ export const adminUi = {
     uz: ["du", "se", "ch", "pa", "ju", "sh", "ya"],
   } satisfies Record<Locale, string[]>,
   digest: {
-    title: { ru: "Сводка в Telegram", en: "Telegram digest", uz: "Telegram xulosasi" },
-    sample: { ru: "пример", en: "sample", uz: "namuna" },
-    text: { ru: "Так выглядит утренняя сводка, которую бот присылает владельцу:", en: "This is the morning digest the bot sends to the owner:", uz: "Bot egasiga yuboradigan ertalabki xulosa shunday koʻrinadi:" },
+    title: { ru: "Сводка в Telegram", en: "Telegram digest", uz: "Telegramda xulosa" },
+    sample: { ru: "Образец формата", en: "Format sample", uz: "Format namunasi" },
+    text: {
+      ru: "Так будет выглядеть сводка, которую владелец получает в Telegram (образец формата).",
+      en: "This is what the digest the owner gets on Telegram will look like (format sample).",
+      uz: "Egasi Telegramda oladigan xulosa shunday koʻrinadi (format namunasi).",
+    },
     head: { ru: "Итоги недели", en: "Weekly summary", uz: "Hafta yakunlari" },
     line1: { ru: "Заказов: {n}, выручка: {sum}", en: "Orders: {n}, revenue: {sum}", uz: "Buyurtmalar: {n}, tushum: {sum}" },
     line2: { ru: "Средний чек: {sum}", en: "Average check: {sum}", uz: "Oʻrtacha chek: {sum}" },

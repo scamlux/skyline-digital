@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useHydrated, useMinuteClock } from "../kit/hooks";
+import { DigestTelegramButton, digestCopy } from "../kit/digest-button";
+import { itemCode, weekdaysToMask } from "../kit/digest-payload";
 import { plural } from "../kit/plural";
 import { addDays, dayOfMonth, diffDays, formatDate, tashkentNow, weekdayOf } from "../kit/tashkent";
 import { formatSum, pick, type L, type Locale } from "../types";
@@ -30,11 +32,13 @@ export function ClinicAdmin({
   locale,
   siteHref,
   localeHrefs,
+  digestBot,
 }: {
   data: ClinicData;
   locale: Locale;
   siteHref: string;
   localeHrefs: Record<Locale, string>;
+  digestBot?: string;
 }) {
   const t = (l: L) => pick(l, locale);
   const [tab, setTab] = useState<Tab>("overview");
@@ -89,7 +93,7 @@ export function ClinicAdmin({
 
       <main className="adm-main">
         {!ready && <div className="adm-skel" role="status" aria-label={t(ui.loading)} />}
-        {ready && tab === "overview" && <Overview data={data} locale={locale} now={clock} bookings={state.bookings} events={state.events} svcName={svcName} docName={docName} />}
+        {ready && tab === "overview" && <Overview data={data} locale={locale} now={clock} bookings={state.bookings} events={state.events} svcName={svcName} docName={docName} digestBot={digestBot} />}
         {ready && tab === "bookings" && <Bookings locale={locale} now={clock} bookings={state.bookings} svcName={svcName} docName={docName} />}
         {ready && tab === "services" && <ServicesTab data={data} locale={locale} />}
         {ready && tab === "doctors" && <DoctorsTab data={data} locale={locale} />}
@@ -125,6 +129,7 @@ function Overview({
   events,
   svcName,
   docName,
+  digestBot,
 }: {
   data: ClinicData;
   locale: Locale;
@@ -133,6 +138,7 @@ function Overview({
   events: DemoEvent[];
   svcName: (id: string) => string;
   docName: (id: string) => string;
+  digestBot?: string;
 }) {
   const t = (l: L) => pick(l, locale);
   const week: [number, number] = [now - 7 * DAY_MS, now + 1];
@@ -219,8 +225,29 @@ function Overview({
           <h2 className="adm-h2">{t(ui.digest.title)}</h2>
           <span className="adm-sample">{t(ui.digest.sample)}</span>
         </div>
-        <p>{t(ui.digest.text)}</p>
+        <p>{digestBot ? t(digestCopy.caption) : t(ui.digest.text)}</p>
         <pre>{`${data.name} · ${t(ui.digest.head)}\n${fill(t(ui.digest.line1), { n: stats[0].cur })}\n${fill(t(ui.digest.line2), { n: stats[1].cur })}\n${fill(t(ui.digest.line3), { when: nextWhen })}`}</pre>
+        {digestBot && (
+          <DigestTelegramButton
+            bot={digestBot}
+            locale={locale}
+            payload={{
+              tpl: "clinic",
+              locale,
+              style: "a",
+              period: "week",
+              values: {
+                bookings: stats[0].cur,
+                calcs,
+                calls: stats[1].cur,
+                telegram: stats[2].cur,
+                views,
+                svc: tip && topSvc ? itemCode(data.services.findIndex((s) => s.id === topSvc[0])) : 0,
+                peak: tip ? weekdaysToMask(peakDays) : 0,
+              },
+            }}
+          />
+        )}
       </div>
     </section>
   );

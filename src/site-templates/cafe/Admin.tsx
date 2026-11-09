@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useHydrated, useMinuteClock } from "../kit/hooks";
+import { DigestTelegramButton, digestCopy } from "../kit/digest-button";
+import { itemCode } from "../kit/digest-payload";
 import { plural } from "../kit/plural";
 import { addDays, tashkentNow, weekdayOf } from "../kit/tashkent";
 import { formatSum, pick, type L, type Locale } from "../types";
@@ -32,7 +34,7 @@ const itemName = (id: string, locale: Locale) => pick(itemById(id)?.name ?? { ru
  * Кабинет владельца кофейни (демо). Шесть экранов: Обзор, Заказы, Меню и цены, Витрина,
  * Лояльность, Акция. Всё читает и пишет демо-хранилище; тот же интерфейс в боевом сайте идёт поверх базы.
  */
-export function CafeAdmin({ data, locale, siteHref, localeHrefs }: { data: CafeData; locale: Locale; siteHref: string; localeHrefs: Record<Locale, string> }) {
+export function CafeAdmin({ data, locale, siteHref, localeHrefs, digestBot }: { data: CafeData; locale: Locale; siteHref: string; localeHrefs: Record<Locale, string>; digestBot?: string }) {
   const t = (l: L) => pick(l, locale);
   const [tab, setTab] = useState<Tab>("overview");
   const state = useCafeState();
@@ -84,7 +86,7 @@ export function CafeAdmin({ data, locale, siteHref, localeHrefs }: { data: CafeD
 
       <main className="adm-main">
         {!ready && <div className="adm-skel" role="status" aria-label={t(ui.loading)} />}
-        {ready && tab === "overview" && <Overview data={data} locale={locale} now={clock} orders={state.orders} events={state.events} />}
+        {ready && tab === "overview" && <Overview data={data} locale={locale} now={clock} orders={state.orders} events={state.events} digestBot={digestBot} />}
         {ready && tab === "orders" && <Orders locale={locale} now={clock} orders={state.orders} />}
         {ready && tab === "menu" && <MenuTab locale={locale} />}
         {ready && tab === "case" && <CaseTab locale={locale} />}
@@ -109,7 +111,7 @@ export function CafeAdmin({ data, locale, siteHref, localeHrefs }: { data: CafeD
 
 /* ——— Обзор ——— */
 
-function Overview({ data, locale, now, orders, events }: { data: CafeData; locale: Locale; now: number; orders: Order[]; events: { at: string; type: import("./store").EventType }[] }) {
+function Overview({ data, locale, now, orders, events, digestBot }: { data: CafeData; locale: Locale; now: number; orders: Order[]; events: { at: string; type: import("./store").EventType }[]; digestBot?: string }) {
   const t = (l: L) => pick(l, locale);
   const cur = periodStats(orders, now - WEEK_MS, now + 1);
   const prev = periodStats(orders, now - 2 * WEEK_MS, now - WEEK_MS);
@@ -188,11 +190,24 @@ function Overview({ data, locale, now, orders, events }: { data: CafeData; local
           <h2 className="adm-h2">{t(ui.digest.title)}</h2>
           <span className="adm-sample">{t(ui.digest.sample)}</span>
         </div>
-        <p>{t(ui.digest.text)}</p>
+        <p>{digestBot ? t(digestCopy.caption) : t(ui.digest.text)}</p>
         <pre>{`${data.name} · ${t(ui.digest.head)}\n${fill(t(ui.digest.line1), { n: cur.count, sum: formatSum(cur.revenue, locale) })}\n${fill(t(ui.digest.line2), { sum: formatSum(cur.avg, locale) })}\n${fill(t(ui.digest.line3), { drink: hit })}`}</pre>
         <p className="adm-hint">
           {cur.count} {w(locale, "orders", cur.count)} · {views} {w(locale, "views", views)}
         </p>
+        {digestBot && (
+          <DigestTelegramButton
+            bot={digestBot}
+            locale={locale}
+            payload={{
+              tpl: "cafe",
+              locale,
+              style: "a",
+              period: "week",
+              values: { orders: cur.count, revenue: cur.revenue, avg: cur.avg, views, drink: top[0] ? itemCode(menu.findIndex((m) => m.id === top[0].itemId)) : 0 },
+            }}
+          />
+        )}
       </div>
     </section>
   );

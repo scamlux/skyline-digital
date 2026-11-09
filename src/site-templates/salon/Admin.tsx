@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useHydrated, useMinuteClock } from "../kit/hooks";
+import { DigestTelegramButton, digestCopy } from "../kit/digest-button";
+import { itemCode } from "../kit/digest-payload";
 import { plural } from "../kit/plural";
 import { addDays, dayOfMonth, diffDays, formatDate, tashkentNow, weekdayOf } from "../kit/tashkent";
 import { formatSum, pick, type L, type Locale } from "../types";
@@ -41,6 +43,8 @@ interface AdminProps {
   locale: Locale;
   siteHref: string;
   localeHrefs: Record<Locale, string>;
+  /** Имя бота сводок без «@»: без него блок «Сводка в Telegram» остаётся превью без кнопки. */
+  digestBot?: string;
 }
 
 /**
@@ -48,14 +52,14 @@ interface AdminProps {
  * красоты». У каждого свои записи, цены, мастера и акция; запись с /a попадает в барбершоп, с /b в
  * салон. Открывается на том бизнесе, который смотрели последним.
  */
-export function SalonAdmin({ businesses, locale, siteHref, localeHrefs }: AdminProps) {
+export function SalonAdmin({ businesses, locale, siteHref, localeHrefs, digestBot }: AdminProps) {
   const hydrated = useHydrated();
   const [chosen, setChosen] = useState<StyleId | null>(null);
   const style: StyleId = chosen ?? (hydrated ? lastStyle() : "a");
   const t = (l: L) => pick(l, locale);
   return (
     <StoreCtx.Provider value={salonStores[style]}>
-      <BusinessAdmin key={style} data={businesses[style]} style={style} locale={locale} siteHref={siteHref.replace(/\/[ab]$/, `/${style}`)} localeHrefs={localeHrefs}>
+      <BusinessAdmin key={style} data={businesses[style]} style={style} locale={locale} siteHref={siteHref.replace(/\/[ab]$/, `/${style}`)} localeHrefs={localeHrefs} digestBot={digestBot}>
         <div className="adm-switch" role="group" aria-label={t(ui.switch.label)}>
           {(["a", "b"] as StyleId[]).map((k) => (
             <button key={k} type="button" aria-pressed={style === k} onClick={() => setChosen(k)}>
@@ -68,7 +72,7 @@ export function SalonAdmin({ businesses, locale, siteHref, localeHrefs }: AdminP
   );
 }
 
-function BusinessAdmin({ data, style, locale, siteHref, localeHrefs, children }: { data: SalonData; style: StyleId; locale: Locale; siteHref: string; localeHrefs: Record<Locale, string>; children: React.ReactNode }) {
+function BusinessAdmin({ data, style, locale, siteHref, localeHrefs, digestBot, children }: { data: SalonData; style: StyleId; locale: Locale; siteHref: string; localeHrefs: Record<Locale, string>; digestBot?: string; children: React.ReactNode }) {
   const t = (l: L) => pick(l, locale);
   const [tab, setTab] = useState<Tab>("overview");
   const { state, demo } = useAdminStore();
@@ -127,7 +131,7 @@ function BusinessAdmin({ data, style, locale, siteHref, localeHrefs, children }:
 
       <main className="adm-main">
         {!ready && <div className="adm-skel" role="status" aria-label={t(ui.loading)} />}
-        {ready && tab === "overview" && <Overview data={data} locale={locale} now={clock} bookings={state.bookings} events={state.events} names={names} />}
+        {ready && tab === "overview" && <Overview data={data} style={style} locale={locale} now={clock} bookings={state.bookings} events={state.events} names={names} digestBot={digestBot} />}
         {ready && tab === "bookings" && <Bookings locale={locale} now={clock} bookings={state.bookings} names={names} />}
         {ready && tab === "services" && <ServicesTab data={data} locale={locale} />}
         {ready && tab === "masters" && <MastersTab data={data} locale={locale} />}
@@ -165,7 +169,7 @@ function topOf(keys: string[]): [string, number] | null {
   return [...counts.entries()].sort((a, b) => b[1] - a[1])[0] ?? null;
 }
 
-function Overview({ data, locale, now, bookings, events, names }: { data: SalonData; locale: Locale; now: number; bookings: Booking[]; events: DemoEvent[]; names: Names }) {
+function Overview({ data, style, locale, now, bookings, events, names, digestBot }: { data: SalonData; style: StyleId; locale: Locale; now: number; bookings: Booking[]; events: DemoEvent[]; names: Names; digestBot?: string }) {
   const t = (l: L) => pick(l, locale);
   const week: [number, number] = [now - WEEK * DAY_MS, now + 1];
   const prev: [number, number] = [now - 2 * WEEK * DAY_MS, now - WEEK * DAY_MS];
@@ -256,8 +260,31 @@ function Overview({ data, locale, now, bookings, events, names }: { data: SalonD
           <h2 className="adm-h2">{t(ui.digest.title)}</h2>
           <span className="adm-sample">{t(ui.digest.sample)}</span>
         </div>
-        <p>{t(ui.digest.text)}</p>
+        <p>{digestBot ? t(digestCopy.caption) : t(ui.digest.text)}</p>
         <pre>{`${data.name} · ${t(ui.digest.head)}\n${fill(t(ui.digest.line1), { n: curBookings.length })}\n${fill(t(ui.digest.line2), { service: topSvc ? names.svc(topSvc[0]) : t(ui.digest.noService) })}\n${fill(t(ui.digest.line3), { when: nextWhen })}`}</pre>
+        {digestBot && (
+          <DigestTelegramButton
+            bot={digestBot}
+            locale={locale}
+            payload={{
+              tpl: "salon",
+              locale,
+              style,
+              period: "week",
+              values: {
+                bookings: curBookings.length,
+                revenue: sum(curBookings),
+                quizzes,
+                calls,
+                telegram: telegram.cur,
+                views: views.cur,
+                svc: tip && topSvc ? itemCode(data.services.findIndex((s) => s.id === topSvc[0])) : 0,
+                master: tip && topMaster ? itemCode(data.masters.findIndex((m) => m.id === topMaster[0])) : 0,
+                masterN: tip && topMaster ? topMaster[1] : 0,
+              },
+            }}
+          />
+        )}
       </div>
     </section>
   );

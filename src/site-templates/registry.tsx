@@ -31,8 +31,11 @@ export interface TemplateDef {
   /** Превью для соцсетей (Telegram/WhatsApp): JPG, а не WebP — WebP там показывается плохо. */
   og: { image: string; description: L };
   render: (p: { locale: Locale; style: StyleId; localeHrefs: Record<Locale, string> }) => ReactElement;
-  /** Демо-кабинет владельца (если у шаблона он есть). */
-  renderAdmin?: (p: { locale: Locale; localeHrefs: Record<Locale, string>; siteHref: string }) => ReactElement;
+  /**
+   * Демо-кабинет владельца (если у шаблона он есть). `digestBot` — имя бота сводок в Telegram (без «@»):
+   * с ним под превью сводки появляется кнопка «Получить в Telegram», без него — только превью.
+   */
+  renderAdmin?: (p: { locale: Locale; localeHrefs: Record<Locale, string>; siteHref: string; digestBot?: string }) => ReactElement;
 }
 
 /**

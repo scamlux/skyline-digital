@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useHydrated, useMinuteClock } from "../kit/hooks";
+import { DigestTelegramButton, digestCopy } from "../kit/digest-button";
+import { weekdaysToMask } from "../kit/digest-payload";
 import { plural } from "../kit/plural";
 import { formatDate, tashkentNow } from "../kit/tashkent";
 import { formatSum, pick, type L, type Locale } from "../types";
@@ -26,7 +28,7 @@ const weekdayName = (dow: number, locale: Locale) => formatDate(`2024-01-0${1 + 
  * Кабинет владельца (демо). Четыре экрана: Обзор, Заявки, Меню и цены (с наборами «на компанию»),
  * Часы и акция. Всё читает и пишет демо-хранилище; тот же интерфейс в боевом сайте идёт поверх базы.
  */
-export function RestaurantAdmin({ data, locale, siteHref, localeHrefs }: { data: RestaurantData; locale: Locale; siteHref: string; localeHrefs: Record<Locale, string> }) {
+export function RestaurantAdmin({ data, locale, siteHref, localeHrefs, digestBot }: { data: RestaurantData; locale: Locale; siteHref: string; localeHrefs: Record<Locale, string>; digestBot?: string }) {
   const t = (l: L) => pick(l, locale);
   const [tab, setTab] = useState<Tab>("overview");
   const state = useDemoState();
@@ -78,7 +80,7 @@ export function RestaurantAdmin({ data, locale, siteHref, localeHrefs }: { data:
 
       <main className="adm-main">
         {!ready && <div className="adm-skel" role="status" aria-label={t(ui.loading)} />}
-        {ready && tab === "overview" && <Overview data={data} locale={locale} now={clock} />}
+        {ready && tab === "overview" && <Overview data={data} locale={locale} now={clock} digestBot={digestBot} />}
         {ready && tab === "leads" && (
           <section aria-label={t(ui.tabs.leads)}>
             {state.leads.length === 0 ? <p className="adm-hint">{t(ui.lead.empty)}</p> : <LeadList leads={state.leads} locale={locale} />}
@@ -103,7 +105,7 @@ export function RestaurantAdmin({ data, locale, siteHref, localeHrefs }: { data:
   );
 }
 
-function Overview({ data, locale, now }: { data: RestaurantData; locale: Locale; now: number }) {
+function Overview({ data, locale, now, digestBot }: { data: RestaurantData; locale: Locale; now: number; digestBot?: string }) {
   const t = (l: L) => pick(l, locale);
   const state = useDemoState();
   const stats = weekStats(state.events, now);
@@ -156,7 +158,7 @@ function Overview({ data, locale, now }: { data: RestaurantData; locale: Locale;
       <LeadList leads={sorted} locale={locale} compact />
       <div className="adm-digest">
         <h2 className="adm-h2">{t(ui.digest.title)}</h2>
-        <p className="adm-hint">{t(ui.digest.text)}</p>
+        <p className="adm-hint">{digestBot ? t(digestCopy.caption) : t(ui.digest.text)}</p>
         <pre>
           {`${data.name} · ${t(ui.period).toLowerCase()}\n` +
             `• ${t(ui.stats.leads)}: ${get("leads")}\n` +
@@ -165,6 +167,13 @@ function Overview({ data, locale, now }: { data: RestaurantData; locale: Locale;
             `• ${t(ui.stats.views)}: ${views}` +
             (tip ? `\n${tip}` : "")}
         </pre>
+        {digestBot && (
+          <DigestTelegramButton
+            bot={digestBot}
+            locale={locale}
+            payload={{ tpl: "restaurant", locale, style: "a", period: "week", values: { leads: get("leads"), calls: get("calls"), telegram: get("telegram"), views, peak: tip ? weekdaysToMask(peak) : 0 } }}
+          />
+        )}
       </div>
     </section>
   );

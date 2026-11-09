@@ -927,3 +927,7 @@ a[href^="tel:"] {
 .adm-foot {
   font-size: 15px;
 }
+
+/* ——— кнопка «Получить в Telegram» под превью сводки ——— */
+.adm .adm-btn.adm-tg { color: var(--on-acc); gap: 8px; min-height: 48px; text-decoration: none; justify-self: start; align-self: start; width: fit-content; max-width: 100%; white-space: normal; text-align: center; }
+.adm .adm-btn.adm-tg:hover { color: var(--on-acc); text-decoration: none; }
