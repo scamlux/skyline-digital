@@ -189,9 +189,9 @@ export const clinicUi = {
       uz: "Administrator 15 daqiqa ichida qoʻngʻiroq qilib tasdiqlaydi.",
     },
     demoNote: {
-      ru: "Демо: на настоящем сайте запись за секунды приходит в Telegram администратору, здесь — в кабинет владельца.",
-      en: "Demo: on a real site the booking reaches the front desk on Telegram in seconds; here it lands in the owner’s dashboard.",
-      uz: "Demo: haqiqiy saytda yozilish soniyalarda Telegramga tushadi, bu yerda — egasi kabinetiga.",
+      ru: "Демо: запись появилась в кабинете владельца. На настоящем сайте также откроется чат Telegram с готовым сообщением — пациент отправляет его клинике.",
+      en: "Demo: the booking now shows in the owner’s dashboard. On a real site a Telegram chat with a prepared message also opens for the patient to send to the clinic.",
+      uz: "Demo: yozilish egasi kabinetida paydo boʻldi. Haqiqiy saytda bemor klinikaga yuboradigan tayyor xabar bilan Telegram chati ham ochiladi.",
     },
     again: { ru: "Записать ещё", en: "Book another", uz: "Yana yozilish" },
     openTelegram: { ru: "Открыть Telegram и отправить", en: "Open Telegram and send", uz: "Telegramni ochib yuborish" },
