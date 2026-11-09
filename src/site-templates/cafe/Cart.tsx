@@ -25,19 +25,21 @@ interface Props {
   telegram: string;
   hours: { open: string; close: string };
   mode: "demo" | "telegram";
+  /** false в режиме "client": карты лояльности и пометок «демо» нет. По умолчанию true (витрина студии). */
+  loyalty?: boolean;
 }
 
 /** Шторка заказа «заберу сам»: три шага — заказ, время, контакты; затем подтверждение. */
-export function CartSheet({ locale, shop, telegram, hours, mode }: Props) {
+export function CartSheet({ locale, shop, telegram, hours, mode, loyalty = true }: Props) {
   const cart = useCart();
   return (
     <Sheet open={cart.open} onClose={() => cartStore.closeCart()} label={pick(ui.cart.title, locale)} className="cf-cart">
-      {cart.open && <CartFlow locale={locale} shop={shop} telegram={telegram} hours={hours} mode={mode} />}
+      {cart.open && <CartFlow locale={locale} shop={shop} telegram={telegram} hours={hours} mode={mode} loyalty={loyalty} />}
     </Sheet>
   );
 }
 
-function CartFlow({ locale, shop, telegram, hours, mode }: Props) {
+function CartFlow({ locale, shop, telegram, hours, mode, loyalty = true }: Props) {
   const cart = useCart();
   const state = useCafeState();
   const clock = useMinuteClock();
@@ -57,7 +59,7 @@ function CartFlow({ locale, shop, telegram, hours, mode }: Props) {
 
   const lines = cart.lines;
   const subtotal = cartSubtotal(lines, pricing);
-  const freeAvailable = freeCupReady(state.stamps) && lines.some((l) => isCoffee(l.itemId));
+  const freeAvailable = loyalty && freeCupReady(state.stamps) && lines.some((l) => isCoffee(l.itemId));
   const discount = freeAvailable && useFree ? freeCupDiscount(lines, pricing, isCoffee) : 0;
   const total = subtotal - discount;
 
@@ -136,7 +138,7 @@ function CartFlow({ locale, shop, telegram, hours, mode }: Props) {
     if (mode === "telegram") window.open(link, "_blank", "noopener,noreferrer");
   };
 
-  if (done) return <Done locale={locale} order={done.order} link={done.link} today={today} headRef={headRef} />;
+  if (done) return <Done locale={locale} order={done.order} link={done.link} today={today} headRef={headRef} loyalty={loyalty} />;
 
   return (
     <>
@@ -298,7 +300,7 @@ function TimeStep({ locale, plan, today, pickup, onPick }: { locale: Locale; pla
   );
 }
 
-function Done({ locale, order, link, today, headRef }: { locale: Locale; order: Order; link: string; today: string; headRef: React.RefObject<HTMLHeadingElement | null> }) {
+function Done({ locale, order, link, today, headRef, loyalty }: { locale: Locale; order: Order; link: string; today: string; headRef: React.RefObject<HTMLHeadingElement | null>; loyalty: boolean }) {
   return (
     <div className="cf-done">
       <span className="cf-done-mark" aria-hidden="true">
@@ -308,7 +310,7 @@ function Done({ locale, order, link, today, headRef }: { locale: Locale; order: 
         {pick(ui.done.title, locale)}
       </h2>
       <p className="cf-done-when">{fill(pick(ui.done.pickup, locale), { when: pickupLabel(order.pickupDate, order.pickupTime, today, locale) })}</p>
-      <p className="cf-done-stamp">{pick(order.free ? ui.done.redeemed : ui.done.stamp, locale)}</p>
+      {loyalty && <p className="cf-done-stamp">{pick(order.free ? ui.done.redeemed : ui.done.stamp, locale)}</p>}
       <a className="cf-cta" href={link} target="_blank" rel="noopener noreferrer">
         <IconSend />
         {pick(ui.done.telegram, locale)}
@@ -316,7 +318,7 @@ function Done({ locale, order, link, today, headRef }: { locale: Locale; order: 
       <button type="button" className="cf-ghost" onClick={() => cartStore.closeCart()}>
         {pick(ui.done.close, locale)}
       </button>
-      <p className="cf-note">{pick(ui.done.demo, locale)}</p>
+      {loyalty && <p className="cf-note">{pick(ui.done.demo, locale)}</p>}
     </div>
   );
 }

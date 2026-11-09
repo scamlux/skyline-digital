@@ -110,7 +110,7 @@ export const cafeUi = {
   loyalty: {
     title: { ru: "6-й кофе бесплатно", en: "6th coffee is free", uz: "6-kofe bepul" },
     lead: { ru: "Каждый заказ — печать. Пять печатей, и шестой кофе в подарок.", en: "Every order earns a stamp. Five stamps, and the sixth coffee is a gift.", uz: "Har buyurtma — bitta muhr. Beshta muhr, oltinchi kofe sovgʻa." },
-    cardLabel: { ru: "Карта лояльности Bodom", en: "Bodom loyalty card", uz: "Bodom sodiqlik kartasi" },
+    cardLabel: { ru: "Карта лояльности {name}", en: "{name} loyalty card", uz: "{name} sodiqlik kartasi" },
     free: { ru: "бесплатно", en: "free", uz: "bepul" },
     progress: { ru: "{n} из {goal}", en: "{n} of {goal}", uz: "{n} / {goal}" },
     ready: { ru: "Кофе в подарок — в следующем заказе", en: "A free coffee on your next order", uz: "Keyingi buyurtmada kofe sovgʻa" },
@@ -136,6 +136,6 @@ export const cafeUi = {
   route: { ru: "Маршрут", en: "Directions", uz: "Yoʻnalish" },
   hours: { ru: "Часы", en: "Hours", uz: "Soatlar" },
   call: { ru: "Позвонить", en: "Call", uz: "Qoʻngʻiroq" },
-  mapLabel: { ru: "Схема: кофейня Bodom", en: "Map: Bodom coffee shop", uz: "Xarita: Bodom kofexonasi" },
+  mapLabel: { ru: "Схема: кофейня {name}", en: "Map: {name} coffee shop", uz: "Xarita: {name} kofexonasi" },
   demoNote: { ru: "Демо-сайт: адрес, цены и отзывы вымышлены.", en: "Demo site: address, prices and reviews are fictional.", uz: "Demo sayt: manzil, narxlar va fikrlar uydirma." },
 } satisfies Record<string, unknown>;

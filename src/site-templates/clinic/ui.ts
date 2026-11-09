@@ -110,14 +110,18 @@ export const clinicUi = {
   prices: {
     title: { ru: "Цены без сюрпризов", en: "Prices, no surprises", uz: "Narxlar sirsiz" },
     lead: { ru: "Вилка «от–до»; точная сумма — после осмотра. Демо-цены.", en: "A from–to range; the exact sum follows the check-up. Demo prices.", uz: "“Dan–gacha” oraliq; aniq summa koʻrikdan keyin. Demo narxlar." },
+    // Режим client (настоящий сайт): те же тексты без пометок «демо».
+    leadClient: { ru: "Вилка «от–до»; точная сумма — после осмотра.", en: "A from–to range; exact sum follows the check-up.", uz: "“Dan–gacha” oraliq; aniq summa koʻrikdan keyin." },
     packages: { ru: "Пакеты", en: "Packages", uz: "Paketlar" },
     perMonth: { ru: "≈ {sum} в месяц · {n} мес (демо)", en: "≈ {sum} a month · {n} mo (demo)", uz: "≈ {sum} oyiga · {n} oy (demo)" },
+    perMonthClient: { ru: "≈ {sum} в месяц · {n} мес", en: "≈ {sum} a month · {n} mo", uz: "≈ {sum} oyiga · {n} oy" },
     free: { ru: "Бесплатно", en: "Free", uz: "Bepul" },
   },
 
   doctors: {
     title: { ru: "Выберите врача", en: "Pick your doctor", uz: "Shifokorni tanlang" },
     lead: { ru: "Приём по записи. Врачи в демо вымышленные.", en: "By appointment. The doctors in this demo are fictional.", uz: "Yozilish boʻyicha. Demodagi shifokorlar xayoliy." },
+    leadClient: { ru: "Приём по записи.", en: "By appointment.", uz: "Yozilish boʻyicha." },
     filterLabel: { ru: "Специальность", en: "Specialty", uz: "Mutaxassislik" },
     all: { ru: "Все", en: "All", uz: "Hammasi" },
     next: { ru: "Ближайшее", en: "Next", uz: "Eng yaqin" },
@@ -142,6 +146,7 @@ export const clinicUi = {
     label: { ru: "Отзывы пациентов", en: "Patient reviews", uz: "Bemorlar fikrlari" },
     stars: { ru: "5 из 5", en: "5 of 5", uz: "5 / 5" },
   },
+  statsLabelClient: { ru: "Клиника в цифрах", en: "The clinic in numbers", uz: "Klinika raqamlarda" },
   statsNote: { ru: "Цифры в демо вымышленные", en: "Demo figures are fictional", uz: "Demodagi raqamlar xayoliy" },
   faq: { title: { ru: "Коротко о главном", en: "Quick answers", uz: "Qisqa javoblar" } },
 
@@ -211,6 +216,7 @@ export const clinicUi = {
   hoursTitle: { ru: "Часы приёма", en: "Opening hours", uz: "Qabul vaqti" },
   hoursValue: { ru: "Пн–Сб {a}–{b}, воскресенье — выходной", en: "Mon–Sat {a}–{b}, Sunday closed", uz: "Du–Sh {a}–{b}, yakshanba — dam olish kuni" },
   mapLabel: { ru: "Схема проезда (демо)", en: "Location map (demo)", uz: "Yoʻl sxemasi (demo)" },
+  mapLabelClient: { ru: "Схема проезда", en: "Location map", uz: "Yoʻl sxemasi" },
   photoAlt: {
     consult: { ru: "Врач на консультации", en: "A doctor during a consultation", uz: "Maslahatdagi shifokor" },
     kids: { ru: "Ребёнок на приёме", en: "A child at the dentist", uz: "Qabuldagi bola" },

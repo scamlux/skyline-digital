@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element -- шаблон переносимый (без next/image): адаптивные <img srcset> с готовыми webp */
 import { Carousel } from "../kit/carousel";
+import { RatingLine, ReviewAuthor } from "../kit/client-content";
 import { MotionLayer } from "../kit/motion";
 import { LOCALES, pick, type Locale, type TemplateProps } from "../types";
 import { CartSheet } from "./Cart";
@@ -27,9 +28,14 @@ const FONT_PRELOAD = { ru: ["/templates/fonts/nunito-latin.woff2", "/templates/f
  * Правила: заголовки до пяти слов, одна поясняющая строка на блок, фото вместо абзацев, опции —
  * чипами, цели ≥ 44px, «Заказать навынос» в первом экране и в липкой панели.
  */
-export function CafeSite({ data, locale, style, localeHrefs }: TemplateProps<CafeData>) {
+export function CafeSite({ data, locale, style, localeHrefs, mode = "demo", client }: TemplateProps<CafeData>) {
   const t = (l: Parameters<typeof pick>[0]) => pick(l, locale);
   const hero = data.hero[style];
+  // Режим "client": вымышленные отзывы, акция, карта лояльности и демо-пометки не показываются, только настоящее из client.
+  // Карты лояльности в клиентском сайте нет: печати копились бы в браузере гостя, а бесплатный кофе владелец не обещал.
+  const demoMode = mode === "demo";
+  const reviews = demoMode ? data.reviews : (client?.reviews ?? []);
+  const rating = demoMode ? undefined : client?.rating;
   // На телефоне даём браузеру 480-й файл (≈17 КБ вместо 48 КБ) — быстрее LCP; на экранах с DPR ≥ 3 он сам возьмёт 960-й.
   // В B фото ещё и затемнено вуалью, потери резкости почти не видно.
   const heroSizes = style === "b" ? "(max-width: 860px) 260px, 100vw" : "(max-width: 860px) 240px, 52vw";
@@ -72,7 +78,7 @@ export function CafeSite({ data, locale, style, localeHrefs }: TemplateProps<Caf
         </a>
         <nav className="cf-nav" aria-label={t(ui.navLabel)}>
           <a href="#menu">{t(ui.nav.menu)}</a>
-          <a href="#card">{t(ui.nav.card)}</a>
+          {demoMode && <a href="#card">{t(ui.nav.card)}</a>}
           <a href="#contacts">{t(ui.nav.contacts)}</a>
         </nav>
         <div className="cf-head-r">
@@ -115,10 +121,10 @@ export function CafeSite({ data, locale, style, localeHrefs }: TemplateProps<Caf
           </div>
         </div>
 
-        <PromoBar fallback={data.promo} locale={locale} />
+        <PromoBar fallback={demoMode ? data.promo : client?.promo} locale={locale} />
         <MenuSection locale={locale} />
         <Showcase locale={locale} />
-        <LoyaltyCard locale={locale} />
+        {demoMode && <LoyaltyCard locale={locale} name={data.name} />}
 
         <section className="cf-sec cf-atmo" aria-label={t(ui.atmo.label)} data-reveal>
           <figure className="cf-atmo-ph a">
@@ -146,37 +152,43 @@ export function CafeSite({ data, locale, style, localeHrefs }: TemplateProps<Caf
           </figure>
         </section>
 
-        <section className="cf-sec cf-reviews" aria-labelledby="reviews-title" data-reveal>
-          <div className="cf-sec-head">
-            <h2 id="reviews-title">{t(ui.reviewsTitle)}</h2>
-            <p>
-              <span className="cf-demo-chip">{t(ui.reviewsDemo)}</span>
-            </p>
-          </div>
-          <Carousel label={t(ui.reviewsLabel)} prevLabel={t(ui.prev)} nextLabel={t(ui.next)}>
-            {data.reviews.map((r) => (
-              <figure className="cf-review" key={r.name}>
-                <span className="cf-stars" aria-hidden="true">
-                  {[0, 1, 2, 3, 4].map((i) => (
-                    <IconStar key={i} />
-                  ))}
-                </span>
-                <blockquote>{t(r.text)}</blockquote>
-                <figcaption>
-                  <b>{r.name}</b>
-                  <small>{t(r.when)}</small>
-                </figcaption>
-              </figure>
-            ))}
-          </Carousel>
-        </section>
+        {(reviews.length > 0 || rating) && (
+          <section className="cf-sec cf-reviews" aria-labelledby="reviews-title" data-reveal>
+            <div className="cf-sec-head">
+              <h2 id="reviews-title">{t(ui.reviewsTitle)}</h2>
+              <p>{demoMode ? <span className="cf-demo-chip">{t(ui.reviewsDemo)}</span> : rating && <RatingLine rating={rating} locale={locale} />}</p>
+            </div>
+            {reviews.length > 0 && (
+              <Carousel label={t(ui.reviewsLabel)} prevLabel={t(ui.prev)} nextLabel={t(ui.next)}>
+                {reviews.map((r) => (
+                  <figure className="cf-review" key={r.name}>
+                    {demoMode && (
+                      <span className="cf-stars" aria-hidden="true">
+                        {[0, 1, 2, 3, 4].map((i) => (
+                          <IconStar key={i} />
+                        ))}
+                      </span>
+                    )}
+                    <blockquote>{t(r.text)}</blockquote>
+                    <figcaption>
+                      <b>
+                        <ReviewAuthor name={r.name} url={"url" in r ? r.url : undefined} />
+                      </b>
+                      {r.when && <small>{t(r.when)}</small>}
+                    </figcaption>
+                  </figure>
+                ))}
+              </Carousel>
+            )}
+          </section>
+        )}
 
         <section className="cf-sec cf-contacts" id="contacts" aria-labelledby="contacts-title" data-reveal>
           <div className="cf-sec-head">
             <h2 id="contacts-title">{t(ui.contactsTitle)}</h2>
           </div>
           <div className="cf-contacts-grid">
-            <MapArt label={t(ui.mapLabel)} name={data.name} />
+            <MapArt label={fill(t(ui.mapLabel), { name: data.name })} name={data.name} />
             <ul className="cf-contact-list">
               <li>
                 <IconPin />
@@ -217,14 +229,15 @@ export function CafeSite({ data, locale, style, localeHrefs }: TemplateProps<Caf
 
       <footer className="cf-foot">
         <span>
-          © {data.name} · {t(ui.demoNote)}
+          © {data.name}
+          {demoMode && ` · ${t(ui.demoNote)}`}
         </span>
         <LangSwitch locale={locale} hrefs={localeHrefs} label={t(ui.langLabel)} />
       </footer>
 
       <StickyBar locale={locale} />
       <OptionsSheet locale={locale} />
-      <CartSheet locale={locale} shop={data.name} telegram={data.telegram} hours={data.hours} mode={data.order.mode} />
+      <CartSheet locale={locale} shop={data.name} telegram={data.telegram} hours={data.hours} mode={demoMode ? data.order.mode : "telegram"} loyalty={demoMode} />
       <MotionLayer />
     </div>
   );

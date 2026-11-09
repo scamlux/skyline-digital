@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { adminClientCopy } from "../kit/client-copy";
 import { useHydrated, useMinuteClock } from "../kit/hooks";
 import { DigestTelegramButton, digestCopy } from "../kit/digest-button";
 import { weekdaysToMask } from "../kit/digest-payload";
 import { plural } from "../kit/plural";
 import { formatDate, tashkentNow } from "../kit/tashkent";
-import { formatSum, pick, type L, type Locale } from "../types";
+import { formatSum, pick, type L, type Locale, type SiteMode } from "../types";
 import { MenuTab } from "./admin-menu";
 import { adminUi as ui, adminWords } from "./admin-ui";
 import type { RestaurantData } from "./data";
@@ -28,7 +29,7 @@ const weekdayName = (dow: number, locale: Locale) => formatDate(`2024-01-0${1 + 
  * Кабинет владельца (демо). Четыре экрана: Обзор, Заявки, Меню и цены (с наборами «на компанию»),
  * Часы и акция. Всё читает и пишет демо-хранилище; тот же интерфейс в боевом сайте идёт поверх базы.
  */
-export function RestaurantAdmin({ data, locale, siteHref, localeHrefs, digestBot }: { data: RestaurantData; locale: Locale; siteHref: string; localeHrefs: Record<Locale, string>; digestBot?: string }) {
+export function RestaurantAdmin({ data, locale, siteHref, localeHrefs, digestBot, mode = "demo" }: { data: RestaurantData; locale: Locale; siteHref: string; localeHrefs: Record<Locale, string>; digestBot?: string; mode?: SiteMode }) {
   const t = (l: L) => pick(l, locale);
   const [tab, setTab] = useState<Tab>("overview");
   const state = useDemoState();
@@ -37,9 +38,11 @@ export function RestaurantAdmin({ data, locale, siteHref, localeHrefs, digestBot
 
   // Пустой кабинет не показывает ничего — при первом открытии наполняем примерами.
   // Заявки с сайта при этом остаются (seed сливает данные).
+  // В режиме "client" кабинет начинается с пустого: вымышленных заявок у настоящего бизнеса нет.
+  const client = mode === "client";
   useEffect(() => {
-    if (hydrated && !state.seededAt) demo.seed(buildSeedLeads(tashkentNow().iso));
-  }, [hydrated, state.seededAt]);
+    if (!client && hydrated && !state.seededAt) demo.seed(buildSeedLeads(tashkentNow().iso));
+  }, [client, hydrated, state.seededAt]);
 
   const ready = hydrated && clock > 0;
   const newCount = state.leads.filter((l) => l.status === "new").length;
@@ -52,7 +55,7 @@ export function RestaurantAdmin({ data, locale, siteHref, localeHrefs, digestBot
       ))}
       <header className="adm-head">
         <div className="adm-title">
-          <span className="adm-badge">{t(ui.demo.badge)}</span>
+          <span className="adm-badge">{t(client ? adminClientCopy.badge : ui.demo.badge)}</span>
           <strong className="adm-name">{data.name}</strong>
         </div>
         <div className="adm-head-r">
@@ -91,13 +94,15 @@ export function RestaurantAdmin({ data, locale, siteHref, localeHrefs, digestBot
       </main>
 
       <footer className="adm-foot">
-        <p>{t(ui.demo.text)}</p>
+        <p>{t(client ? adminClientCopy.text : ui.demo.text)}</p>
         <div>
-          <button type="button" className="adm-link" onClick={() => demo.seed(buildSeedLeads(tashkentNow().iso))}>
-            {t(ui.demo.seed)}
-          </button>
+          {!client && (
+            <button type="button" className="adm-link" onClick={() => demo.seed(buildSeedLeads(tashkentNow().iso))}>
+              {t(ui.demo.seed)}
+            </button>
+          )}
           <button type="button" className="adm-link" onClick={() => demo.reset()}>
-            {t(ui.demo.reset)}
+            {t(client ? adminClientCopy.reset : ui.demo.reset)}
           </button>
         </div>
       </footer>

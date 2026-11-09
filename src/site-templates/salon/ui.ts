@@ -129,5 +129,6 @@ export const salonUi = {
     hours: { ru: "Часы работы", en: "Opening hours", uz: "Ish vaqti" },
     hoursValue: { ru: "Каждый день, {a}–{b}", en: "Every day, {a}–{b}", uz: "Har kuni, {a}–{b}" },
     map: { ru: "Схема района (вымышленная)", en: "Neighbourhood sketch (fictional)", uz: "Hudud sxemasi (xayoliy)" },
+    mapClient: { ru: "Схема района", en: "Neighbourhood sketch", uz: "Hudud sxemasi" },
   },
 };
