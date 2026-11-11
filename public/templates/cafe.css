@@ -144,7 +144,7 @@
 /* наклейки */
 .cf-sticker {
   position: absolute; z-index: 3; display: inline-flex; align-items: center; justify-content: center; text-align: center;
-  padding: 9px 16px; border-radius: 99px; font-size: 15px; font-weight: 1000; line-height: 1.1; letter-spacing: -0.005em;
+  padding: 9px 16px; border-radius: 99px; font-size: 14px; font-weight: 1000; line-height: 1.1; letter-spacing: -0.005em;
   max-width: 50%;
 }
 .cf-sticker.s1 { top: -10px; left: -2px; transform: rotate(-8deg); }
@@ -314,7 +314,7 @@
 .cf-link:hover { text-decoration: underline; text-underline-offset: 4px; }
 
 /* ——— подвал ——— */
-.cf-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding: 28px var(--edge) calc(104px + env(safe-area-inset-bottom, 0px)); font-size: 15px; font-weight: 700; color: var(--dim); }
+.cf-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding: 28px var(--edge) calc(104px + env(safe-area-inset-bottom, 0px)); font-size: 14px; font-weight: 700; color: var(--dim); }
 
 /* ——— липкая панель (зона большого пальца) ——— */
 .cf-sticky { position: fixed; z-index: 20; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; padding: 10px 12px calc(12px + env(safe-area-inset-bottom, 0px)); pointer-events: none; transition: transform 0.3s ease; }

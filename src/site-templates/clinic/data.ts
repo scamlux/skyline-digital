@@ -163,18 +163,19 @@ export const clinicDemo: ClinicData = {
     en: "Free check-up and consultation until the end of the month (demo offer)",
     uz: "Koʻrik va maslahat bepul — oy oxirigacha (demo aksiya)",
   },
-  // Имена снимков в public/templates/clinic/img (<имя>-<480|960>.webp). Лицензии стоков:
-  // public/templates/STOCK-CREDITS.json. Все кадры демонстрационные: под клиента заменяются.
+  // Имена снимков: пока нужных кадров нет, ссылаемся на существующие (каждое имя меняется одной
+  // строкой на consult / kids / scanner / whiten-before / whiten-after, когда кадры появятся).
+  // «До» и «после» отбеливания — один кадр: у «до» CSS-фильтр (см. WhitenSlider).
   photos: {
     hero: "hero",
     interior: "interior",
     cabinet: "cabinet",
     smile: "smile",
-    consult: "consult",
-    kids: "kids",
-    scanner: "scanner",
-    whitenBefore: "whiten-before",
-    whitenAfter: "whiten-after",
+    consult: "cabinet",
+    kids: "interior",
+    scanner: "interior",
+    whitenBefore: "smile",
+    whitenAfter: "smile",
   },
   // Новые услуги дописаны в конец: тесты и сид обращаются к первым по индексу.
   services: [

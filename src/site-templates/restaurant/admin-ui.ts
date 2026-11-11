@@ -67,9 +67,9 @@ export const adminUi = {
   digest: {
     title: { ru: "Сводка в Telegram", en: "Telegram digest", uz: "Telegramda xulosa" },
     text: {
-      ru: "Так будет выглядеть сводка, которую владелец получает в Telegram (образец формата).",
-      en: "This is what the digest the owner gets on Telegram will look like (format sample).",
-      uz: "Egasi Telegramda oladigan xulosa shunday koʻrinadi (format namunasi).",
+      ru: "Каждый понедельник в 9:00 эти цифры приходят владельцу в Telegram. Так выглядит сообщение:",
+      en: "Every Monday at 9:00 these numbers reach the owner on Telegram. The message looks like this:",
+      uz: "Har dushanba 9:00 da bu raqamlar egasining Telegramiga keladi. Xabar shunday koʻrinadi:",
     },
   },
   lead: {

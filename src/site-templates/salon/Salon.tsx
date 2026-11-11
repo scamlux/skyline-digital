@@ -1,5 +1,4 @@
 /* eslint-disable @next/next/no-img-element -- шаблон переносимый (без next/image): адаптивные <img srcset> с готовыми webp */
-import { RatingLine, ReviewAuthor } from "../kit/client-content";
 import { MotionLayer } from "../kit/motion";
 import { LOCALES, pick, type L, type Locale, type StyleId, type TemplateProps } from "../types";
 import { BookingSheet } from "./Booking";
@@ -34,7 +33,7 @@ const img = (base: string, w: W) => `${IMG}/${base}-${w}.webp`;
 const srcSet = (base: string, widths: W[]) => widths.map((w) => `${img(base, w)} ${w}w`).join(", ");
 
 /** Секция: номер (виден только в стиле A), заголовок до пяти слов и одна короткая строка. */
-function Section({ id, n, copy, locale, className, line, children }: { id: string; n: number; copy: SectionCopy; locale: Locale; className?: string; line?: React.ReactNode; children: React.ReactNode }) {
+function Section({ id, n, copy, locale, className, children }: { id: string; n: number; copy: SectionCopy; locale: Locale; className?: string; children: React.ReactNode }) {
   const t = (l: L) => pick(l, locale);
   return (
     <section className={`sl-sec${className ? ` ${className}` : ""}`} id={id} aria-labelledby={`${id}-title`}>
@@ -43,7 +42,7 @@ function Section({ id, n, copy, locale, className, line, children }: { id: strin
           {String(n).padStart(2, "0")}
         </span>
         <h2 id={`${id}-title`}>{t(copy.title)}</h2>
-        {line === undefined ? <p>{t(copy.line)}</p> : line}
+        <p>{t(copy.line)}</p>
       </header>
       {children}
     </section>
@@ -61,15 +60,9 @@ function Section({ id, n, copy, locale, className, line, children }: { id: strin
  * ставятся на паузу вне экрана и в фоновой вкладке; без canvas и WebGL; при prefers-reduced-motion
  * страница статична.
  */
-export function SalonSite({ data, locale, style, localeHrefs, mode = "demo", client }: TemplateProps<SalonData>) {
+export function SalonSite({ data, locale, style, localeHrefs }: TemplateProps<SalonData>) {
   const t = (l: L) => pick(l, locale);
-  // Режим "client": вымышленные отзывы, акция и демо-пометки из data не показываются, только настоящее из client.
-  const demoMode = mode === "demo";
-  const catalog = buildCatalog(demoMode ? data : { ...data, booking: { mode: "telegram" }, promo: client?.promo ?? { ru: "", en: "", uz: "" } }, locale);
-  const reviews = demoMode ? data.reviews : (client?.reviews ?? []);
-  const rating = demoMode ? undefined : client?.rating;
-  const showReviews = reviews.length > 0 || !!rating;
-  const promoText = demoMode ? t(data.promo) : client?.promo ? t(client.promo) : "";
+  const catalog = buildCatalog(data, locale);
   const hero = data.hero.photo;
   const heroWidths = hero.widths as W[];
   const heroDefault = (heroWidths.includes(640) ? 640 : 960) as W;
@@ -140,7 +133,7 @@ export function SalonSite({ data, locale, style, localeHrefs, mode = "demo", cli
             </div>
           </section>
 
-          <PromoStrip text={promoText} locale={locale} />
+          <PromoStrip text={t(data.promo)} locale={locale} />
 
           <Section id="looks" n={1} copy={data.copy.looks} locale={locale} className="sl-sec-wide">
             <Lookbook />
@@ -148,7 +141,7 @@ export function SalonSite({ data, locale, style, localeHrefs, mode = "demo", cli
 
           <Section id="services" n={2} copy={data.copy.services} locale={locale}>
             <ServicesPicker />
-            {demoMode && <p className="sl-demo-note">{t(ui.demoTag)}</p>}
+            <p className="sl-demo-note">{t(ui.demoTag)}</p>
           </Section>
 
           <Section id="quiz" n={3} copy={data.copy.quiz} locale={locale} className="sl-quiz-sec">
@@ -182,44 +175,23 @@ export function SalonSite({ data, locale, style, localeHrefs, mode = "demo", cli
             </div>
           </Section>
 
-          {showReviews && (
-            <Section
-              id="reviews"
-              n={6}
-              copy={data.copy.reviews}
-              locale={locale}
-              line={
-                demoMode ? undefined : rating ? (
-                  <p>
-                    <RatingLine rating={rating} locale={locale} />
+          <Section id="reviews" n={6} copy={data.copy.reviews} locale={locale}>
+            <ul className="sl-reviews sl-snap" aria-label={t(ui.reviews.label)}>
+              {data.reviews.map((r) => (
+                <li key={r.name} className="sl-review">
+                  <p className="sl-stars" role="img" aria-label={t(ui.reviews.stars)}>
+                    ★★★★★
                   </p>
-                ) : null
-              }
-            >
-              {reviews.length > 0 && (
-                <ul className="sl-reviews sl-snap" aria-label={t(ui.reviews.label)}>
-                  {reviews.map((r) => (
-                    <li key={r.name} className="sl-review">
-                      {demoMode && (
-                        <p className="sl-stars" role="img" aria-label={t(ui.reviews.stars)}>
-                          ★★★★★
-                        </p>
-                      )}
-                      <blockquote>{t(r.text)}</blockquote>
-                      <p className="sl-review-who">
-                        <b>
-                          <ReviewAuthor name={r.name} url={"url" in r ? r.url : undefined} />
-                        </b>
-                        {"service" in r && <> · {t(r.service)}</>}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </Section>
-          )}
+                  <blockquote>{t(r.text)}</blockquote>
+                  <p className="sl-review-who">
+                    <b>{r.name}</b> · {t(r.service)}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </Section>
 
-          <Section id="faq" n={showReviews ? 7 : 6} copy={data.copy.faq} locale={locale} className="sl-faq">
+          <Section id="faq" n={7} copy={data.copy.faq} locale={locale} className="sl-faq">
             <div className="sl-faq-list" data-reveal>
               {data.faq.map((x) => (
                 <details key={x.q.ru} name="faq">
@@ -236,7 +208,7 @@ export function SalonSite({ data, locale, style, localeHrefs, mode = "demo", cli
             <BookButton className="sl-btn sl-btn-big" />
           </section>
 
-          <Section id="contacts" n={showReviews ? 8 : 7} copy={data.copy.contacts} locale={locale}>
+          <Section id="contacts" n={8} copy={data.copy.contacts} locale={locale}>
             <div className="sl-contacts-grid" data-reveal>
               <ul className="sl-contacts-list">
                 <li>
@@ -265,7 +237,7 @@ export function SalonSite({ data, locale, style, localeHrefs, mode = "demo", cli
                   </TrackedLink>
                 </li>
               </ul>
-              <MapCard label={t(demoMode ? ui.contacts.map : ui.contacts.mapClient)} />
+              <MapCard label={t(ui.contacts.map)} />
             </div>
           </Section>
           <MotionLayer />

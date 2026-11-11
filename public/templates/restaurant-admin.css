@@ -101,7 +101,7 @@
 .adm-lead-main { display: grid; gap: 3px; min-width: 0; font-size: 15px; }
 .adm-lead-main > b { font-size: 17px; font-weight: 800; }
 .adm-lead-main > span { color: var(--dim); font-weight: 500; overflow-wrap: anywhere; }
-.adm-phone { font-variant-numeric: tabular-nums; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; display: inline-flex; align-items: center; min-height: 44px; }
+.adm-phone { font-variant-numeric: tabular-nums; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; min-height: 24px; }
 .adm-site { margin-left: 8px; padding: 2px 10px; border-radius: 99px; background: var(--acc-soft); color: var(--acc-deep); font-size: 13px; font-weight: 700; font-style: normal; }
 .adm-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .adm-tags em { padding: 2px 11px; border-radius: 99px; background: var(--saffron-soft); color: #5a3d06; font-size: 14px; font-weight: 700; font-style: normal; }
@@ -199,10 +199,3 @@
 @media (prefers-reduced-motion: reduce) {
   .adm *, .adm *::before, .adm *::after { transition: none !important; animation: none !important; }
 }
-
-/* ——— кнопка «Получить в Telegram» под превью сводки ——— */
-.adm .adm-btn.adm-tg { color: var(--on-acc); gap: 8px; min-height: 48px; text-decoration: none; justify-self: start; align-self: start; width: fit-content; max-width: 100%; white-space: normal; text-align: center; }
-.adm .adm-btn.adm-tg:hover { color: var(--on-acc); text-decoration: none; }
-.adm-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 20px; border: 0; border-radius: 99px; background: var(--acc); color: var(--on-acc); font-size: 15px; font-weight: 800; white-space: nowrap; transition: background-color 0.15s, transform 0.12s; }
-.adm-btn:hover { background: var(--acc-deep); }
-.adm-btn:active { transform: scale(0.96); }

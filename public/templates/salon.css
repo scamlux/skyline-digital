@@ -368,7 +368,7 @@
 .sl[data-style="b"] .sl-contacts-list svg { color: var(--acc); }
 .sl .sl-map { position: relative; min-height: 300px; border-radius: var(--r); overflow: hidden; box-shadow: inset 0 0 0 1px var(--line); }
 .sl .sl-map svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.sl .sl-map small { position: absolute; left: 12px; bottom: 10px; padding: 3px 10px; background: var(--surface); color: var(--dim); font-size: 15px; }
+.sl .sl-map small { position: absolute; left: 12px; bottom: 10px; padding: 3px 10px; background: var(--surface); color: var(--dim); font-size: 13px; }
 .sl .m-bg { fill: var(--surface2); }
 .sl .m-park { fill: color-mix(in srgb, var(--acc) 16%, var(--surface2)); }
 .sl .m-river { fill: color-mix(in srgb, var(--ink) 10%, var(--surface2)); }

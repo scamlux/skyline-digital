@@ -1,13 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { adminClientCopy } from "../kit/client-copy";
 import { useHydrated, useMinuteClock } from "../kit/hooks";
-import { DigestTelegramButton, digestCopy } from "../kit/digest-button";
-import { weekdaysToMask } from "../kit/digest-payload";
 import { plural } from "../kit/plural";
 import { formatDate, tashkentNow } from "../kit/tashkent";
-import { formatSum, pick, type L, type Locale, type SiteMode } from "../types";
+import { formatSum, pick, type L, type Locale } from "../types";
 import { MenuTab } from "./admin-menu";
 import { adminUi as ui, adminWords } from "./admin-ui";
 import type { RestaurantData } from "./data";
@@ -29,7 +26,7 @@ const weekdayName = (dow: number, locale: Locale) => formatDate(`2024-01-0${1 + 
  * Кабинет владельца (демо). Четыре экрана: Обзор, Заявки, Меню и цены (с наборами «на компанию»),
  * Часы и акция. Всё читает и пишет демо-хранилище; тот же интерфейс в боевом сайте идёт поверх базы.
  */
-export function RestaurantAdmin({ data, locale, siteHref, localeHrefs, digestBot, mode = "demo" }: { data: RestaurantData; locale: Locale; siteHref: string; localeHrefs: Record<Locale, string>; digestBot?: string; mode?: SiteMode }) {
+export function RestaurantAdmin({ data, locale, siteHref, localeHrefs }: { data: RestaurantData; locale: Locale; siteHref: string; localeHrefs: Record<Locale, string> }) {
   const t = (l: L) => pick(l, locale);
   const [tab, setTab] = useState<Tab>("overview");
   const state = useDemoState();
@@ -38,11 +35,9 @@ export function RestaurantAdmin({ data, locale, siteHref, localeHrefs, digestBot
 
   // Пустой кабинет не показывает ничего — при первом открытии наполняем примерами.
   // Заявки с сайта при этом остаются (seed сливает данные).
-  // В режиме "client" кабинет начинается с пустого: вымышленных заявок у настоящего бизнеса нет.
-  const client = mode === "client";
   useEffect(() => {
-    if (!client && hydrated && !state.seededAt) demo.seed(buildSeedLeads(tashkentNow().iso));
-  }, [client, hydrated, state.seededAt]);
+    if (hydrated && !state.seededAt) demo.seed(buildSeedLeads(tashkentNow().iso));
+  }, [hydrated, state.seededAt]);
 
   const ready = hydrated && clock > 0;
   const newCount = state.leads.filter((l) => l.status === "new").length;
@@ -55,7 +50,7 @@ export function RestaurantAdmin({ data, locale, siteHref, localeHrefs, digestBot
       ))}
       <header className="adm-head">
         <div className="adm-title">
-          <span className="adm-badge">{t(client ? adminClientCopy.badge : ui.demo.badge)}</span>
+          <span className="adm-badge">{t(ui.demo.badge)}</span>
           <strong className="adm-name">{data.name}</strong>
         </div>
         <div className="adm-head-r">
@@ -83,7 +78,7 @@ export function RestaurantAdmin({ data, locale, siteHref, localeHrefs, digestBot
 
       <main className="adm-main">
         {!ready && <div className="adm-skel" role="status" aria-label={t(ui.loading)} />}
-        {ready && tab === "overview" && <Overview data={data} locale={locale} now={clock} digestBot={digestBot} />}
+        {ready && tab === "overview" && <Overview data={data} locale={locale} now={clock} />}
         {ready && tab === "leads" && (
           <section aria-label={t(ui.tabs.leads)}>
             {state.leads.length === 0 ? <p className="adm-hint">{t(ui.lead.empty)}</p> : <LeadList leads={state.leads} locale={locale} />}
@@ -94,15 +89,13 @@ export function RestaurantAdmin({ data, locale, siteHref, localeHrefs, digestBot
       </main>
 
       <footer className="adm-foot">
-        <p>{t(client ? adminClientCopy.text : ui.demo.text)}</p>
+        <p>{t(ui.demo.text)}</p>
         <div>
-          {!client && (
-            <button type="button" className="adm-link" onClick={() => demo.seed(buildSeedLeads(tashkentNow().iso))}>
-              {t(ui.demo.seed)}
-            </button>
-          )}
+          <button type="button" className="adm-link" onClick={() => demo.seed(buildSeedLeads(tashkentNow().iso))}>
+            {t(ui.demo.seed)}
+          </button>
           <button type="button" className="adm-link" onClick={() => demo.reset()}>
-            {t(client ? adminClientCopy.reset : ui.demo.reset)}
+            {t(ui.demo.reset)}
           </button>
         </div>
       </footer>
@@ -110,7 +103,7 @@ export function RestaurantAdmin({ data, locale, siteHref, localeHrefs, digestBot
   );
 }
 
-function Overview({ data, locale, now, digestBot }: { data: RestaurantData; locale: Locale; now: number; digestBot?: string }) {
+function Overview({ data, locale, now }: { data: RestaurantData; locale: Locale; now: number }) {
   const t = (l: L) => pick(l, locale);
   const state = useDemoState();
   const stats = weekStats(state.events, now);
@@ -163,7 +156,7 @@ function Overview({ data, locale, now, digestBot }: { data: RestaurantData; loca
       <LeadList leads={sorted} locale={locale} compact />
       <div className="adm-digest">
         <h2 className="adm-h2">{t(ui.digest.title)}</h2>
-        <p className="adm-hint">{digestBot ? t(digestCopy.caption) : t(ui.digest.text)}</p>
+        <p className="adm-hint">{t(ui.digest.text)}</p>
         <pre>
           {`${data.name} · ${t(ui.period).toLowerCase()}\n` +
             `• ${t(ui.stats.leads)}: ${get("leads")}\n` +
@@ -172,13 +165,6 @@ function Overview({ data, locale, now, digestBot }: { data: RestaurantData; loca
             `• ${t(ui.stats.views)}: ${views}` +
             (tip ? `\n${tip}` : "")}
         </pre>
-        {digestBot && (
-          <DigestTelegramButton
-            bot={digestBot}
-            locale={locale}
-            payload={{ tpl: "restaurant", locale, style: "a", period: "week", values: { leads: get("leads"), calls: get("calls"), telegram: get("telegram"), views, peak: tip ? weekdaysToMask(peak) : 0 } }}
-          />
-        )}
       </div>
     </section>
   );

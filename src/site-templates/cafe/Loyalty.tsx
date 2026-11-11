@@ -2,18 +2,17 @@
 
 import { fill } from "./format";
 import { pick, type Locale } from "../types";
-import { CARD_SLOTS, STAMPS_GOAL, freeCupReady } from "./pricing";
+import { STAMPS_GOAL, freeCupReady } from "./pricing";
 import { Almond, IconCup } from "./icons";
 import { demo, useCafeState } from "./store";
 import { cafeUi as ui } from "./ui";
 
 /**
- * Карта «6-й кофе бесплатно»: пять мест под печати-миндалины и шестое, подарочное, с чашкой.
- * Каждый заказ с сайта ставит печать (хранилище, localStorage); после пяти печатей карта
- * «открывается»: чашка заполняется и появляется наклейка «бесплатно».
+ * Карта «6-й кофе бесплатно»: шесть мест под печати-миндалины. Каждый заказ с сайта ставит печать
+ * (хранилище, localStorage); на шестой печати карта «открывается» — появляется наклейка «бесплатно».
  * Текста почти нет: смысл читается по картинке.
  */
-export function LoyaltyCard({ locale, name }: { locale: Locale; name: string }) {
+export function LoyaltyCard({ locale }: { locale: Locale }) {
   const { stamps } = useCafeState();
   const ready = freeCupReady(stamps);
   return (
@@ -22,11 +21,11 @@ export function LoyaltyCard({ locale, name }: { locale: Locale; name: string }) 
         <h2 id="card-title">{pick(ui.loyalty.title, locale)}</h2>
         <p>{pick(ui.loyalty.lead, locale)}</p>
       </div>
-      <div className="cf-stampcard" data-ready={ready || undefined} role="group" aria-label={fill(pick(ui.loyalty.cardLabel, locale), { name })}>
+      <div className="cf-stampcard" data-ready={ready || undefined} role="group" aria-label={pick(ui.loyalty.cardLabel, locale)}>
         <ol className="cf-stamps">
-          {Array.from({ length: CARD_SLOTS }, (_, i) => {
-            const last = i === CARD_SLOTS - 1;
-            const filled = last ? ready : i < stamps;
+          {Array.from({ length: STAMPS_GOAL }, (_, i) => {
+            const filled = i < stamps;
+            const last = i === STAMPS_GOAL - 1;
             return (
               <li key={`${i}-${filled ? "f" : "e"}`} className="cf-stamp" data-filled={filled || undefined} data-last={last || undefined} aria-label={fill(pick(ui.loyalty.stampAria, locale), { n: i + 1 })}>
                 {last ? <IconCup /> : <Almond />}

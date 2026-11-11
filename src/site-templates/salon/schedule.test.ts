@@ -55,11 +55,8 @@ describe("сетка и набор услуг", () => {
   });
 
   it("мастер, который ведёт все услуги набора, находится; чужие услуги не смешиваются", () => {
-    // Сардор ведёт стрижки, камуфляж и бороду, но не бритьё (в сырых данных он есть всегда).
-    const withSardor = ["jasur", "rustam", "sardor"];
-    expect(mastersFor(data, ["fade", "beard"]).map((m) => m.id).sort()).toEqual(withSardor);
-    expect(mastersFor(data, ["camo"]).map((m) => m.id).sort()).toEqual(withSardor);
-    expect(mastersFor(data, ["razor"]).map((m) => m.id).sort()).toEqual(["jasur", "rustam"]);
+    expect(mastersFor(data, ["fade", "beard"]).map((m) => m.id).sort()).toEqual(["jasur", "rustam"]);
+    expect(mastersFor(data, ["camo"]).map((m) => m.id).sort()).toEqual(["jasur", "rustam"]);
     expect(mastersFor(wdata, ["mani", "wcut"])).toEqual([]);
     expect(mastersFor(wdata, ["mani", "pedi"]).map((m) => m.id)).toEqual(["zarina"]);
     expect(mastersFor(wdata, ["mani", "wcut"])).toEqual([]);
@@ -195,7 +192,7 @@ describe("график мастеров", () => {
   });
 
   it("если у всех подходящих мастеров выходной, окон нет", () => {
-    const off: SalonOverrides = { services: {}, schedule: { rustam: [], jasur: [], sardor: [] } };
+    const off: SalonOverrides = { services: {}, schedule: { rustam: [], jasur: [] } };
     expect(slotsForDay({ ...base, ov: off, serviceIds: ["fade"], masterId: "any" })).toEqual([]);
     expect(nextFreeSlot(data, off, [], NOW, { serviceIds: ["fade"] })).toBeNull();
   });

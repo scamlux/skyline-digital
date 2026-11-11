@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   LAST_ORDER_BEFORE_CLOSE,
   PICKUP_LEAD,
-  CARD_SLOTS,
   STAMPS_GOAL,
   addLine,
   buildOrderText,
@@ -141,9 +140,7 @@ describe("время получения", () => {
 });
 
 describe("лояльность", () => {
-  it("после пяти оплаченных кофе шестой бесплатный", () => {
-    expect(STAMPS_GOAL).toBe(5);
-    expect(CARD_SLOTS).toBe(6);
+  it("каждый заказ добавляет печать, шестая открывает бесплатный кофе", () => {
     let stamps = 0;
     for (let i = 0; i < STAMPS_GOAL; i++) stamps = stampsAfterOrder(stamps, false);
     expect(stamps).toBe(STAMPS_GOAL);

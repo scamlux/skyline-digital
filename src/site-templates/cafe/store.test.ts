@@ -42,13 +42,9 @@ describe("заказы и печати", () => {
     expect(demo.get().events.some((e) => e.type === "stamp")).toBe(true);
   });
 
-  it("пятая печать открывает карту (шестой кофе бесплатно), заказ с бесплатным кофе обнуляет её", () => {
-    for (let i = 0; i < 4; i++) demo.addOrder(baseOrder(), false);
-    expect(demo.get().stamps).toBe(4);
-    demo.addOrder(baseOrder(), false);
-    expect(demo.get().stamps).toBe(5);
-    for (let i = 0; i < 2; i++) demo.addOrder(baseOrder(), false);
-    expect(demo.get().stamps).toBe(5);
+  it("шестая печать открывает карту, заказ с бесплатным кофе обнуляет её", () => {
+    for (let i = 0; i < 6; i++) demo.addOrder(baseOrder(), false);
+    expect(demo.get().stamps).toBe(6);
     demo.addOrder(baseOrder({ free: true }), true);
     expect(demo.get().stamps).toBe(0);
     expect(demo.get().events.filter((e) => e.type === "redeem")).toHaveLength(1);

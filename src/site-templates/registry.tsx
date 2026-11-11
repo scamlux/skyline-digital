@@ -31,11 +31,8 @@ export interface TemplateDef {
   /** Превью для соцсетей (Telegram/WhatsApp): JPG, а не WebP — WebP там показывается плохо. */
   og: { image: string; description: L };
   render: (p: { locale: Locale; style: StyleId; localeHrefs: Record<Locale, string> }) => ReactElement;
-  /**
-   * Демо-кабинет владельца (если у шаблона он есть). `digestBot` — имя бота сводок в Telegram (без «@»):
-   * с ним под превью сводки появляется кнопка «Получить в Telegram», без него — только превью.
-   */
-  renderAdmin?: (p: { locale: Locale; localeHrefs: Record<Locale, string>; siteHref: string; digestBot?: string }) => ReactElement;
+  /** Демо-кабинет владельца (если у шаблона он есть). */
+  renderAdmin?: (p: { locale: Locale; localeHrefs: Record<Locale, string>; siteHref: string }) => ReactElement;
 }
 
 /**
@@ -47,7 +44,7 @@ export const TEMPLATES: TemplateDef[] = [
     id: "restaurant",
     demoName: restaurantDemo.name,
     og: { image: "/templates/restaurant/img/og-1200.jpg", description: restaurantDemo.tagline },
-    title: { ru: "Ресторан", en: "Restaurant", uz: "Restoran" },
+    title: { ru: "Ресторан и кафе", en: "Restaurant & café", uz: "Restoran va kafe" },
     blurb: {
       ru: "Меню с фото, набор «на компанию» с ценой, бронь стола в три шага, доставка.",
       en: "A photo menu, a group set with a live price, table booking in three steps, delivery.",
@@ -151,8 +148,8 @@ export const TEMPLATES: TemplateDef[] = [
   {
     id: "cafe",
     demoName: cafeDemo.name,
-    // JPG лучше для превью в Telegram/WhatsApp.
-    og: { image: "/templates/cafe/img/og-1200.jpg", description: cafeDemo.tagline },
+    // TODO: когда появится og-1200.jpg (JPG лучше для Telegram/WhatsApp), заменить на него.
+    og: { image: "/templates/cafe/img/hero-1280.webp", description: cafeDemo.tagline },
     title: { ru: "Кафе и кофейня", en: "Café & coffee shop", uz: "Kafe va kofexona" },
     blurb: {
       ru: "Меню с фото, заказ навынос к нужному времени, карта «6-й кофе бесплатно».",
@@ -163,7 +160,6 @@ export const TEMPLATES: TemplateDef[] = [
       {
         id: "a",
         name: { ru: "Утро", en: "Morning", uz: "Tong" },
-        label: { ru: "Утро", en: "Morning", uz: "Tong" },
         mood: {
           ru: "Сливочный и терракота, миндаль и шалфей, круглые шрифты и наклейки. Тёплое утро.",
           en: "Cream and terracotta, almond and sage, round type and stickers. A warm morning.",
@@ -173,7 +169,6 @@ export const TEMPLATES: TemplateDef[] = [
       {
         id: "b",
         name: { ru: "Вечер", en: "Evening", uz: "Kech" },
-        label: { ru: "Вечер", en: "Evening", uz: "Kech" },
         mood: {
           ru: "Тёмный эспрессо, янтарное свечение, десерты и раф после шести. Вечерний уют.",
           en: "Dark espresso, amber glow, desserts and raf after six. An evening hideout.",
