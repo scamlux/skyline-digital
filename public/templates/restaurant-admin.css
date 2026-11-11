@@ -199,3 +199,10 @@
 @media (prefers-reduced-motion: reduce) {
   .adm *, .adm *::before, .adm *::after { transition: none !important; animation: none !important; }
 }
+
+/* ——— кнопка «Получить в Telegram» под превью сводки ——— */
+.adm .adm-btn.adm-tg { color: var(--on-acc); gap: 8px; min-height: 48px; text-decoration: none; justify-self: start; align-self: start; width: fit-content; max-width: 100%; white-space: normal; text-align: center; }
+.adm .adm-btn.adm-tg:hover { color: var(--on-acc); text-decoration: none; }
+.adm-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 20px; border: 0; border-radius: 99px; background: var(--acc); color: var(--on-acc); font-size: 15px; font-weight: 800; white-space: nowrap; transition: background-color 0.15s, transform 0.12s; }
+.adm-btn:hover { background: var(--acc-deep); }
+.adm-btn:active { transform: scale(0.96); }

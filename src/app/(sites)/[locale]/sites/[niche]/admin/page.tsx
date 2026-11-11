@@ -4,6 +4,7 @@ import { hasLocale } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { localePath } from "@/site-templates/demo";
+import { normalizeBotUsername } from "@/site-templates/kit/digest-payload";
 import { TEMPLATES, getTemplate } from "@/site-templates/registry";
 import { LOCALES, type Locale } from "@/site-templates/types";
 
@@ -27,5 +28,7 @@ export default async function AdminPage({ params }: { params: Promise<{ locale: 
   if (!tpl?.renderAdmin) notFound();
   const path = `/sites/${tpl.id}/admin`;
   const localeHrefs = Object.fromEntries(LOCALES.map((l) => [l, localePath(l, path)])) as Record<Locale, string>;
-  return tpl.renderAdmin({ locale, localeHrefs, siteHref: localePath(locale, `/sites/${tpl.id}/${tpl.styles[0].id}`) });
+  // Бот сводок задаётся env: без него кабинет показывает только превью (так же в экспортированных сайтах).
+  const digestBot = normalizeBotUsername(process.env.NEXT_PUBLIC_TELEGRAM_DIGEST_BOT);
+  return tpl.renderAdmin({ locale, localeHrefs, siteHref: localePath(locale, `/sites/${tpl.id}/${tpl.styles[0].id}`), digestBot });
 }

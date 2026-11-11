@@ -1,10 +1,13 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { adminClientCopy } from "../kit/client-copy";
 import { useHydrated, useMinuteClock } from "../kit/hooks";
+import { DigestTelegramButton, digestCopy } from "../kit/digest-button";
+import { itemCode } from "../kit/digest-payload";
 import { plural } from "../kit/plural";
 import { addDays, dayOfMonth, diffDays, formatDate, tashkentNow, weekdayOf } from "../kit/tashkent";
-import { formatSum, pick, type L, type Locale } from "../types";
+import { formatSum, pick, type L, type Locale, type SiteMode } from "../types";
 import { adminUi as ui, adminWords as words } from "./admin-ui";
 import type { SalonData } from "./data";
 import type { StyleId } from "../types";
@@ -41,6 +44,12 @@ interface AdminProps {
   locale: Locale;
   siteHref: string;
   localeHrefs: Record<Locale, string>;
+  /** Имя бота сводок без «@»: без него блок «Сводка в Telegram» остаётся превью без кнопки. */
+  digestBot?: string;
+  /** "client": кабинет одного настоящего бизнеса (экспорт) без наполнения примерами и без переключателя. */
+  mode?: SiteMode;
+  /** Какой бизнес открыт в режиме "client" (у салона их два: a — барбершоп, b — салон красоты). */
+  style?: StyleId;
 }
 
 /**
@@ -48,27 +57,30 @@ interface AdminProps {
  * красоты». У каждого свои записи, цены, мастера и акция; запись с /a попадает в барбершоп, с /b в
  * салон. Открывается на том бизнесе, который смотрели последним.
  */
-export function SalonAdmin({ businesses, locale, siteHref, localeHrefs }: AdminProps) {
+export function SalonAdmin({ businesses, locale, siteHref, localeHrefs, digestBot, mode = "demo", style: fixedStyle }: AdminProps) {
   const hydrated = useHydrated();
   const [chosen, setChosen] = useState<StyleId | null>(null);
-  const style: StyleId = chosen ?? (hydrated ? lastStyle() : "a");
+  const client = mode === "client";
+  const style: StyleId = client && fixedStyle ? fixedStyle : (chosen ?? (hydrated ? lastStyle() : "a"));
   const t = (l: L) => pick(l, locale);
   return (
     <StoreCtx.Provider value={salonStores[style]}>
-      <BusinessAdmin key={style} data={businesses[style]} style={style} locale={locale} siteHref={siteHref.replace(/\/[ab]$/, `/${style}`)} localeHrefs={localeHrefs}>
-        <div className="adm-switch" role="group" aria-label={t(ui.switch.label)}>
-          {(["a", "b"] as StyleId[]).map((k) => (
-            <button key={k} type="button" aria-pressed={style === k} onClick={() => setChosen(k)}>
-              {t(ui.switch[k])}
-            </button>
-          ))}
-        </div>
+      <BusinessAdmin key={style} data={businesses[style]} style={style} locale={locale} siteHref={siteHref.replace(/\/[ab]$/, `/${style}`)} localeHrefs={localeHrefs} digestBot={digestBot} mode={mode}>
+        {!client && (
+          <div className="adm-switch" role="group" aria-label={t(ui.switch.label)}>
+            {(["a", "b"] as StyleId[]).map((k) => (
+              <button key={k} type="button" aria-pressed={style === k} onClick={() => setChosen(k)}>
+                {t(ui.switch[k])}
+              </button>
+            ))}
+          </div>
+        )}
       </BusinessAdmin>
     </StoreCtx.Provider>
   );
 }
 
-function BusinessAdmin({ data, style, locale, siteHref, localeHrefs, children }: { data: SalonData; style: StyleId; locale: Locale; siteHref: string; localeHrefs: Record<Locale, string>; children: React.ReactNode }) {
+function BusinessAdmin({ data, style, locale, siteHref, localeHrefs, digestBot, mode, children }: { data: SalonData; style: StyleId; locale: Locale; siteHref: string; localeHrefs: Record<Locale, string>; digestBot?: string; mode: SiteMode; children: React.ReactNode }) {
   const t = (l: L) => pick(l, locale);
   const [tab, setTab] = useState<Tab>("overview");
   const { state, demo } = useAdminStore();
@@ -77,13 +89,15 @@ function BusinessAdmin({ data, style, locale, siteHref, localeHrefs, children }:
   const sched = useMemo(() => toScheduleData(data), [data]);
   const ov = useMemo(() => ({ services: state.services, schedule: state.schedule, packages: state.packages }), [state.services, state.schedule, state.packages]);
   const guests = style === "b" ? GUESTS_WOMEN : GUESTS_MEN;
-  const ready = hydrated && !!state.seededAt && clock > 0;
+  // Режим "client": кабинет начинается с пустого, вымышленных записей у настоящего бизнеса нет.
+  const client = mode === "client";
+  const ready = hydrated && (client || !!state.seededAt) && clock > 0;
 
   // Пустой кабинет не показывает ничего — при первом открытии наполняем примерами. Записи с сайта
   // при этом остаются (seed сливает данные), а демо-записи ложатся на рабочие дни мастеров.
   useEffect(() => {
-    if (hydrated && !state.seededAt) demo.seed(buildSeedBookings(sched, ov, Date.now(), guests), SEED_SALT[style]);
-  }, [hydrated, state.seededAt, sched, ov, demo, guests, style]);
+    if (!client && hydrated && !state.seededAt) demo.seed(buildSeedBookings(sched, ov, Date.now(), guests), SEED_SALT[style]);
+  }, [client, hydrated, state.seededAt, sched, ov, demo, guests, style]);
 
   const svcName = (id: string) => pick(data.services.find((s) => s.id === id)?.name ?? { ru: id, en: id, uz: id }, locale);
   const masterName = (id: string) => pick(data.masters.find((m) => m.id === id)?.name ?? { ru: id, en: id, uz: id }, locale);
@@ -97,7 +111,7 @@ function BusinessAdmin({ data, style, locale, siteHref, localeHrefs, children }:
       <link rel="preload" href="/templates/fonts/onest-cyrillic.woff2" as="font" type="font/woff2" crossOrigin="" />
       <header className="adm-head">
         <div className="adm-title">
-          <span className="adm-badge">{t(ui.demo.badge)}</span>
+          <span className="adm-badge">{t(client ? adminClientCopy.badge : ui.demo.badge)}</span>
           <strong className="adm-name">{data.name}</strong>
         </div>
         <div className="adm-head-r">
@@ -114,7 +128,7 @@ function BusinessAdmin({ data, style, locale, siteHref, localeHrefs, children }:
         </div>
       </header>
 
-      <div className="adm-biz">{children}</div>
+      {children && <div className="adm-biz">{children}</div>}
 
       <nav className="adm-tabs" aria-label={t(ui.tabsLabel)}>
         {TABS.map((k) => (
@@ -127,21 +141,23 @@ function BusinessAdmin({ data, style, locale, siteHref, localeHrefs, children }:
 
       <main className="adm-main">
         {!ready && <div className="adm-skel" role="status" aria-label={t(ui.loading)} />}
-        {ready && tab === "overview" && <Overview data={data} locale={locale} now={clock} bookings={state.bookings} events={state.events} names={names} />}
+        {ready && tab === "overview" && <Overview data={data} style={style} locale={locale} now={clock} bookings={state.bookings} events={state.events} names={names} digestBot={digestBot} />}
         {ready && tab === "bookings" && <Bookings locale={locale} now={clock} bookings={state.bookings} names={names} />}
         {ready && tab === "services" && <ServicesTab data={data} locale={locale} />}
         {ready && tab === "masters" && <MastersTab data={data} locale={locale} />}
-        {ready && tab === "promo" && <PromoTab data={data} locale={locale} />}
+        {ready && tab === "promo" && <PromoTab data={data} locale={locale} client={client} />}
       </main>
 
       <footer className="adm-foot">
-        <p>{t(ui.demo.text)}</p>
+        <p>{t(client ? adminClientCopy.text : ui.demo.text)}</p>
         <div>
-          <button type="button" className="adm-link" onClick={() => demo.seed(buildSeedBookings(sched, ov, Date.now(), guests), SEED_SALT[style])}>
-            {t(ui.demo.seed)}
-          </button>
+          {!client && (
+            <button type="button" className="adm-link" onClick={() => demo.seed(buildSeedBookings(sched, ov, Date.now(), guests), SEED_SALT[style])}>
+              {t(ui.demo.seed)}
+            </button>
+          )}
           <button type="button" className="adm-link" onClick={() => demo.reset()}>
-            {t(ui.demo.reset)}
+            {t(client ? adminClientCopy.reset : ui.demo.reset)}
           </button>
         </div>
       </footer>
@@ -165,7 +181,7 @@ function topOf(keys: string[]): [string, number] | null {
   return [...counts.entries()].sort((a, b) => b[1] - a[1])[0] ?? null;
 }
 
-function Overview({ data, locale, now, bookings, events, names }: { data: SalonData; locale: Locale; now: number; bookings: Booking[]; events: DemoEvent[]; names: Names }) {
+function Overview({ data, style, locale, now, bookings, events, names, digestBot }: { data: SalonData; style: StyleId; locale: Locale; now: number; bookings: Booking[]; events: DemoEvent[]; names: Names; digestBot?: string }) {
   const t = (l: L) => pick(l, locale);
   const week: [number, number] = [now - WEEK * DAY_MS, now + 1];
   const prev: [number, number] = [now - 2 * WEEK * DAY_MS, now - WEEK * DAY_MS];
@@ -256,8 +272,31 @@ function Overview({ data, locale, now, bookings, events, names }: { data: SalonD
           <h2 className="adm-h2">{t(ui.digest.title)}</h2>
           <span className="adm-sample">{t(ui.digest.sample)}</span>
         </div>
-        <p>{t(ui.digest.text)}</p>
+        <p>{digestBot ? t(digestCopy.caption) : t(ui.digest.text)}</p>
         <pre>{`${data.name} · ${t(ui.digest.head)}\n${fill(t(ui.digest.line1), { n: curBookings.length })}\n${fill(t(ui.digest.line2), { service: topSvc ? names.svc(topSvc[0]) : t(ui.digest.noService) })}\n${fill(t(ui.digest.line3), { when: nextWhen })}`}</pre>
+        {digestBot && (
+          <DigestTelegramButton
+            bot={digestBot}
+            locale={locale}
+            payload={{
+              tpl: "salon",
+              locale,
+              style,
+              period: "week",
+              values: {
+                bookings: curBookings.length,
+                revenue: sum(curBookings),
+                quizzes,
+                calls,
+                telegram: telegram.cur,
+                views: views.cur,
+                svc: tip && topSvc ? itemCode(data.services.findIndex((s) => s.id === topSvc[0])) : 0,
+                master: tip && topMaster ? itemCode(data.masters.findIndex((m) => m.id === topMaster[0])) : 0,
+                masterN: tip && topMaster ? topMaster[1] : 0,
+              },
+            }}
+          />
+        )}
       </div>
     </section>
   );
@@ -508,7 +547,7 @@ function MastersTab({ data, locale }: { data: SalonData; locale: Locale }) {
 
 /* ——— Акция ——— */
 
-function PromoTab({ data, locale }: { data: SalonData; locale: Locale }) {
+function PromoTab({ data, locale, client }: { data: SalonData; locale: Locale; client: boolean }) {
   const t = (l: L) => pick(l, locale);
   const { state, demo } = useAdminStore();
   return (
@@ -520,7 +559,7 @@ function PromoTab({ data, locale }: { data: SalonData; locale: Locale }) {
       </label>
       <label className="adm-field">
         {t(ui.promo.text)}
-        <input type="text" value={state.promo?.text?.[locale] ?? t(data.promo)} onChange={(e) => demo.setPromo({ on: state.promo?.on ?? true, text: { ...state.promo?.text, [locale]: e.target.value } })} />
+        <input type="text" value={state.promo?.text?.[locale] ?? (client ? "" : t(data.promo))} onChange={(e) => demo.setPromo({ on: state.promo?.on ?? true, text: { ...state.promo?.text, [locale]: e.target.value } })} />
       </label>
       <p className="adm-hint">{t(ui.promo.hint)}</p>
     </section>

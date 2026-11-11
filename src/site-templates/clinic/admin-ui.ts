@@ -26,7 +26,7 @@ export const adminWords: Record<"views" | "calls" | "telegram" | "bookings" | "c
   },
   calcs: {
     ru: { one: "расчёт", few: "расчёта", many: "расчётов" },
-    en: { one: "estimate", other: "estimates" },
+    en: { one: "treatment estimate", other: "treatment estimates" },
     uz: { other: "ta hisob" },
   },
 };
@@ -56,7 +56,7 @@ export const adminUi = {
     // {views} {calls} {telegram} {bookings} {calcs} — числа за 7 дней, *W — слова в нужной форме, {conv} — % записей от визитов.
     text: {
       ru: "За неделю: {views} {viewsW} сайта, {calcs} {calcsW} лечения, {calls} {callsW} на «Позвонить», {telegram} {telegramW} в Telegram и {bookings} {bookingsW} — это {conv}% от визитов.",
-      en: "This week: {views} {viewsW} to the site, {calcs} treatment {calcsW}, {calls} {callsW} on “Call”, {telegram} {telegramW} to Telegram and {bookings} {bookingsW} — {conv}% of visits.",
+      en: "This week: {views} {viewsW} to the site, {calcs} {calcsW}, {calls} {callsW} on “Call”, {telegram} {telegramW} to Telegram and {bookings} {bookingsW} — {conv}% of visits.",
       uz: "Bu hafta: saytga {views} {viewsW}, davolash boʻyicha {calcs} {calcsW}, «Qoʻngʻiroq» tugmasi {calls} {callsW}, Telegramga {telegram} {telegramW} va {bookings} {bookingsW} — tashriflarning {conv}%.",
     },
     // {service} — услуга, на которую записывались чаще всего; {days} — дни недели с наибольшим числом записей на приём.
@@ -78,9 +78,9 @@ export const adminUi = {
     title: { ru: "Сводка в Telegram", en: "Telegram digest", uz: "Telegramda xulosa" },
     sample: { ru: "Образец формата", en: "Format sample", uz: "Format namunasi" },
     text: {
-      ru: "Так выглядит сообщение, которое администратор получает в Telegram (в боевом сайте — по расписанию, цифры из ваших данных):",
-      en: "This is what the front-desk message on Telegram looks like (on a live site it arrives on schedule, with your own figures):",
-      uz: "Administrator Telegramda shunday xabar oladi (jonli saytda — jadval boʻyicha, raqamlar sizning maʼlumotlaringizdan):",
+      ru: "Так будет выглядеть сводка, которую владелец получает в Telegram (образец формата).",
+      en: "This is what the digest the owner gets on Telegram will look like (format sample).",
+      uz: "Egasi Telegramda oladigan xulosa shunday koʻrinadi (format namunasi).",
     },
     head: { ru: "Сводка за неделю", en: "Weekly summary", uz: "Haftalik xulosa" },
     line1: { ru: "Записей: {n}", en: "Appointments: {n}", uz: "Yozilishlar: {n}" },

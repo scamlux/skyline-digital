@@ -49,10 +49,10 @@ export function OpenStatus({ open, close, locale, className = "cf-status" }: { o
 }
 
 /** Плашка акции над меню: по умолчанию текст из данных, кабинет может выключить или переписать. */
-export function PromoBar({ fallback, locale }: { fallback: L; locale: Locale }) {
+export function PromoBar({ fallback, locale }: { fallback?: L; locale: Locale }) {
   const { promo } = useCafeState();
   if (promo && !promo.on) return null;
-  const text = promo?.text?.[locale] ?? pick(fallback, locale);
+  const text = promo?.text?.[locale] ?? (fallback ? pick(fallback, locale) : "");
   if (!text) return null;
   return (
     <p className="cf-promo" role="status">

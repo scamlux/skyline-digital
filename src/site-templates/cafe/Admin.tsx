@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { adminClientCopy } from "../kit/client-copy";
 import { useHydrated, useMinuteClock } from "../kit/hooks";
+import { DigestTelegramButton, digestCopy } from "../kit/digest-button";
+import { itemCode } from "../kit/digest-payload";
 import { plural } from "../kit/plural";
 import { addDays, tashkentNow, weekdayOf } from "../kit/tashkent";
-import { formatSum, pick, type L, type Locale } from "../types";
+import { formatSum, pick, type L, type Locale, type SiteMode } from "../types";
 import { adminUi as ui, adminWords as words } from "./admin-ui";
 import { STAMPS_GOAL } from "./pricing";
 import { CATS, itemById, menu, photoOf, type CafeData } from "./data";
@@ -32,19 +35,22 @@ const itemName = (id: string, locale: Locale) => pick(itemById(id)?.name ?? { ru
  * Кабинет владельца кофейни (демо). Шесть экранов: Обзор, Заказы, Меню и цены, Витрина,
  * Лояльность, Акция. Всё читает и пишет демо-хранилище; тот же интерфейс в боевом сайте идёт поверх базы.
  */
-export function CafeAdmin({ data, locale, siteHref, localeHrefs }: { data: CafeData; locale: Locale; siteHref: string; localeHrefs: Record<Locale, string> }) {
+export function CafeAdmin({ data, locale, siteHref, localeHrefs, digestBot, mode = "demo" }: { data: CafeData; locale: Locale; siteHref: string; localeHrefs: Record<Locale, string>; digestBot?: string; mode?: SiteMode }) {
   const t = (l: L) => pick(l, locale);
   const [tab, setTab] = useState<Tab>("overview");
   const state = useCafeState();
   const hydrated = useHydrated();
   const clock = useMinuteClock();
-  const ready = hydrated && !!state.seededAt && clock > 0;
+  // Режим "client": кабинет начинается с пустого, без карты лояльности (на настоящем сайте её нет).
+  const client = mode === "client";
+  const tabs = client ? TABS.filter((k) => k !== "loyalty") : TABS;
+  const ready = hydrated && (client || !!state.seededAt) && clock > 0;
 
   // Пустой кабинет не показывает ничего — при первом открытии наполняем примерами.
   // Заказы с сайта при этом остаются (seed сливает данные).
   useEffect(() => {
-    if (hydrated && !state.seededAt) demo.seed(buildSeedOrders(Date.now(), data.hours));
-  }, [hydrated, state.seededAt, data.hours]);
+    if (!client && hydrated && !state.seededAt) demo.seed(buildSeedOrders(Date.now(), data.hours));
+  }, [client, hydrated, state.seededAt, data.hours]);
 
   const newCount = state.orders.filter((o) => o.status === "new").length;
 
@@ -56,7 +62,7 @@ export function CafeAdmin({ data, locale, siteHref, localeHrefs }: { data: CafeD
       ))}
       <header className="adm-head">
         <div className="adm-title">
-          <span className="adm-badge">{t(ui.demo.badge)}</span>
+          <span className="adm-badge">{t(client ? adminClientCopy.badge : ui.demo.badge)}</span>
           <strong className="adm-name">{data.name}</strong>
         </div>
         <div className="adm-head-r">
@@ -74,7 +80,7 @@ export function CafeAdmin({ data, locale, siteHref, localeHrefs }: { data: CafeD
       </header>
 
       <nav className="adm-tabs" aria-label={t(ui.tabsLabel)}>
-        {TABS.map((k) => (
+        {tabs.map((k) => (
           <button key={k} type="button" aria-current={tab === k ? "page" : undefined} onClick={() => setTab(k)}>
             {t(ui.tabs[k])}
             {k === "orders" && ready && newCount > 0 && <i className="adm-dot" aria-label={t(ui.orders.status.new)} />}
@@ -84,22 +90,24 @@ export function CafeAdmin({ data, locale, siteHref, localeHrefs }: { data: CafeD
 
       <main className="adm-main">
         {!ready && <div className="adm-skel" role="status" aria-label={t(ui.loading)} />}
-        {ready && tab === "overview" && <Overview data={data} locale={locale} now={clock} orders={state.orders} events={state.events} />}
+        {ready && tab === "overview" && <Overview data={data} locale={locale} now={clock} orders={state.orders} events={state.events} digestBot={digestBot} />}
         {ready && tab === "orders" && <Orders locale={locale} now={clock} orders={state.orders} />}
         {ready && tab === "menu" && <MenuTab locale={locale} />}
         {ready && tab === "case" && <CaseTab locale={locale} />}
         {ready && tab === "loyalty" && <LoyaltyTab locale={locale} />}
-        {ready && tab === "promo" && <PromoTab data={data} locale={locale} />}
+        {ready && tab === "promo" && <PromoTab data={data} locale={locale} client={client} />}
       </main>
 
       <footer className="adm-foot">
-        <p>{t(ui.demo.text)}</p>
+        <p>{t(client ? adminClientCopy.text : ui.demo.text)}</p>
         <div>
-          <button type="button" className="adm-link" onClick={() => demo.seed(buildSeedOrders(Date.now(), data.hours))}>
-            {t(ui.demo.seed)}
-          </button>
+          {!client && (
+            <button type="button" className="adm-link" onClick={() => demo.seed(buildSeedOrders(Date.now(), data.hours))}>
+              {t(ui.demo.seed)}
+            </button>
+          )}
           <button type="button" className="adm-link" onClick={() => demo.reset()}>
-            {t(ui.demo.reset)}
+            {t(client ? adminClientCopy.reset : ui.demo.reset)}
           </button>
         </div>
       </footer>
@@ -109,7 +117,7 @@ export function CafeAdmin({ data, locale, siteHref, localeHrefs }: { data: CafeD
 
 /* ——— Обзор ——— */
 
-function Overview({ data, locale, now, orders, events }: { data: CafeData; locale: Locale; now: number; orders: Order[]; events: { at: string; type: import("./store").EventType }[] }) {
+function Overview({ data, locale, now, orders, events, digestBot }: { data: CafeData; locale: Locale; now: number; orders: Order[]; events: { at: string; type: import("./store").EventType }[]; digestBot?: string }) {
   const t = (l: L) => pick(l, locale);
   const cur = periodStats(orders, now - WEEK_MS, now + 1);
   const prev = periodStats(orders, now - 2 * WEEK_MS, now - WEEK_MS);
@@ -188,11 +196,24 @@ function Overview({ data, locale, now, orders, events }: { data: CafeData; local
           <h2 className="adm-h2">{t(ui.digest.title)}</h2>
           <span className="adm-sample">{t(ui.digest.sample)}</span>
         </div>
-        <p>{t(ui.digest.text)}</p>
+        <p>{digestBot ? t(digestCopy.caption) : t(ui.digest.text)}</p>
         <pre>{`${data.name} · ${t(ui.digest.head)}\n${fill(t(ui.digest.line1), { n: cur.count, sum: formatSum(cur.revenue, locale) })}\n${fill(t(ui.digest.line2), { sum: formatSum(cur.avg, locale) })}\n${fill(t(ui.digest.line3), { drink: hit })}`}</pre>
         <p className="adm-hint">
           {cur.count} {w(locale, "orders", cur.count)} · {views} {w(locale, "views", views)}
         </p>
+        {digestBot && (
+          <DigestTelegramButton
+            bot={digestBot}
+            locale={locale}
+            payload={{
+              tpl: "cafe",
+              locale,
+              style: "a",
+              period: "week",
+              values: { orders: cur.count, revenue: cur.revenue, avg: cur.avg, views, drink: top[0] ? itemCode(menu.findIndex((m) => m.id === top[0].itemId)) : 0 },
+            }}
+          />
+        )}
       </div>
     </section>
   );
@@ -447,11 +468,11 @@ function LoyaltyTab({ locale }: { locale: Locale }) {
 
 /* ——— Акция ——— */
 
-function PromoTab({ data, locale }: { data: CafeData; locale: Locale }) {
+function PromoTab({ data, locale, client }: { data: CafeData; locale: Locale; client: boolean }) {
   const t = (l: L) => pick(l, locale);
   const { promo } = useCafeState();
   const on = promo ? promo.on : true;
-  const text = promo?.text?.[locale] ?? pick(data.promo, locale);
+  const text = promo?.text?.[locale] ?? (client ? "" : pick(data.promo, locale));
   return (
     <section aria-label={t(ui.tabs.promo)}>
       <h2 className="adm-h2">{t(ui.promo.title)}</h2>

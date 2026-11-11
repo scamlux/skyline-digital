@@ -50,9 +50,11 @@ export function PromoStrip({ text, locale }: { text: string; locale: Locale }) {
   const { state } = useSalonStore();
   const promo = state.promo;
   if (promo && !promo.on) return null;
+  const shown = promo?.text?.[locale] ?? text;
+  if (!shown) return null;
   return (
     <p className="sl-promo" role="note">
-      {promo?.text?.[locale] ?? text}
+      {shown}
     </p>
   );
 }

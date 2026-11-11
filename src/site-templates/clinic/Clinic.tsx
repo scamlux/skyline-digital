@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element -- шаблон переносимый (без next/image): адаптивные <img srcset> с готовыми webp */
+import { RatingLine, ReviewAuthor } from "../kit/client-content";
 import { MotionLayer } from "../kit/motion";
 import { LOCALES, pick, type Locale, type TemplateProps } from "../types";
 import { BookButton, OpenStatus, PageView, PromoBar, StickyBar, TrackedLink } from "./client-bits";
@@ -37,9 +38,14 @@ const srcSet = (base: string, widths: W[]) => widths.map((w) => `${img(base, w)}
  * и стартуют после первой отрисовки; движение — один остров MotionLayer; при
  * prefers-reduced-motion страница статична. Тяжёлого JS нет: ни canvas, ни WebGL.
  */
-export function ClinicSite({ data, locale, style, localeHrefs }: TemplateProps<ClinicData>) {
+export function ClinicSite({ data, locale, style, localeHrefs, mode = "demo", client }: TemplateProps<ClinicData>) {
   const t = (l: Parameters<typeof pick>[0]) => pick(l, locale);
   const sched = toScheduleData(data);
+  // Режим "client": вымышленные отзывы, цифры, акция и демо-пометки из data не показываются, только настоящее из client.
+  const demoMode = mode === "demo";
+  const reviews = demoMode ? data.reviews : (client?.reviews ?? []);
+  const rating = demoMode ? undefined : client?.rating;
+  const clientStats = demoMode ? [] : (client?.stats ?? []);
   const doctorOf = (id: string) => data.doctors.find((d) => d.id === id) ?? data.doctors[0];
   const decSep = locale === "en" ? "." : ",";
   const group = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, "\u00a0");
@@ -141,22 +147,33 @@ export function ClinicSite({ data, locale, style, localeHrefs }: TemplateProps<C
           <SymptomTiles tiles={tiles} sched={sched} locale={locale} />
         </section>
 
-        <PromoBar text={t(data.promo)} locale={locale} />
+        <PromoBar text={demoMode ? t(data.promo) : client?.promo ? t(client.promo) : ""} locale={locale} />
 
-        <section className="cl-stats" aria-label={t(ui.statsNote)}>
-          <dl>
-            {data.stats.map((s) => (
-              <div key={s.id}>
-                <dt>{t(s.label)}</dt>
-                <dd>
-                  <b data-count={s.value} data-dec={s.decimals ?? 0} data-dec-sep={decSep}>
-                    {statText(s.value, s.decimals, s.plus)}
-                  </b>
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </section>
+        {(demoMode || clientStats.length > 0) && (
+          <section className="cl-stats" aria-label={t(demoMode ? ui.statsNote : ui.statsLabelClient)}>
+            <dl>
+              {demoMode
+                ? data.stats.map((s) => (
+                    <div key={s.id}>
+                      <dt>{t(s.label)}</dt>
+                      <dd>
+                        <b data-count={s.value} data-dec={s.decimals ?? 0} data-dec-sep={decSep}>
+                          {statText(s.value, s.decimals, s.plus)}
+                        </b>
+                      </dd>
+                    </div>
+                  ))
+                : clientStats.map((s) => (
+                    <div key={s.value + t(s.label)}>
+                      <dt>{t(s.label)}</dt>
+                      <dd>
+                        <b>{s.value}</b>
+                      </dd>
+                    </div>
+                  ))}
+            </dl>
+          </section>
+        )}
 
         <section className="cl-sec cl-jaw-sec" id="jaw" aria-labelledby="jaw-title">
           <div className="cl-sec-head" data-reveal>
@@ -177,40 +194,47 @@ export function ClinicSite({ data, locale, style, localeHrefs }: TemplateProps<C
         <section className="cl-sec" id="prices" aria-labelledby="prices-title">
           <div className="cl-sec-head" data-reveal>
             <h2 id="prices-title">{t(ui.prices.title)}</h2>
-            <p>{t(ui.prices.lead)}</p>
+            <p>{t(demoMode ? ui.prices.lead : ui.prices.leadClient)}</p>
           </div>
           <PriceBento cells={cells} sched={sched} locale={locale} />
           <h3 className="cl-sub" data-reveal>
             {t(ui.prices.packages)}
           </h3>
-          <Packages packages={packages} sched={sched} locale={locale} />
+          <Packages packages={packages} sched={sched} locale={locale} mode={mode} />
         </section>
 
         <section className="cl-sec" id="doctors" aria-labelledby="doctors-title">
           <div className="cl-sec-head" data-reveal>
             <h2 id="doctors-title">{t(ui.doctors.title)}</h2>
-            <p>{t(ui.doctors.lead)}</p>
+            <p>{t(demoMode ? ui.doctors.lead : ui.doctors.leadClient)}</p>
           </div>
           <DoctorList doctors={doctorCards} sched={sched} locale={locale} />
         </section>
 
-        <section className="cl-sec" id="reviews" aria-labelledby="reviews-title">
-          <div className="cl-sec-head" data-reveal>
-            <h2 id="reviews-title">{t(ui.reviews.title)}</h2>
-            <p>{t(ui.reviews.note)}</p>
-          </div>
-          <div className="cl-reviews cl-snap" role="region" aria-label={t(ui.reviews.label)} tabIndex={0}>
-            {data.reviews.map((r) => (
-              <figure key={r.name} className="cl-review">
-                <p className="cl-stars">{t(ui.reviews.stars)}</p>
-                <blockquote>{t(r.text)}</blockquote>
-                <figcaption>
-                  <b>{r.name}</b> · {t(r.service)}
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-        </section>
+        {(reviews.length > 0 || rating) && (
+          <section className="cl-sec" id="reviews" aria-labelledby="reviews-title">
+            <div className="cl-sec-head" data-reveal>
+              <h2 id="reviews-title">{t(ui.reviews.title)}</h2>
+              <p>{demoMode ? t(ui.reviews.note) : rating && <RatingLine rating={rating} locale={locale} />}</p>
+            </div>
+            {reviews.length > 0 && (
+              <div className="cl-reviews cl-snap" role="region" aria-label={t(ui.reviews.label)} tabIndex={0}>
+                {reviews.map((r) => (
+                  <figure key={r.name} className="cl-review">
+                    {demoMode && <p className="cl-stars">{t(ui.reviews.stars)}</p>}
+                    <blockquote>{t(r.text)}</blockquote>
+                    <figcaption>
+                      <b>
+                        <ReviewAuthor name={r.name} url={"url" in r ? r.url : undefined} />
+                      </b>
+                      {"service" in r && <> · {t(r.service)}</>}
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
         <section className="cl-sec cl-faq" aria-labelledby="faq-title">
           <div className="cl-sec-head" data-reveal>
@@ -261,7 +285,7 @@ export function ClinicSite({ data, locale, style, localeHrefs }: TemplateProps<C
                 </div>
               ))}
             </div>
-            <MapCard label={t(ui.mapLabel)} />
+            <MapCard label={t(demoMode ? ui.mapLabel : ui.mapLabelClient)} />
           </div>
         </section>
         <MotionLayer />
@@ -278,7 +302,7 @@ export function ClinicSite({ data, locale, style, localeHrefs }: TemplateProps<C
       </footer>
 
       <BookingSheet
-        mode={data.booking.mode}
+        mode={demoMode ? data.booking.mode : "telegram"}
         telegram={data.telegram}
         clinic={data.name}
         sched={sched}

@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { adminClientCopy } from "../kit/client-copy";
 import { useHydrated, useMinuteClock } from "../kit/hooks";
+import { DigestTelegramButton, digestCopy } from "../kit/digest-button";
+import { itemCode, weekdaysToMask } from "../kit/digest-payload";
 import { plural } from "../kit/plural";
 import { addDays, dayOfMonth, diffDays, formatDate, tashkentNow, weekdayOf } from "../kit/tashkent";
-import { formatSum, pick, type L, type Locale } from "../types";
+import { formatSum, pick, type L, type Locale, type SiteMode } from "../types";
 import { adminUi as ui, adminWords as words } from "./admin-ui";
 import type { ClinicData } from "./data";
 import { fill } from "./format";
@@ -30,11 +33,15 @@ export function ClinicAdmin({
   locale,
   siteHref,
   localeHrefs,
+  digestBot,
+  mode = "demo",
 }: {
   data: ClinicData;
   locale: Locale;
   siteHref: string;
   localeHrefs: Record<Locale, string>;
+  digestBot?: string;
+  mode?: SiteMode;
 }) {
   const t = (l: L) => pick(l, locale);
   const [tab, setTab] = useState<Tab>("overview");
@@ -42,13 +49,15 @@ export function ClinicAdmin({
   const hydrated = useHydrated();
   const clock = useMinuteClock();
   const sched = useMemo(() => toScheduleData(data), [data]);
-  const ready = hydrated && !!state.seededAt && clock > 0;
+  // Режим "client": кабинет начинается с пустого, вымышленных записей у настоящей клиники нет.
+  const client = mode === "client";
+  const ready = hydrated && (client || !!state.seededAt) && clock > 0;
 
   // Пустой кабинет не показывает ничего — при первом открытии наполняем примерами. Записи с сайта
   // при этом остаются (seed сливает данные), а демо-записи ложатся на рабочие дни врачей.
   useEffect(() => {
-    if (hydrated && !state.seededAt) demo.seed(buildSeedBookings(sched, { services: state.services, schedule: state.schedule }));
-  }, [hydrated, state.seededAt, state.services, state.schedule, sched]);
+    if (!client && hydrated && !state.seededAt) demo.seed(buildSeedBookings(sched, { services: state.services, schedule: state.schedule }));
+  }, [client, hydrated, state.seededAt, state.services, state.schedule, sched]);
 
   const svcName = (id: string) => pick(data.services.find((s) => s.id === id)?.name ?? { ru: id, en: id, uz: id }, locale);
   const docName = (id: string) => pick(data.doctors.find((d) => d.id === id)?.name ?? { ru: id, en: id, uz: id }, locale);
@@ -61,7 +70,7 @@ export function ClinicAdmin({
       {locale === "ru" && <link rel="preload" href="/templates/fonts/onest-cyrillic.woff2" as="font" type="font/woff2" crossOrigin="" />}
       <header className="adm-head">
         <div className="adm-title">
-          <span className="adm-badge">{t(ui.demo.badge)}</span>
+          <span className="adm-badge">{t(client ? adminClientCopy.badge : ui.demo.badge)}</span>
           <strong className="adm-name">{data.name}</strong>
         </div>
         <div className="adm-head-r">
@@ -89,21 +98,23 @@ export function ClinicAdmin({
 
       <main className="adm-main">
         {!ready && <div className="adm-skel" role="status" aria-label={t(ui.loading)} />}
-        {ready && tab === "overview" && <Overview data={data} locale={locale} now={clock} bookings={state.bookings} events={state.events} svcName={svcName} docName={docName} />}
+        {ready && tab === "overview" && <Overview data={data} locale={locale} now={clock} bookings={state.bookings} events={state.events} svcName={svcName} docName={docName} digestBot={digestBot} />}
         {ready && tab === "bookings" && <Bookings locale={locale} now={clock} bookings={state.bookings} svcName={svcName} docName={docName} />}
         {ready && tab === "services" && <ServicesTab data={data} locale={locale} />}
         {ready && tab === "doctors" && <DoctorsTab data={data} locale={locale} />}
-        {ready && tab === "promo" && <PromoTab data={data} locale={locale} />}
+        {ready && tab === "promo" && <PromoTab data={data} locale={locale} client={client} />}
       </main>
 
       <footer className="adm-foot">
-        <p>{t(ui.demo.text)}</p>
+        <p>{t(client ? adminClientCopy.text : ui.demo.text)}</p>
         <div>
-          <button type="button" className="adm-link" onClick={() => demo.seed(buildSeedBookings(sched, { services: state.services, schedule: state.schedule }))}>
-            {t(ui.demo.seed)}
-          </button>
+          {!client && (
+            <button type="button" className="adm-link" onClick={() => demo.seed(buildSeedBookings(sched, { services: state.services, schedule: state.schedule }))}>
+              {t(ui.demo.seed)}
+            </button>
+          )}
           <button type="button" className="adm-link" onClick={() => demo.reset()}>
-            {t(ui.demo.reset)}
+            {t(client ? adminClientCopy.reset : ui.demo.reset)}
           </button>
         </div>
       </footer>
@@ -125,6 +136,7 @@ function Overview({
   events,
   svcName,
   docName,
+  digestBot,
 }: {
   data: ClinicData;
   locale: Locale;
@@ -133,6 +145,7 @@ function Overview({
   events: DemoEvent[];
   svcName: (id: string) => string;
   docName: (id: string) => string;
+  digestBot?: string;
 }) {
   const t = (l: L) => pick(l, locale);
   const week: [number, number] = [now - 7 * DAY_MS, now + 1];
@@ -219,8 +232,29 @@ function Overview({
           <h2 className="adm-h2">{t(ui.digest.title)}</h2>
           <span className="adm-sample">{t(ui.digest.sample)}</span>
         </div>
-        <p>{t(ui.digest.text)}</p>
+        <p>{digestBot ? t(digestCopy.caption) : t(ui.digest.text)}</p>
         <pre>{`${data.name} · ${t(ui.digest.head)}\n${fill(t(ui.digest.line1), { n: stats[0].cur })}\n${fill(t(ui.digest.line2), { n: stats[1].cur })}\n${fill(t(ui.digest.line3), { when: nextWhen })}`}</pre>
+        {digestBot && (
+          <DigestTelegramButton
+            bot={digestBot}
+            locale={locale}
+            payload={{
+              tpl: "clinic",
+              locale,
+              style: "a",
+              period: "week",
+              values: {
+                bookings: stats[0].cur,
+                calcs,
+                calls: stats[1].cur,
+                telegram: stats[2].cur,
+                views,
+                svc: tip && topSvc ? itemCode(data.services.findIndex((s) => s.id === topSvc[0])) : 0,
+                peak: tip ? weekdaysToMask(peakDays) : 0,
+              },
+            }}
+          />
+        )}
       </div>
     </section>
   );
@@ -497,7 +531,7 @@ function DoctorsTab({ data, locale }: { data: ClinicData; locale: Locale }) {
 
 /* ——— Акция ——— */
 
-function PromoTab({ data, locale }: { data: ClinicData; locale: Locale }) {
+function PromoTab({ data, locale, client }: { data: ClinicData; locale: Locale; client: boolean }) {
   const t = (l: L) => pick(l, locale);
   const state = useClinicState();
   return (
@@ -511,7 +545,7 @@ function PromoTab({ data, locale }: { data: ClinicData; locale: Locale }) {
         {t(ui.promo.text)}
         <input
           type="text"
-          value={state.promo?.text?.[locale] ?? t(data.promo)}
+          value={state.promo?.text?.[locale] ?? (client ? "" : t(data.promo))}
           onChange={(e) => demo.setPromo({ on: state.promo?.on ?? true, text: { ...state.promo?.text, [locale]: e.target.value } })}
         />
       </label>
