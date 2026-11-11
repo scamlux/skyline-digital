@@ -1,6 +1,6 @@
 "use client";
 
-import { pick, type Locale, type SiteMode } from "../types";
+import { pick, type Locale } from "../types";
 import { formatSum } from "../types";
 import { fill, priceParts } from "./format";
 import { useLive } from "./live";
@@ -85,7 +85,7 @@ function CellBody({ c, price }: { c: BentoCell; price: { num: string; unit: stri
 }
 
 /** Пакеты: цена считается по текущему прайсу, рассрочка — демо-платёж в месяц. */
-export function Packages({ packages, sched, locale, mode = "demo" }: { packages: PackageCard[]; sched: ScheduleData; locale: Locale; mode?: SiteMode }) {
+export function Packages({ packages, sched, locale }: { packages: PackageCard[]; sched: ScheduleData; locale: Locale }) {
   const { ov } = useLive();
   const words = { free: pick(ui.prices.free, locale), upTo: pick(ui.hero.upTo, locale) };
   return (
@@ -106,7 +106,7 @@ export function Packages({ packages, sched, locale, mode = "demo" }: { packages:
               <b>{price.num}</b> <span>{price.unit}</span>
             </p>
             <p className="cl-pack-sub">
-              {pkg.instalmentMonths ? fill(pick(mode === "demo" ? ui.prices.perMonth : ui.prices.perMonthClient, locale), { sum: formatSum(Math.round(total.min / pkg.instalmentMonths / 1000) * 1000, locale), n: pkg.instalmentMonths }) : " "}
+              {pkg.instalmentMonths ? fill(pick(ui.prices.perMonth, locale), { sum: formatSum(Math.round(total.min / pkg.instalmentMonths / 1000) * 1000, locale), n: pkg.instalmentMonths }) : " "}
             </p>
             <button type="button" className="cl-btn ghost" onClick={() => planDraft.send({ items: total.items, serviceId: "consult" })}>
               {pick(ui.book, locale)}

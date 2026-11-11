@@ -10,20 +10,6 @@ export const CONFIG_FIELDS = ["name", "tagline", "phone", "telegram", "address",
 /** Ключи, которые остаются в config у вложенных объектов (прочее, например closedDays, правится в data.ts). */
 const NESTED_KEYS = { hours: ["open", "close"], phone: ["display", "e164"] };
 
-/** Пометки «(демо-адрес)», «(demo manzil)» в скобках: в site.config.ts клиента им не место. */
-const DEMO_PAREN = /\s*\((?:демо|demo)[^)]*\)/gi;
-
-/** Убирает демо-пометки в скобках из текста (файла или строки). */
-export const stripDemoParens = (text) => text.replace(DEMO_PAREN, "");
-
-/** Убирает демо-пометки из строк (рекурсивно по объектам и массивам). */
-export function stripDemoMarks(value) {
-  if (typeof value === "string") return stripDemoParens(value).trim();
-  if (Array.isArray(value)) return value.map(stripDemoMarks);
-  if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, stripDemoMarks(v)]));
-  return value;
-}
-
 /**
  * @param {import("typescript")} ts
  * @param {import("typescript").Node} node
@@ -89,7 +75,7 @@ export async function readDemoFields(file, constName) {
       throw new Error(`${file}: поле «${key}» — ${e.message}. Экспорт не может предзаполнить site.config.`);
     }
     const keep = NESTED_KEYS[key];
-    result[key] = stripDemoMarks(keep ? Object.fromEntries(keep.filter((k) => k in value).map((k) => [k, value[k]])) : value);
+    result[key] = keep ? Object.fromEntries(keep.filter((k) => k in value).map((k) => [k, value[k]])) : value;
   }
   const missing = CONFIG_FIELDS.filter((k) => !(k in result));
   if (missing.length > 0) throw new Error(`${file}: у «${constName}» нет полей ${missing.join(", ")}`);

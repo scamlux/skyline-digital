@@ -1,11 +1,7 @@
 // Проверка экспортированного сайта (scripts/export-template.mjs): раздаёт готовую папку out/ тиньким
 // статическим сервером и гоняет в локальном Chrome (puppeteer-core; Playwright/Chromium не ставим).
 //
-//   node scripts/qa/export-check.mjs <папка-проекта> <restaurant|clinic|salon|cafe> [--shots <папка>] [--expect-reviews]
-//
-// Клиентский режим (ADR 0009): на публичных страницах (кроме кабинета) нет текста по маске демо/вымышлено,
-// нет блока отзывов, звёзд и полосы цифр (с --expect-reviews, когда в site.config.ts даны настоящие отзывы,
-// блок отзывов обязан быть), а форма записи/заказа открывает t.me/<telegram из site.config.ts>.
+//   node scripts/qa/export-check.mjs <папка-проекта> <restaurant|clinic|salon|cafe> [--shots <папка>]
 //
 // Проверяет страницы /, /en/, /uz/, /admin/: загрузка, ошибки консоли, 404 и упавшие запросы, отсутствие
 // слоя студии (плашка «демо», «Заказать за 50 $», ссылки на /sites и /contact, @vercel/analytics),
@@ -132,41 +128,33 @@ const FLOWS = {
     if (!(await domClick(page, '.cf-add[aria-label*="круассан"]'))) throw new Error("нет кнопки «круассан»");
     await sleep(300);
     await domClick(page, ".cf-sticky .cf-pill");
-    await page.waitForSelector(".cf-cart-foot .cf-cta", { timeout: 5000 });
-    await domClick(page, ".cf-cart-foot .cf-cta"); // корзина → время (по умолчанию «через 10 минут»)
+    await page.waitForSelector(".cf-cart[open] .cf-total", { timeout: 5000 });
+    await domClick(page, ".cf-cart .cf-cta", "Дальше");
     await sleep(300);
-    await domClick(page, ".cf-cart-foot .cf-cta"); // время → контакты
+    await domClick(page, '.cf-cart .cf-chips.big [role="radio"]');
+    await domClick(page, ".cf-cart .cf-slots [role=radio]");
+    await domClick(page, ".cf-cart .cf-cta", "Дальше");
     await sleep(300);
     await page.type('.cf-cart input[name="name"]', "Тест Экспорт");
     await page.type('.cf-cart input[name="phone"]', "+998901234567");
-    await domClick(page, ".cf-cart-foot .cf-cta"); // отправить
+    await domClick(page, ".cf-cart .cf-cta", "Отправить");
     await page.waitForSelector(".cf-done", { timeout: 5000 });
     return "Тест Экспорт";
   },
 };
 
 const PAGES = ["/", "/en/", "/uz/", "/admin/"];
-/** Демо-пометки, которых на публичных страницах клиентского сайта быть не должно. */
-const DEMO_TEXT = /демо|demo|вымышлен|fictional|xayoliy/gi;
-/** Блок отзывов, звёзды и полоса цифр шаблонов (restaurant/clinic/salon/cafe). */
-const REVIEWS_SEL = '#reviews, #reviews-title, [class*="-reviews"], [class*="-review"]';
-const STARS_SEL = ".rs-stars, .cf-stars, .cl-stars, .sl-stars";
-const STATS_SEL = ".rs-facts, .cl-stats";
 const STUDIO_TEXT = /Заказать за 50|Order for \$50|Oyiga 50 \$|50 \$\/мес/;
 
 async function main() {
   const [projectDir, template] = process.argv.slice(2);
   const shotsIdx = process.argv.indexOf("--shots");
   const shots = shotsIdx > -1 ? process.argv[shotsIdx + 1] : null;
-  const expectReviews = process.argv.includes("--expect-reviews");
   if (!projectDir || !FLOWS[template]) {
     console.error("Использование: node scripts/qa/export-check.mjs <папка-проекта> <restaurant|clinic|salon|cafe> [--shots <папка>]");
     process.exit(2);
   }
   const outDir = path.resolve(projectDir, "out");
-  // Telegram клиента: из его site.config.ts, а не из демо-данных шаблона.
-  const handle = /telegram:\s*"([^"]+)"/.exec(fs.readFileSync(path.join(path.resolve(projectDir), "site.config.ts"), "utf8"))?.[1];
-  if (!handle) throw new Error("В site.config.ts не найдено поле telegram.");
   if (!fs.existsSync(outDir)) throw new Error(`Нет ${outDir}: сначала \`npm run build\` в проекте.`);
   const { server, base } = await serve(outDir);
   const browser = await puppeteer.launch({ executablePath: CHROME, headless: "new", args: ["--hide-scrollbars"] });
@@ -219,18 +207,7 @@ async function main() {
       await sleep(80);
     }
     await sleep(500);
-    // Ленивые картинки в горизонтальных каруселях браузер может так и не начать грузить: для таких проверяем сам файл.
-    const lazyUnloaded = await page.evaluate(async () => {
-      const pending = [...document.images].filter((i) => !(i.complete && i.naturalWidth > 0));
-      const bad = [];
-      for (const img of pending) {
-        const src = img.currentSrc || img.src;
-        const ok = src ? await fetch(src).then((r) => r.ok && /^image\//.test(r.headers.get("content-type") ?? "")).catch(() => false) : false;
-        if (!ok) bad.push(src || "(нет src)");
-      }
-      return { pending: pending.length, bad };
-    });
-    const info = await page.evaluate((REVIEWS_SEL, STARS_SEL, STATS_SEL) => {
+    const info = await page.evaluate(() => {
       const meta = (sel, attr) => document.querySelector(sel)?.getAttribute(attr) ?? null;
       const imgs = [...document.images];
       return {
@@ -243,25 +220,14 @@ async function main() {
         hreflang: [...document.querySelectorAll('link[rel="alternate"][hreflang]')].map((l) => l.getAttribute("hreflang")),
         tpl: !!document.querySelector("[data-tpl]"),
         images: imgs.length,
+        brokenImages: imgs.filter((i) => !(i.complete && i.naturalWidth > 0)).map((i) => i.currentSrc || i.src),
         studioLinks: [...document.querySelectorAll("a[href]")].map((a) => a.getAttribute("href")).filter((h) => /^\/(\w\w\/)?(sites|contact)\b/.test(h)),
         studioText: document.body.innerText.slice(0, 20000),
-        // Весь текст страницы, включая скрытый (без script/style), подписи и описание для поиска.
-        allText: (() => {
-          const c = document.body.cloneNode(true);
-          c.querySelectorAll("script, style, noscript").forEach((n) => n.remove());
-          const attrs = [...document.querySelectorAll("[aria-label], [alt], [title], [placeholder]")].flatMap((e) => ["aria-label", "alt", "title", "placeholder"].map((a) => e.getAttribute(a) ?? ""));
-          const metas = [...document.querySelectorAll('meta[name="description"], meta[property^="og:"]')].map((m) => m.getAttribute("content") ?? "");
-          return [document.title, c.textContent, ...attrs, ...metas].join("\n");
-        })(),
-        reviewsEls: document.querySelectorAll(REVIEWS_SEL).length,
-        starsEls: document.querySelectorAll(STARS_SEL).length,
-        statsEls: document.querySelectorAll(STATS_SEL).length,
-        tgHrefs: [...new Set([...document.querySelectorAll('a[href*="t.me/"]')].map((a) => a.getAttribute("href")))],
         vercelScripts: [...document.scripts].map((s) => s.src).filter((s) => /vercel|_vercel|insights/.test(s)),
         demoBar: !!document.querySelector(".bg-night"),
         overflow: document.documentElement.scrollWidth - window.innerWidth,
       };
-    }, REVIEWS_SEL, STARS_SEL, STATS_SEL);
+    });
     const isAdmin = p.includes("admin");
     report.pages[p] = {
       status: res.status(),
@@ -269,23 +235,13 @@ async function main() {
       title: info.title,
       lang: info.lang,
       robots: info.robots,
-      // Публичные страницы открыты для индексации; кабинет владельца намеренно закрыт (noindex).
-      noindexOk: isAdmin ? /noindex/.test(info.robots ?? "") : !/noindex/.test(info.robots ?? ""),
+      noindexOk: isAdmin ? /noindex/.test(info.robots ?? "") : !/noindex/.test(info.robots ?? "noindex-absent") || info.robots === null || !/noindex/.test(info.robots),
       canonical: info.canonical,
       ogImage: info.ogImage,
       hreflang: info.hreflang,
       templateRendered: isAdmin ? true : info.tpl,
       images: info.images,
-      lazyNotLoaded: lazyUnloaded.pending,
-      brokenImages: lazyUnloaded.bad,
-      // Клиентский режим: демо-текст, отзывы, звёзды и цифры. В кабинете демо-слова только фиксируем, не валим.
-      clientMode: {
-        demoText: [...new Set(info.allText.match(DEMO_TEXT) ?? [])],
-        reviewsEls: info.reviewsEls,
-        starsEls: info.starsEls,
-        statsEls: info.statsEls,
-        foreignTelegram: info.tgHrefs.filter((h) => !h.startsWith(`https://t.me/${handle}`)),
-      },
+      brokenImages: info.brokenImages,
       studioChrome: { demoBar: info.demoBar, links: info.studioLinks, text: STUDIO_TEXT.test(info.studioText), vercelScripts: info.vercelScripts },
       overflow: info.overflow,
       errors: sink.errors,
@@ -307,23 +263,12 @@ async function main() {
   const page = await ctx.newPage();
   await page.setViewport({ width: 1440, height: 900 });
   await watch(page, sink);
-  // Окно Telegram не открываем, а записываем адрес: так видно, куда уйдёт заявка гостя.
-  await page.evaluateOnNewDocument(() => {
-    window.__opened = [];
-    window.open = (u) => {
-      window.__opened.push(String(u));
-      return null;
-    };
-  });
   try {
     await page.goto(base + "/", { waitUntil: "networkidle0" });
     await sleep(800);
     const guest = await FLOWS[template](page);
     report.flow.submitted = true;
-    await sleep(300);
-    report.flow.telegramLinks = await page.evaluate(() => window.__opened);
-    report.flow.telegramOk = report.flow.telegramLinks.some((u) => u.startsWith(`https://t.me/${handle}?text=`));
-    await sleep(200);
+    await sleep(500);
     await page.goto(base + "/admin/", { waitUntil: "networkidle0" });
     await sleep(900);
     report.flow.inAdmin = (await page.evaluate(() => document.body.innerText)).includes(guest);
@@ -339,14 +284,7 @@ async function main() {
   await browser.close();
   server.close();
   const pageList = Object.values(report.pages);
-  const publicPages = Object.entries(report.pages).filter(([p]) => !p.includes("admin")).map(([, v]) => v);
   report.summary = {
-    telegramHandle: handle,
-    telegramOk: report.flow.telegramOk === true && publicPages.every((p) => p.clientMode.foreignTelegram.length === 0),
-    demoTextPublic: publicPages.flatMap((p) => p.clientMode.demoText),
-    demoTextAdmin: [...new Set(Object.entries(report.pages).filter(([p]) => p.includes("admin")).flatMap(([, v]) => v.clientMode.demoText))],
-    // Без настоящих отзывов в конфиге: ни блока отзывов, ни звёзд, ни цифр. С ними (--expect-reviews): блок есть, звёзд нет.
-    reviewsOk: publicPages.every((p) => (expectReviews ? p.clientMode.reviewsEls > 0 : p.clientMode.reviewsEls === 0 && p.clientMode.statsEls === 0) && p.clientMode.starsEls === 0),
     pagesOk: pageList.every((p) => p.ok && p.templateRendered),
     flowOk: report.flow.submitted === true && report.flow.inAdmin === true && !report.flow.error,
     consoleErrors: pageList.reduce((n, p) => n + p.errors.length, 0) + report.flow.errors.length,
@@ -357,7 +295,7 @@ async function main() {
     outMB: Number((report.outBytes / 1024 / 1024).toFixed(2)),
   };
   console.log(JSON.stringify(report, null, 2));
-  process.exit(report.summary.pagesOk && report.summary.flowOk && report.summary.telegramOk && report.summary.demoTextPublic.length === 0 && report.summary.reviewsOk && report.summary.consoleErrors === 0 && report.summary.notFound === 0 && !report.summary.studioChrome && report.summary.noindexOk && report.summary.brokenImages === 0 ? 0 : 1);
+  process.exit(report.summary.pagesOk && report.summary.flowOk && report.summary.consoleErrors === 0 && report.summary.notFound === 0 && !report.summary.studioChrome && report.summary.noindexOk && report.summary.brokenImages === 0 ? 0 : 1);
 }
 
 main().catch((e) => {

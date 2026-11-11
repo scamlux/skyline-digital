@@ -13,7 +13,7 @@ import { cafeUi as ui } from "./ui";
  * «открывается»: чашка заполняется и появляется наклейка «бесплатно».
  * Текста почти нет: смысл читается по картинке.
  */
-export function LoyaltyCard({ locale, name }: { locale: Locale; name: string }) {
+export function LoyaltyCard({ locale }: { locale: Locale }) {
   const { stamps } = useCafeState();
   const ready = freeCupReady(stamps);
   return (
@@ -22,7 +22,7 @@ export function LoyaltyCard({ locale, name }: { locale: Locale; name: string }) 
         <h2 id="card-title">{pick(ui.loyalty.title, locale)}</h2>
         <p>{pick(ui.loyalty.lead, locale)}</p>
       </div>
-      <div className="cf-stampcard" data-ready={ready || undefined} role="group" aria-label={fill(pick(ui.loyalty.cardLabel, locale), { name })}>
+      <div className="cf-stampcard" data-ready={ready || undefined} role="group" aria-label={pick(ui.loyalty.cardLabel, locale)}>
         <ol className="cf-stamps">
           {Array.from({ length: CARD_SLOTS }, (_, i) => {
             const last = i === CARD_SLOTS - 1;

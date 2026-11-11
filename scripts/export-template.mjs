@@ -12,9 +12,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { checkImportGraph, describeViolation } from "./lib/import-graph.mjs";
-import { readDemoFields, stripDemoParens } from "./lib/demo-fields.mjs";
+import { readDemoFields } from "./lib/demo-fields.mjs";
 import * as gen from "./lib/export-files.mjs";
-import { listPhotos, readmeMd } from "./lib/export-readme.mjs";
+import { findDemoMarks, listPhotos, readmeMd } from "./lib/export-readme.mjs";
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SITE_TEMPLATES = path.join(REPO, "src/site-templates");
@@ -31,7 +31,7 @@ const USAGE = `Использование:
   --style a|b     стиль сайта (по умолчанию a)
   --out <папка>   куда выгрузить проект (должна быть пустой, если нет --force)
   --locales       языки через запятую; первый — основной (корень сайта). По умолчанию ru,en,uz
-  --with-admin    добавить кабинет владельца (/admin, /en/admin, …): пустой, данные в браузере
+  --with-admin    добавить демо-кабинет владельца (/admin, /en/admin, …)
   --force         выгружать в непустую папку (перезаписываются src/, public/ и файлы проекта)`;
 
 class UserError extends Error {}
@@ -182,10 +182,7 @@ async function main() {
   // 4. Код шаблона.
   for (const file of plan.copy) {
     const dest = path.join(out, "src/site-templates", path.relative(SITE_TEMPLATES, file));
-    const rel = path.relative(SITE_TEMPLATES, file);
-    if (rel === "types.ts") write(out, "src/site-templates/types.ts", patchLocales(fs.readFileSync(file, "utf8"), locales));
-    // В данных шаблона остаются пометки «(демо)» у вымышленных позиций: в проект клиента они не едут.
-    else if (/^[a-z]+[\\/]data(-\w+)?\.ts$/.test(rel)) write(out, path.join("src/site-templates", rel), stripDemoParens(fs.readFileSync(file, "utf8")));
+    if (path.relative(SITE_TEMPLATES, file) === "types.ts") write(out, "src/site-templates/types.ts", patchLocales(fs.readFileSync(file, "utf8"), locales));
     else copyFile(file, dest);
   }
 
@@ -254,13 +251,14 @@ async function main() {
   write(out, "src/app/robots.ts", gen.robotsTs({ withAdmin }));
   write(out, "src/app/sitemap.ts", gen.sitemapTs());
 
-  // 7. Проверка ссылок на ресурсы и README (фото считаем по готовой папке).
+  // 7. Проверка ссылок на ресурсы и README (фото и пометки «демо» считаем по готовой папке).
   const checked = [...listSources(path.join(out, "src")), ...cssFiles.map((f) => path.join(out, "public/templates", f)), path.join(out, "src/site/data.ts")];
   verifyAssets(out, checked);
-  write(out, "README.md", readmeMd({ templateId, style, locales, withAdmin, photos: listPhotos(path.join(out, "public/templates", templateId, "img")), fields, dataFile }));
+  const marks = findDemoMarks(path.join(out, "src/site-templates", templateId));
+  write(out, "README.md", readmeMd({ templateId, style, locales, withAdmin, photos: listPhotos(path.join(out, "public/templates", templateId, "img")), marks, fields }));
 
   console.log(`Готово: ${out}`);
-  console.log(`  шаблон ${templateId}, стиль ${style}, языки ${locales.join(",")}${withAdmin ? ", с кабинетом владельца" : ""}, режим client (без демо-контента)`);
+  console.log(`  шаблон ${templateId}, стиль ${style}, языки ${locales.join(",")}${withAdmin ? ", с демо-кабинетом" : ""}`);
   console.log(`  файлов шаблона: ${plan.copy.length}, шрифтов: ${fonts.length}, фото-файлов: ${fs.readdirSync(path.join(out, "public/templates", templateId, "img")).length}`);
   console.log("Дальше:  cd " + out + " && npm install && npm run build   (результат в папке out/)");
 }

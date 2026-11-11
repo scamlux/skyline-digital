@@ -46,9 +46,6 @@ export const TEMPLATE_META = {
   },
 };
 
-/** Имя-заглушка Telegram в site.config.ts: сборка предупреждает, пока его не заменили. */
-export const TELEGRAM_PLACEHOLDER = "your_telegram";
-
 const LOCALE_NAMES = { ru: "русский", en: "английский", uz: "узбекский (латиница)" };
 export const localeName = (l) => LOCALE_NAMES[l];
 
@@ -75,13 +72,11 @@ export function siteConfigTs({ templateId, style, withAdmin, fields }) {
  * Настройки сайта клиента: меняйте только значения в кавычках, структуру не трогайте.
  * После правки пересоберите сайт (\`npm run build\` локально или новый деплой на хостинге).
  *
- * Здесь — имя, контакты, часы работы, настоящие отзывы, оценка, цифры и акция. Меню/услуги/цены лежат в
+ * Здесь — имя, контакты, часы и режим заявок. Меню/услуги/цены/отзывы лежат в
  * src/site-templates/${templateId}/data.ts, тексты интерфейса — в src/site-templates/${templateId}/ui.ts
- * (подробности в README.md). Название, адрес, телефон и часы ниже — образец шаблона «${meta.title}»,
- * стиль «${style}»: замените их данными клиента. Заявки гостей приходят в Telegram по полю telegram.
+ * (подробности в README.md). Исходные значения ниже — демо-данные шаблона «${meta.title}»,
+ * стиль «${style}»: замените их данными клиента.
  */
-import type { ClientRating } from "./src/site-templates/types";
-import type { ConfigReview, ConfigStat, Multilang } from "./src/site-templates/kit/client-config";
 
 /** Адрес сайта после публикации (без «/» в конце): нужен для canonical, og:image и sitemap. */
 const DETECTED_URL =
@@ -93,30 +88,17 @@ export const siteConfig = {
   /** Свой домен впишите сюда строкой, например "https://dasturxon.uz" (или задайте переменную окружения SITE_URL). */
   siteUrl: DETECTED_URL ?? "https://example.com",
 
+  /**
+   * Что происходит при отправке формы записи/заказа:
+   *  "telegram" — открывается чат владельца в Telegram с готовым текстом заявки (работает без сервера);
+   *  "demo"     — только показывает подтверждение, ничего никому не отправляет.
+   */
+  bookingMode: "telegram" as "telegram" | "demo",
 ${withAdmin ? `
-  /** Кабинет владельца на /admin (пустой блокнот, данные хранятся в браузере). false — страницы кабинета не собираются вовсе. */
+  /** Демо-кабинет владельца на /admin. false — страницы кабинета не собираются вовсе. */
   admin: true,
 ` : ""}
-${field("name", fields.name, "Название бизнеса (шапка, заголовок страницы, схема для поисковиков).")}${brandBlock}${field("tagline", fields.tagline, "Короткая подпись: попадает в заголовок страницы и описание для поиска.")}${field("phone", fields.phone, "display — как показывать, e164 — для ссылки tel: (+998…, без пробелов).")}${field("telegram", TELEGRAM_PLACEHOLDER, "Имя в Telegram без @: на https://t.me/<имя> уходят заявки гостей. ОБЯЗАТЕЛЬНО замените на своё.")}${field("address", fields.address, "Адрес на трёх языках.")}${field("hours", fields.hours, "Часы работы, формат ЧЧ:ММ, время Ташкента (UTC+5).")}${field("mapUrl", fields.mapUrl, "Ссылка на карту: откройте место в Google Maps или Яндекс Картах → «Поделиться» → скопируйте ссылку.")}
-  /**
-   * НАСТОЯЩИЕ отзывы гостей. Пока список пуст, блока отзывов на сайте нет: вымышленные не показываются никогда.
-   * text — строка (одна на все языки) или { ru: "…", en: "…", uz: "…" }; url — ссылка на отзыв (2ГИС, Google Maps), необязательна.
-   * Пример: { author: "Дилноза", text: "Плов как у мамы", url: "https://maps.app.goo.gl/…" }
-   */
-  reviews: [] as ConfigReview[],
-  /**
-   * НАСТОЯЩАЯ общая оценка и откуда она взята; без неё на сайте нет ни звёзд, ни «4,9».
-   * Пример: { value: 4.8, count: 132, source: "Google Maps", url: "https://maps.app.goo.gl/…" }
-   */
-  rating: undefined as ClientRating | undefined,
-  /**
-   * НАСТОЯЩИЕ цифры («9 лет», «12 000 гостей»); пустой список — полосы с цифрами нет.
-   * Пример: { value: "9 лет", label: "с вами" }; label — строка или { ru, en, uz }.
-   */
-  stats: [] as ConfigStat[],
-  /** Настоящая акция одной строкой (или { ru, en, uz }); без неё баннера акции нет. */
-  promo: undefined as Multilang | undefined,
-};
+${field("name", fields.name, "Название бизнеса (шапка, заголовок страницы, схема для поисковиков).")}${brandBlock}${field("tagline", fields.tagline, "Короткая подпись: попадает в заголовок страницы и описание для поиска.")}${field("phone", fields.phone, "display — как показывать, e164 — для ссылки tel: (+998…, без пробелов).")}${field("telegram", fields.telegram, "Имя в Telegram без @: на него уходят заявки (https://t.me/<имя>).")}${field("address", fields.address, "Адрес на трёх языках.")}${field("hours", fields.hours, "Часы работы, формат ЧЧ:ММ, время Ташкента (UTC+5).")}${field("mapUrl", fields.mapUrl, "Ссылка на карту: откройте место в Google Maps или Яндекс Картах → «Поделиться» → скопируйте ссылку.")}};
 
 export type SiteConfig = typeof siteConfig;
 `;
@@ -137,8 +119,8 @@ interface Overridable {
 }
 
 /**
- * Накладывает site.config.ts на образец данных шаблона. Данные не мутируются: возвращается новая копия.
- * Часы сливаются поверх образца (у клиники там ещё \`closedDays\`), в booking/order всегда "telegram".
+ * Накладывает site.config.ts на демо-данные шаблона. Данные не мутируются: возвращается новая копия.
+ * Часы сливаются поверх демо (у клиники там ещё \`closedDays\`), режим записи кладётся в booking/order.
  */
 export function applyConfig<D extends Overridable>(demo: D, config: SiteConfig, modeKey: "booking" | "order"): D {
   const brand = (config as { brand?: { main: string; sub: string } }).brand;
@@ -153,8 +135,7 @@ export function applyConfig<D extends Overridable>(demo: D, config: SiteConfig, 
     mapUrl: config.mapUrl,
     hours: { ...demo.hours, ...config.hours },
     ...(brand ? { brand } : {}),
-    // Заявка гостя уходит в Telegram владельца (t.me/<telegram> с готовым текстом): режима «только подтверждение» у клиентского сайта нет.
-    [modeKey]: { ...modeHolder, mode: "telegram" },
+    [modeKey]: { ...modeHolder, mode: config.bookingMode },
   } as D;
 }
 `;
@@ -167,7 +148,6 @@ export function dataTs({ templateId, style }) {
     return `import { ${meta.data.import} } from "${dir}/data";
 import type { StyleId } from "../site-templates/types";
 import { siteConfig } from "../../site.config";
-import { normalizeClientContent } from "../site-templates/kit/client-config";
 import { applyConfig } from "./apply-config";
 
 export const TEMPLATE_ID = "${templateId}";
@@ -178,15 +158,11 @@ export const OG_IMAGE = "/templates/${templateId}/img/og-1200.jpg";
 /** Оба бизнеса шаблона; клиентские правки из site.config.ts накладываются на выбранный стиль. */
 export const businesses = { ...${meta.data.import}, [STYLE]: applyConfig(${meta.data.import}[STYLE], siteConfig, "${meta.modeKey}") };
 export const data = businesses[STYLE];
-
-/** Настоящие отзывы, оценка, цифры и акция из site.config.ts; вымышленные из data.ts не показываются. */
-export const client = normalizeClientContent({ reviews: siteConfig.reviews, rating: siteConfig.rating, stats: siteConfig.stats, promo: siteConfig.promo });
 `;
   }
   return `import { ${meta.data.import} } from "${dir}/data";
 import type { StyleId } from "../site-templates/types";
 import { siteConfig } from "../../site.config";
-import { normalizeClientContent } from "../site-templates/kit/client-config";
 import { applyConfig } from "./apply-config";
 
 export const TEMPLATE_ID = "${templateId}";
@@ -195,9 +171,6 @@ export const STYLE: StyleId = "${style}";
 export const OG_IMAGE = "/templates/${templateId}/img/og-1200.jpg";
 
 export const data = applyConfig(${meta.data.import}, siteConfig, "${meta.modeKey}");
-
-/** Настоящие отзывы, оценка, цифры и акция из site.config.ts; вымышленные из data.ts не показываются. */
-export const client = normalizeClientContent({ reviews: siteConfig.reviews, rating: siteConfig.rating, stats: siteConfig.stats, promo: siteConfig.promo });
 `;
 }
 
@@ -205,13 +178,13 @@ export function templateTsx({ templateId, withAdmin }) {
   const meta = TEMPLATE_META[templateId];
   const dir = `../site-templates/${templateId}`;
   const adminImport = withAdmin ? `import { ${meta.adminExport} } from "${dir}/Admin";\n` : "";
-  const dataImport = meta.perStyleData ? "businesses, client, data, STYLE" : "client, data, STYLE";
+  const dataImport = meta.perStyleData ? "businesses, data, STYLE" : "data, STYLE";
   const adminProp = meta.perStyleData ? "businesses={businesses}" : "data={data}";
   const adminFn = withAdmin
     ? `
-/** Кабинет владельца (данные живут в браузере, см. README): режим "client", пустой, без примеров. */
+/** Демо-кабинет владельца (данные живут в браузере, см. README). */
 export function renderAdmin({ locale, localeHrefs, siteHref }: AdminProps): ReactElement {
-  return <${meta.adminExport} ${adminProp}${meta.perStyleData ? " style={STYLE}" : ""} mode="client" locale={locale} localeHrefs={localeHrefs} siteHref={siteHref} />;
+  return <${meta.adminExport} ${adminProp} locale={locale} localeHrefs={localeHrefs} siteHref={siteHref} />;
 }
 `
     : "";
@@ -226,7 +199,7 @@ interface SiteProps {
 }
 ${withAdmin ? "\ninterface AdminProps extends SiteProps {\n  siteHref: string;\n}\n" : ""}
 export function renderSite({ locale, localeHrefs }: SiteProps): ReactElement {
-  return <${meta.siteExport} data={data} mode="client" client={client} locale={locale} style={STYLE} localeHrefs={localeHrefs} />;
+  return <${meta.siteExport} data={data} locale={locale} style={STYLE} localeHrefs={localeHrefs} />;
 }
 ${adminFn}`;
 }
@@ -292,9 +265,6 @@ export const SITE_URL = siteConfig.siteUrl.replace(/\\/+$/, "");
 
 if (/example\\.com/.test(SITE_URL)) {
   console.warn("[site] В site.config.ts не задан siteUrl (сейчас " + SITE_URL + "): canonical, og:image и sitemap будут указывать на example.com.");
-}
-if (siteConfig.telegram === "${TELEGRAM_PLACEHOLDER}") {
-  console.warn("[site] В site.config.ts не задан telegram: заявки гостей уходят на t.me/${TELEGRAM_PLACEHOLDER}, а не владельцу.");
 }
 
 const OG_LOCALE: Record<Locale, string> = { ru: "ru_RU", en: "en_US", uz: "uz_UZ" };

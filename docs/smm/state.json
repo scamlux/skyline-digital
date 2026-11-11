@@ -1,6 +1,24 @@
 {
   "_comment": "Состояние SMM-машины, редакция 3 — карусели вместо видео, Instagram главный, LinkedIn с личного профиля владельца. Спецификация — docs/SMM-PLAN.md и docs/SMM-ANALYSIS-2026-09.md. Обновляет пятничная сверка, правила — docs/smm/QA.md.",
   "updated": "2026-09-04",
+  "last_weekly_check": {
+    "date": "2026-10-16",
+    "status": "ожидает данных владельца — цифры недели не внесены",
+    "metrics_entered": false,
+    "note": "Блоки week, followers, median_views и медианы форматов НЕ обновлялись: владелец не прислал цифры. Правило сверки запрещает проставлять их по ощущению.",
+    "verified_without_owner": {
+      "state_last_data_update": "2026-09-04 — 6 недель без обновления",
+      "content_plan_current_month": "отсутствует: последний план content-plan-2026-09.json, период 2026-09-07 — 2026-10-04, истёк 12 дней назад",
+      "queue_dir": "docs/smm/queue пуста с момента создания 2026-09-03",
+      "playbook_last_modified": "2026-08-31 — ни одной недельной записи",
+      "git_last_commit_touching_smm": "2026-09-07; репозиторий при этом активен до 2026-10-12 (конвейер заказов)",
+      "telegram_channel_bot": "НЕ настроен: в .env.local нет TELEGRAM_CHANNEL_BOT_TOKEN и TELEGRAM_CHANNEL_ID, isChannelConfigured() вернёт false. Есть только TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID — это бот лидов, не канал",
+      "prod_cron": "vercel.json: /api/cron/content, расписание 5 7 * * * — маршрут существует, но публиковать в канал ему нечем",
+      "meta_tokens": "tokens.meta_expires null, google_status not_created, last_refresh null — доступы не заводились",
+      "supabase_content_posts": "проверить не удалось: проект pxfvcxogjrhiwrbwqyvz недоступен через подключённый Supabase MCP"
+    },
+    "kill_rule_verdict": "решение перенесено: ни по одному формату нет трёх публикаций подряд (posts = 0 везде). Ни один формат не уходит в kill_list и ни один не становится winner"
+  },
   "phase": 0,
   "phase_name": "упаковка",
   "goal": {

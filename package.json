@@ -12,7 +12,6 @@
     "radar": "tsx scripts/radar/cli.ts",
     "content": "tsx scripts/content/cli.ts",
     "content:import": "tsx scripts/content/import-plan.mjs",
-    "export:template": "node scripts/export-template.mjs",
     "audit:bench": "tsx --conditions=react-server --env-file=.env.local scripts/audit/bench.ts",
     "audit:radar": "tsx --conditions=react-server --env-file=.env.local scripts/audit/radar-batch.ts"
   },

@@ -46,11 +46,9 @@ export function OpenStatus({ open, close, closedDays, locale }: { open: string; 
 export function PromoBar({ text, locale }: { text: string; locale: Locale }) {
   const promo = useClinicState().promo;
   if (promo && !promo.on) return null;
-  const shown = promo?.text?.[locale] ?? text;
-  if (!shown) return null;
   return (
     <p className="cl-promo" role="note">
-      {shown}
+      {promo?.text?.[locale] ?? text}
     </p>
   );
 }

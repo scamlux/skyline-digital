@@ -83,10 +83,10 @@ export function HoursText({ open, close, locale }: { open: string; close: string
 }
 
 /** Плашка акции: по умолчанию текст из данных, кабинет может выключить или переписать. */
-export function PromoBar({ fallback, locale }: { fallback?: L; locale: Locale }) {
+export function PromoBar({ fallback, locale }: { fallback: L; locale: Locale }) {
   const { promo } = useDemoState();
   if (promo && !promo.on) return null;
-  const text = promo?.text?.[locale] ?? (fallback ? pick(fallback, locale) : "");
+  const text = promo?.text?.[locale] ?? pick(fallback, locale);
   if (!text) return null;
   return (
     <p className="rs-promo" role="note">

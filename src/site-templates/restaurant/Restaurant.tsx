@@ -1,8 +1,7 @@
 /* eslint-disable @next/next/no-img-element -- шаблон переносимый (без next/image): адаптивные <img srcset> с готовыми webp */
 import { Carousel } from "../kit/carousel";
-import { RatingLine, ReviewAuthor } from "../kit/client-content";
 import { MotionLayer } from "../kit/motion";
-import { LOCALES, pick, type L, type Locale, type TemplateProps } from "../types";
+import { LOCALES, pick, type Locale, type TemplateProps } from "../types";
 import { BookButton, HoursText, OpenStatus, PageView, PromoBar, StickyBar, TrackedLink } from "./client-bits";
 import type { DeliveryId, RestaurantData } from "./data";
 import { IconArrow, IconBag, IconClock, IconPhone, IconPin, IconScooter, IconSend, IconStar, Kazan } from "./icons";
@@ -40,15 +39,9 @@ const DELIVERY_ICON = { uzum: IconBag, yandex: IconScooter } satisfies Record<De
  * Правила: заголовки до пяти слов, одна поясняющая строка на блок, фото и цифры вместо абзацев,
  * цели ≥ 44px, «Забронировать стол» в первом экране и в липкой панели.
  */
-export function RestaurantSite({ data, locale, style, localeHrefs, mode = "demo", client }: TemplateProps<RestaurantData>) {
+export function RestaurantSite({ data, locale, style, localeHrefs }: TemplateProps<RestaurantData>) {
   const t = (l: Parameters<typeof pick>[0]) => pick(l, locale);
   const hero = data.hero[style];
-  // Режим "client": вымышленные отзывы, цифры, акция и демо-пометки из data не показываются, только настоящее из client.
-  const demoMode = mode === "demo";
-  const facts: { photo?: string; value: string; label: L }[] = demoMode ? data.facts : (client?.stats ?? []);
-  const reviews = demoMode ? data.reviews : (client?.reviews ?? []);
-  const rating = demoMode ? undefined : client?.rating;
-  const delivery = demoMode ? data.delivery : data.delivery.filter((d) => /^https?:/.test(d.url)); // заглушки «#» — только в демо
   const heroPhoto = data.photos.hero[style];
   // A: фото в верхней части экрана на телефоне и половина экрана на десктопе; B: фон на всю ширину.
   const heroSizes = style === "b" ? "100vw" : "(max-width: 860px) 55vw, 52vw";
@@ -130,19 +123,17 @@ export function RestaurantSite({ data, locale, style, localeHrefs, mode = "demo"
           </div>
         </section>
 
-        {facts.length > 0 && (
-          <ul className="rs-facts" aria-label={t(ui.factsLabel)} data-reveal>
-            {facts.map((f) => (
-              <li key={f.value + t(f.label)}>
-                {f.photo && <Photo name={f.photo} src={480} widths={[240, 480]} sizes="(max-width: 640px) 34vw, 22vw" width={480} height={480} loading="lazy" />}
-                <b>{f.value}</b>
-                <span>{t(f.label)}</span>
-              </li>
-            ))}
-          </ul>
-        )}
+        <ul className="rs-facts" aria-label={t(ui.factsLabel)} data-reveal>
+          {data.facts.map((f) => (
+            <li key={f.value + f.photo}>
+              <Photo name={f.photo} src={480} widths={[240, 480]} sizes="(max-width: 640px) 34vw, 22vw" width={480} height={480} loading="lazy" />
+              <b>{f.value}</b>
+              <span>{t(f.label)}</span>
+            </li>
+          ))}
+        </ul>
 
-        <PromoBar fallback={demoMode ? data.promo : client?.promo} locale={locale} />
+        <PromoBar fallback={data.promo} locale={locale} />
         <MenuSection menu={data.menu} locale={locale} />
         <SetBuilder sets={data.sets} menu={data.menu} locale={locale} />
 
@@ -161,7 +152,7 @@ export function RestaurantSite({ data, locale, style, localeHrefs, mode = "demo"
                 <small>{t(ui.delivery.direct)}</small>
               </TrackedLink>
             </li>
-            {delivery.map((d) => {
+            {data.delivery.map((d) => {
               const Icon = DELIVERY_ICON[d.id];
               return (
                 <li key={d.id}>
@@ -178,36 +169,30 @@ export function RestaurantSite({ data, locale, style, localeHrefs, mode = "demo"
           </ul>
         </section>
 
-        {(reviews.length > 0 || rating) && (
-          <section className="rs-sec rs-reviews" aria-labelledby="reviews-title" data-reveal>
-            <div className="rs-sec-head">
-              <h2 id="reviews-title">{t(ui.reviews.title)}</h2>
-              <p>{demoMode ? <span className="rs-demo-chip">{t(ui.reviews.demo)}</span> : rating && <RatingLine rating={rating} locale={locale} />}</p>
-            </div>
-            {reviews.length > 0 && (
-              <Carousel label={t(ui.reviews.label)} prevLabel={t(ui.reviews.prev)} nextLabel={t(ui.reviews.next)}>
-                {reviews.map((r) => (
-                  <figure className="rs-review" key={r.name}>
-                    {demoMode && (
-                      <span className="rs-stars" aria-hidden="true">
-                        {[0, 1, 2, 3, 4].map((i) => (
-                          <IconStar key={i} />
-                        ))}
-                      </span>
-                    )}
-                    <blockquote>{t(r.text)}</blockquote>
-                    <figcaption>
-                      <b>
-                        <ReviewAuthor name={r.name} url={"url" in r ? r.url : undefined} />
-                      </b>
-                      {r.when && <small>{t(r.when)}</small>}
-                    </figcaption>
-                  </figure>
-                ))}
-              </Carousel>
-            )}
-          </section>
-        )}
+        <section className="rs-sec rs-reviews" aria-labelledby="reviews-title" data-reveal>
+          <div className="rs-sec-head">
+            <h2 id="reviews-title">{t(ui.reviews.title)}</h2>
+            <p>
+              <span className="rs-demo-chip">{t(ui.reviews.demo)}</span>
+            </p>
+          </div>
+          <Carousel label={t(ui.reviews.label)} prevLabel={t(ui.reviews.prev)} nextLabel={t(ui.reviews.next)}>
+            {data.reviews.map((r) => (
+              <figure className="rs-review" key={r.name}>
+                <span className="rs-stars" aria-hidden="true">
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <IconStar key={i} />
+                  ))}
+                </span>
+                <blockquote>{t(r.text)}</blockquote>
+                <figcaption>
+                  <b>{r.name}</b>
+                  <small>{t(r.when)}</small>
+                </figcaption>
+              </figure>
+            ))}
+          </Carousel>
+        </section>
 
         <section className="rs-sec rs-contacts" id="contacts" aria-labelledby="contacts-title" data-reveal>
           <div className="rs-sec-head">
@@ -257,14 +242,13 @@ export function RestaurantSite({ data, locale, style, localeHrefs, mode = "demo"
 
       <footer className="rs-foot">
         <span>
-          © {data.name}
-          {demoMode && ` · ${t(ui.footerDemo)}`}
+          © {data.name} · {t(ui.footerDemo)}
         </span>
         <LangSwitch locale={locale} hrefs={localeHrefs} label={t(ui.langLabel)} />
       </footer>
 
       <StickyBar phone={data.phone.e164} telegram={data.telegram} locale={locale} />
-      <LazyBookingSheet name={data.name} telegram={data.telegram} hours={data.hours} mode={demoMode ? data.booking.mode : "telegram"} menu={data.menu} sets={data.sets} locale={locale} />
+      <LazyBookingSheet name={data.name} telegram={data.telegram} hours={data.hours} mode={data.booking.mode} menu={data.menu} sets={data.sets} locale={locale} />
       <MotionLayer />
     </div>
   );
