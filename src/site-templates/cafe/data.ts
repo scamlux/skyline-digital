@@ -68,20 +68,7 @@ export type GlyphKind = "cup" | "iced" | "matcha" | "glass" | "croissant" | "coo
  * Фото, файлы которых лежат в public/templates/cafe/img. Позиция с фото вне списка показывает
  * нарисованную плитку, а не битую картинку. Когда добавите файл — допишите имя сюда.
  */
-export const AVAILABLE_PHOTOS: ReadonlySet<string> = new Set([
-  "flat-white",
-  "cappuccino",
-  "iced-latte",
-  "matcha-latte",
-  "raf",
-  "lemonade",
-  "croissant",
-  "cheesecake",
-  "syrniki",
-  "avocado-toast",
-  "breakfast",
-  "granola",
-]);
+export const AVAILABLE_PHOTOS: ReadonlySet<string> = new Set(["flat-white", "cappuccino", "iced-latte", "matcha-latte"]);
 
 export interface MenuItem {
   id: string;

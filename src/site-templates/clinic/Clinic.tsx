@@ -1,5 +1,4 @@
 /* eslint-disable @next/next/no-img-element -- шаблон переносимый (без next/image): адаптивные <img srcset> с готовыми webp */
-import { RatingLine, ReviewAuthor } from "../kit/client-content";
 import { MotionLayer } from "../kit/motion";
 import { LOCALES, pick, type Locale, type TemplateProps } from "../types";
 import { BookButton, OpenStatus, PageView, PromoBar, StickyBar, TrackedLink } from "./client-bits";
@@ -23,8 +22,6 @@ const FONT_CYRILLIC = "/templates/fonts/onest-cyrillic.woff2";
 const HERO_SIZES = "(max-width: 760px) 96px, 560px";
 
 type W = 480 | 960 | 1280;
-/** Реальные размеры 480-х файлов плиток-фото (для width/height у <img>, без сдвига вёрстки). */
-const PHOTO_SIZE = { consult: { w: 480, h: 320 }, scanner: { w: 480, h: 480 }, kids: { w: 480, h: 600 } } as const;
 const img = (base: string, w: W) => `${IMG}/${base}-${w}.webp`;
 const srcSet = (base: string, widths: W[]) => widths.map((w) => `${img(base, w)} ${w}w`).join(", ");
 
@@ -38,14 +35,9 @@ const srcSet = (base: string, widths: W[]) => widths.map((w) => `${img(base, w)}
  * и стартуют после первой отрисовки; движение — один остров MotionLayer; при
  * prefers-reduced-motion страница статична. Тяжёлого JS нет: ни canvas, ни WebGL.
  */
-export function ClinicSite({ data, locale, style, localeHrefs, mode = "demo", client }: TemplateProps<ClinicData>) {
+export function ClinicSite({ data, locale, style, localeHrefs }: TemplateProps<ClinicData>) {
   const t = (l: Parameters<typeof pick>[0]) => pick(l, locale);
   const sched = toScheduleData(data);
-  // Режим "client": вымышленные отзывы, цифры, акция и демо-пометки из data не показываются, только настоящее из client.
-  const demoMode = mode === "demo";
-  const reviews = demoMode ? data.reviews : (client?.reviews ?? []);
-  const rating = demoMode ? undefined : client?.rating;
-  const clientStats = demoMode ? [] : (client?.stats ?? []);
   const doctorOf = (id: string) => data.doctors.find((d) => d.id === id) ?? data.doctors[0];
   const decSep = locale === "en" ? "." : ",";
   const group = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, "\u00a0");
@@ -62,15 +54,15 @@ export function ClinicSite({ data, locale, style, localeHrefs, mode = "demo", cl
   const svc = (id: string) => data.services.find((s) => s.id === id)!;
   const cell = (id: string, extra: Partial<BentoCell> = {}): BentoCell => ({ id, name: t(svc(id).name), unit: t(svc(id).unit), ...extra });
   const cells: BentoCell[] = [
-    cell("consult", { span: "big", photo: data.photos.consult, photoSize: PHOTO_SIZE.consult, unit: t(svc("consult").blurb) }),
+    cell("consult", { span: "big", photo: data.photos.consult, unit: t(svc("consult").blurb) }),
     cell("clean"),
     cell("filling"),
     cell("canals"),
     cell("whitening"),
     cell("implant", { span: "wide", accent: true }),
-    cell("braces", { photo: data.photos.scanner, photoSize: PHOTO_SIZE.scanner }),
+    cell("braces"),
     cell("veneers"),
-    cell("kids", { span: "wide", photo: data.photos.kids, photoSize: PHOTO_SIZE.kids }),
+    cell("kids", { span: "wide" }),
     cell("crown"),
     cell("extract"),
   ];
@@ -147,33 +139,22 @@ export function ClinicSite({ data, locale, style, localeHrefs, mode = "demo", cl
           <SymptomTiles tiles={tiles} sched={sched} locale={locale} />
         </section>
 
-        <PromoBar text={demoMode ? t(data.promo) : client?.promo ? t(client.promo) : ""} locale={locale} />
+        <PromoBar text={t(data.promo)} locale={locale} />
 
-        {(demoMode || clientStats.length > 0) && (
-          <section className="cl-stats" aria-label={t(demoMode ? ui.statsNote : ui.statsLabelClient)}>
-            <dl>
-              {demoMode
-                ? data.stats.map((s) => (
-                    <div key={s.id}>
-                      <dt>{t(s.label)}</dt>
-                      <dd>
-                        <b data-count={s.value} data-dec={s.decimals ?? 0} data-dec-sep={decSep}>
-                          {statText(s.value, s.decimals, s.plus)}
-                        </b>
-                      </dd>
-                    </div>
-                  ))
-                : clientStats.map((s) => (
-                    <div key={s.value + t(s.label)}>
-                      <dt>{t(s.label)}</dt>
-                      <dd>
-                        <b>{s.value}</b>
-                      </dd>
-                    </div>
-                  ))}
-            </dl>
-          </section>
-        )}
+        <section className="cl-stats" aria-label={t(ui.statsNote)}>
+          <dl>
+            {data.stats.map((s) => (
+              <div key={s.id}>
+                <dt>{t(s.label)}</dt>
+                <dd>
+                  <b data-count={s.value} data-dec={s.decimals ?? 0} data-dec-sep={decSep}>
+                    {statText(s.value, s.decimals, s.plus)}
+                  </b>
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </section>
 
         <section className="cl-sec cl-jaw-sec" id="jaw" aria-labelledby="jaw-title">
           <div className="cl-sec-head" data-reveal>
@@ -194,47 +175,40 @@ export function ClinicSite({ data, locale, style, localeHrefs, mode = "demo", cl
         <section className="cl-sec" id="prices" aria-labelledby="prices-title">
           <div className="cl-sec-head" data-reveal>
             <h2 id="prices-title">{t(ui.prices.title)}</h2>
-            <p>{t(demoMode ? ui.prices.lead : ui.prices.leadClient)}</p>
+            <p>{t(ui.prices.lead)}</p>
           </div>
           <PriceBento cells={cells} sched={sched} locale={locale} />
           <h3 className="cl-sub" data-reveal>
             {t(ui.prices.packages)}
           </h3>
-          <Packages packages={packages} sched={sched} locale={locale} mode={mode} />
+          <Packages packages={packages} sched={sched} locale={locale} />
         </section>
 
         <section className="cl-sec" id="doctors" aria-labelledby="doctors-title">
           <div className="cl-sec-head" data-reveal>
             <h2 id="doctors-title">{t(ui.doctors.title)}</h2>
-            <p>{t(demoMode ? ui.doctors.lead : ui.doctors.leadClient)}</p>
+            <p>{t(ui.doctors.lead)}</p>
           </div>
           <DoctorList doctors={doctorCards} sched={sched} locale={locale} />
         </section>
 
-        {(reviews.length > 0 || rating) && (
-          <section className="cl-sec" id="reviews" aria-labelledby="reviews-title">
-            <div className="cl-sec-head" data-reveal>
-              <h2 id="reviews-title">{t(ui.reviews.title)}</h2>
-              <p>{demoMode ? t(ui.reviews.note) : rating && <RatingLine rating={rating} locale={locale} />}</p>
-            </div>
-            {reviews.length > 0 && (
-              <div className="cl-reviews cl-snap" role="region" aria-label={t(ui.reviews.label)} tabIndex={0}>
-                {reviews.map((r) => (
-                  <figure key={r.name} className="cl-review">
-                    {demoMode && <p className="cl-stars">{t(ui.reviews.stars)}</p>}
-                    <blockquote>{t(r.text)}</blockquote>
-                    <figcaption>
-                      <b>
-                        <ReviewAuthor name={r.name} url={"url" in r ? r.url : undefined} />
-                      </b>
-                      {"service" in r && <> · {t(r.service)}</>}
-                    </figcaption>
-                  </figure>
-                ))}
-              </div>
-            )}
-          </section>
-        )}
+        <section className="cl-sec" id="reviews" aria-labelledby="reviews-title">
+          <div className="cl-sec-head" data-reveal>
+            <h2 id="reviews-title">{t(ui.reviews.title)}</h2>
+            <p>{t(ui.reviews.note)}</p>
+          </div>
+          <div className="cl-reviews cl-snap" role="region" aria-label={t(ui.reviews.label)} tabIndex={0}>
+            {data.reviews.map((r) => (
+              <figure key={r.name} className="cl-review">
+                <p className="cl-stars">{t(ui.reviews.stars)}</p>
+                <blockquote>{t(r.text)}</blockquote>
+                <figcaption>
+                  <b>{r.name}</b> · {t(r.service)}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
 
         <section className="cl-sec cl-faq" aria-labelledby="faq-title">
           <div className="cl-sec-head" data-reveal>
@@ -285,7 +259,7 @@ export function ClinicSite({ data, locale, style, localeHrefs, mode = "demo", cl
                 </div>
               ))}
             </div>
-            <MapCard label={t(demoMode ? ui.mapLabel : ui.mapLabelClient)} />
+            <MapCard label={t(ui.mapLabel)} />
           </div>
         </section>
         <MotionLayer />
@@ -302,7 +276,7 @@ export function ClinicSite({ data, locale, style, localeHrefs, mode = "demo", cl
       </footer>
 
       <BookingSheet
-        mode={demoMode ? data.booking.mode : "telegram"}
+        mode={data.booking.mode}
         telegram={data.telegram}
         clinic={data.name}
         sched={sched}

@@ -31,7 +31,7 @@ export function WhitenSlider({ sched, before, after, locale }: { sched: Schedule
         {/* eslint-disable-next-line @next/next/no-img-element -- переносимый шаблон: без next/image */}
         <img className="cl-ba-after" src={src(after, 960)} srcSet={`${src(after, 480)} 480w, ${src(after, 960)} 960w`} sizes="(max-width: 860px) calc(100vw - 32px), 640px" width={960} height={720} alt={pick(ui.photoAlt.after, locale)} loading="lazy" decoding="async" />
         {/* eslint-disable-next-line @next/next/no-img-element -- переносимый шаблон: без next/image */}
-        <img className="cl-ba-before" src={src(before, 960)} srcSet={`${src(before, 480)} 480w, ${src(before, 960)} 960w`} sizes="(max-width: 860px) calc(100vw - 32px), 640px" width={960} height={720} alt={pick(ui.photoAlt.before, locale)} loading="lazy" decoding="async" />
+        <img className="cl-ba-before" data-same={before === after ? "" : undefined} src={src(before, 960)} srcSet={`${src(before, 480)} 480w, ${src(before, 960)} 960w`} sizes="(max-width: 860px) calc(100vw - 32px), 640px" width={960} height={720} alt={pick(ui.photoAlt.before, locale)} loading="lazy" decoding="async" />
         <span className="cl-ba-tag cl-ba-tag-l">{pick(ui.whiten.before, locale)}</span>
         <span className="cl-ba-tag cl-ba-tag-r">{pick(ui.whiten.after, locale)}</span>
         <span className="cl-ba-ill">{pick(ui.whiten.illustration, locale)}</span>

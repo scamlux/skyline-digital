@@ -22,13 +22,6 @@ export function formatSum(value: number, locale: Locale): string {
 export type StyleId = "a" | "b";
 export const STYLE_IDS: StyleId[] = ["a", "b"];
 
-/**
- * Режим показа шаблона. "demo" — витрина студии (/sites): пометки «демо», вымышленные отзывы и цифры.
- * "client" — настоящий сайт клиента (экспорт, ADR 0009): ни одной демо-пометки, отзывы, оценка, цифры
- * и акция показываются только если владелец дал настоящие (site.config.ts), иначе блока нет.
- */
-export type SiteMode = "demo" | "client";
-
 /** Пропсы любого шаблона. */
 export interface TemplateProps<D> {
   data: D;
@@ -36,46 +29,4 @@ export interface TemplateProps<D> {
   style: StyleId;
   /** Ссылки на тот же сайт на других языках (в демо — свои, на хостинге клиента — свои). */
   localeHrefs: Record<Locale, string>;
-  /** По умолчанию "demo": студия ничего не передаёт, экспорт передаёт "client". */
-  mode?: SiteMode;
-  /**
-   * Настоящий контент клиента (только в режиме "client"). Отзывы, оценка, цифры и акция берутся
-   * ТОЛЬКО отсюда: вымышленные из `data` в режиме "client" не показываются никогда.
-   */
-  client?: ClientContent;
-}
-
-/** Настоящий отзыв клиента из site.config.ts. Звёзд у него нет: оценку отзыва владелец не задаёт. */
-export interface ClientReview {
-  name: string;
-  text: L;
-  /** Подпись «когда» или «откуда» (необязательна). */
-  when?: L;
-  /** Ссылка на отзыв в первоисточнике (2ГИС, Google Maps…). */
-  url?: string;
-}
-
-/** Общая оценка бизнеса с указанием, откуда она взята. */
-export interface ClientRating {
-  /** 0…5. */
-  value: number;
-  count: number;
-  /** Где собрана оценка: «Google Maps», «2ГИС»… */
-  source: string;
-  url?: string;
-}
-
-/** Настоящая цифра клиента («9 лет», «12 000 гостей»): значение строкой, как оно должно выглядеть. */
-export interface ClientStat {
-  value: string;
-  label: L;
-}
-
-/** Всё «настоящее», что владелец может дать сайту сверх названия и контактов (site.config.ts). */
-export interface ClientContent {
-  reviews: ClientReview[];
-  rating?: ClientRating;
-  stats: ClientStat[];
-  /** Настоящая акция: показывается вместо демо-баннера. */
-  promo?: L;
 }

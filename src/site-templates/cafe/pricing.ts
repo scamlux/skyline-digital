@@ -125,10 +125,8 @@ export function isValidPickup(plan: PickupPlan, time: string): boolean {
 
 /* ——— лояльность ——— */
 
-/** Сколько оплаченных кофе нужно, чтобы следующий, шестой, был бесплатным. */
-export const STAMPS_GOAL = 5;
-/** Мест на карте: пять печатей и шестое, подарочное, место с чашкой. */
-export const CARD_SLOTS = STAMPS_GOAL + 1;
+/** Сколько печатей на карте до бесплатного кофе. */
+export const STAMPS_GOAL = 6;
 
 export const freeCupReady = (stamps: number): boolean => stamps >= STAMPS_GOAL;
 

@@ -66,8 +66,6 @@ for (const style of STYLES) {
       const t = m.text();
       // 404 картинок-стока допустимы, пока файлы не легли (позиции рисуют плитку-фолбэк).
       if (/Failed to load resource.*404/.test(t)) return;
-      // Скрипт Vercel Analytics существует только на Vercel; локально он отдаёт 404 — не ошибка шаблона.
-      if (/_vercel\/insights/.test(t)) return;
       errors.push(t);
     });
     const shot = (name) => page.screenshot({ path: path.join(SHOTS, name) });
@@ -250,19 +248,6 @@ for (const style of STYLES) {
     });
     check(`${tag} сайт: витрина «Чизкейк» — закончилось`, /закончилось/.test(cake.text) && cake.addDisabled, JSON.stringify(cake));
     check(`${tag} сайт: печать лояльности сохранилась после перезагрузки`, (await page.$$eval(".cf-stamp[data-filled]", (n) => n.length)) === 1);
-    // Карта лояльности: после 5 оплаченных кофе шестой бесплатный (4 демо-печати к уже стоящей одной).
-    await page.evaluate(() => document.getElementById("card")?.scrollIntoView());
-    check(`${tag} карта: 6 мест (5 печатей + чашка)`, (await page.$$eval(".cf-stamp", (n) => n.length)) === 6);
-    for (let i = 0; i < 4; i++) {
-      await page.click(".cf-stampcard .cf-ghost.sm");
-      await sleep(120);
-    }
-    const loyal = await page.evaluate(() => ({
-      ready: document.querySelector(".cf-stampcard")?.hasAttribute("data-ready") ?? false,
-      filled: document.querySelectorAll(".cf-stamp[data-filled]").length,
-      text: document.querySelector(".cf-stamp-count")?.textContent ?? "",
-    }));
-    check(`${tag} карта: на пятой печати открывается бесплатный шестой (6 заполнено)`, loyal.ready && loyal.filled === 6 && /подарок/.test(loyal.text), JSON.stringify(loyal));
     check(`${tag} нет переполнения после правок`, (await overflow(page)) <= 0);
     check(`${tag} 0 ошибок в консоли`, errors.length === 0, errors.slice(0, 3).join(" | "));
     await ctx.close();
