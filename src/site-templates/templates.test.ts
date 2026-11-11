@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { restaurantDemo } from "./restaurant/data";
 import { restaurantUi } from "./restaurant/ui";
-import { adminUi as restaurantAdminUi } from "./restaurant/admin-ui";
-import { MAX_DISCOUNT } from "./restaurant/sets";
 import { clinicDemo } from "./clinic/data";
 import { clinicUi } from "./clinic/ui";
 import { adminUi as clinicAdminUi, adminWords } from "./clinic/admin-ui";
@@ -31,7 +29,6 @@ describe("шаблоны: тексты на трёх языках", () => {
   const all: { path: string; l: L }[] = [];
   collect(restaurantDemo, "data", all);
   collect(restaurantUi, "ui", all);
-  collect(restaurantAdminUi, "restaurant.admin", all);
   collect(clinicDemo, "clinic.data", all);
   collect(clinicUi, "clinic.ui", all);
   collect(clinicAdminUi, "clinic.admin", all);
@@ -70,36 +67,6 @@ describe("шаблон «Ресторан»: данные", () => {
       expect(c.items.length).toBeGreaterThan(0);
       for (const it of c.items) expect(it.price).toBeGreaterThan(0);
     }
-  });
-
-  it("первый экран: заголовок до пяти слов и одна строка пояснения до 90 знаков, на всех языках и в обоих стилях", () => {
-    for (const style of STYLE_IDS) {
-      for (const loc of LOCALES) {
-        const h = restaurantDemo.hero[style];
-        expect(h.title[loc].trim().split(/\s+/).length).toBeLessThanOrEqual(5);
-        expect(h.lead[loc].length).toBeLessThanOrEqual(90);
-      }
-    }
-  });
-
-  it("наборы «на компанию»: блюда существуют, порции и скидка в допустимых пределах", () => {
-    const ids = new Set(restaurantDemo.menu.flatMap((c) => c.items.map((i) => i.id)));
-    expect(restaurantDemo.sets.length).toBeGreaterThanOrEqual(2);
-    for (const s of restaurantDemo.sets) {
-      expect(s.discount).toBeGreaterThanOrEqual(0);
-      expect(s.discount).toBeLessThanOrEqual(MAX_DISCOUNT);
-      expect(s.items.length).toBeGreaterThan(0);
-      for (const i of s.items) {
-        expect(ids.has(i.id)).toBe(true);
-        expect(i.per).toBeGreaterThanOrEqual(1);
-      }
-    }
-  });
-
-  it("у каждого стиля первого экрана есть фото, стили витрины ресторана имеют короткие подписи", () => {
-    for (const style of STYLE_IDS) expect(restaurantDemo.photos.hero[style].length).toBeGreaterThan(0);
-    const t = TEMPLATES.find((x) => x.id === "restaurant")!;
-    for (const st of t.styles) for (const loc of LOCALES) expect(st.label?.[loc].length ?? 99).toBeLessThanOrEqual(8);
   });
 
   it("часы работы в формате HH:MM", () => {

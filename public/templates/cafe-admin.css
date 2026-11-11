@@ -126,7 +126,7 @@
 .adm-btn.ghost, .adm-btn.sm[aria-pressed] { background: var(--surface-2); color: var(--ink); }
 .adm-btn[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
 .adm-btn[data-tone="bad"] { background: var(--hot-soft); color: var(--hot); }
-.adm-link { min-height: 44px; min-width: 44px; padding: 0 4px; border: 0; background: none; font-size: 15px; font-weight: 900; color: var(--acc-deep); text-decoration: underline; text-underline-offset: 4px; }
+.adm-link { min-height: 44px; padding: 0 4px; border: 0; background: none; font-size: 14px; font-weight: 900; color: var(--acc-deep); text-decoration: underline; text-underline-offset: 4px; }
 
 /* ——— меню и цены ——— */
 .adm-cat { display: grid; gap: 8px; }
@@ -180,7 +180,7 @@
 .adm-digest pre { margin: 0; padding: 14px 16px; border-radius: 16px; background: var(--surface-2); font-family: var(--font, "Nunito", system-ui, sans-serif); font-size: 15px; font-weight: 700; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
 
 /* ——— подвал ——— */
-.adm-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; padding: 18px var(--edge) calc(28px + env(safe-area-inset-bottom, 0px)); font-size: 15px; font-weight: 700; color: var(--dim); }
+.adm-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; padding: 18px var(--edge) calc(28px + env(safe-area-inset-bottom, 0px)); font-size: 14px; font-weight: 700; color: var(--dim); }
 .adm-foot > p { flex: 1 1 320px; max-width: 62ch; }
 .adm-foot > div { display: flex; gap: 14px; }
 
@@ -211,7 +211,3 @@
 @media (prefers-reduced-motion: reduce) {
   .adm *, .adm *::before, .adm *::after { transition: none !important; animation: none !important; }
 }
-
-/* ——— кнопка «Получить в Telegram» под превью сводки ——— */
-.adm .adm-btn.adm-tg { color: var(--on-acc); gap: 8px; min-height: 48px; text-decoration: none; justify-self: start; align-self: start; width: fit-content; max-width: 100%; white-space: normal; text-align: center; }
-.adm .adm-btn.adm-tg:hover { color: var(--on-acc); text-decoration: none; }

@@ -1,6 +1,6 @@
 "use client";
 
-import { pick, type Locale, type SiteMode } from "../types";
+import { pick, type Locale } from "../types";
 import { formatSum } from "../types";
 import { fill, priceParts } from "./format";
 import { useLive } from "./live";
@@ -16,8 +16,6 @@ export interface BentoCell {
   /** Размер в сетке: колонки × ряды (на телефоне 2 колонки). */
   span?: "wide" | "big" | "tall";
   photo?: string;
-  /** Реальный размер файла (480-й), чтобы у <img> были верные width/height. */
-  photoSize?: { w: number; h: number };
   /** Подпись фото вместо цены (3D-снимок). */
   caption?: string;
   accent?: boolean;
@@ -67,7 +65,7 @@ function CellBody({ c, price }: { c: BentoCell; price: { num: string; unit: stri
     <>
       {c.photo && (
         // eslint-disable-next-line @next/next/no-img-element -- переносимый шаблон: без next/image
-        <img src={`${IMG}/${c.photo}-480.webp`} srcSet={`${IMG}/${c.photo}-480.webp 480w, ${IMG}/${c.photo}-960.webp 960w`} sizes="(max-width: 860px) 50vw, 320px" width={c.photoSize?.w ?? 480} height={c.photoSize?.h ?? 480} alt="" loading="lazy" decoding="async" />
+        <img src={`${IMG}/${c.photo}-480.webp`} srcSet={`${IMG}/${c.photo}-480.webp 480w, ${IMG}/${c.photo}-960.webp 960w`} sizes="(max-width: 860px) 50vw, 320px" width={480} height={480} alt="" loading="lazy" decoding="async" />
       )}
       <span className="cl-bento-name">{c.name}</span>
       <span className="cl-bento-price">
@@ -85,7 +83,7 @@ function CellBody({ c, price }: { c: BentoCell; price: { num: string; unit: stri
 }
 
 /** Пакеты: цена считается по текущему прайсу, рассрочка — демо-платёж в месяц. */
-export function Packages({ packages, sched, locale, mode = "demo" }: { packages: PackageCard[]; sched: ScheduleData; locale: Locale; mode?: SiteMode }) {
+export function Packages({ packages, sched, locale }: { packages: PackageCard[]; sched: ScheduleData; locale: Locale }) {
   const { ov } = useLive();
   const words = { free: pick(ui.prices.free, locale), upTo: pick(ui.hero.upTo, locale) };
   return (
@@ -106,7 +104,7 @@ export function Packages({ packages, sched, locale, mode = "demo" }: { packages:
               <b>{price.num}</b> <span>{price.unit}</span>
             </p>
             <p className="cl-pack-sub">
-              {pkg.instalmentMonths ? fill(pick(mode === "demo" ? ui.prices.perMonth : ui.prices.perMonthClient, locale), { sum: formatSum(Math.round(total.min / pkg.instalmentMonths / 1000) * 1000, locale), n: pkg.instalmentMonths }) : " "}
+              {pkg.instalmentMonths ? fill(pick(ui.prices.perMonth, locale), { sum: formatSum(Math.round(total.min / pkg.instalmentMonths / 1000) * 1000, locale), n: pkg.instalmentMonths }) : " "}
             </p>
             <button type="button" className="cl-btn ghost" onClick={() => planDraft.send({ items: total.items, serviceId: "consult" })}>
               {pick(ui.book, locale)}

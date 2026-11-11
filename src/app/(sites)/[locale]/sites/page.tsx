@@ -25,12 +25,12 @@ export default async function ShowroomPage({ params }: { params: Promise<{ local
       <link rel="preload" href="/templates/fonts/onest-latin.woff2" as="font" type="font/woff2" crossOrigin="" />
       <link rel="preload" href="/templates/fonts/onest-cyrillic.woff2" as="font" type="font/woff2" crossOrigin="" />
       <div className="mx-auto max-w-5xl px-5 py-12 md:px-8 md:py-20">
-        <a href={localePath(locale, "/")} className="inline-flex min-h-[44px] items-center text-[15px] text-muted hover:text-ink">
+        <a href={localePath(locale, "/")} className="text-sm text-muted hover:text-ink">
           Skyline Digital
         </a>
         <h1 className="font-display mt-6 text-3xl font-medium md:text-5xl">{t(demoUi.showroomTitle)}</h1>
         <p className="mt-4 max-w-2xl text-lg text-muted">{t(demoUi.showroomLead)}</p>
-        <p className="mt-2 max-w-2xl text-[15px] text-muted">{t(demoUi.includes)}</p>
+        <p className="mt-2 max-w-2xl text-sm text-muted">{t(demoUi.includes)}</p>
 
         <ul className="mt-12 grid gap-6 md:grid-cols-2">
           {TEMPLATES.map((tpl) => (
@@ -46,9 +46,9 @@ export default async function ShowroomPage({ params }: { params: Promise<{ local
                     >
                       <span>
                         <span className="block font-medium">{t(s.name)}</span>
-                        <span className="block text-[15px] text-muted">{t(s.mood)}</span>
+                        <span className="block text-sm text-muted">{t(s.mood)}</span>
                       </span>
-                      <span className="shrink-0 text-[15px] font-medium">{t(demoUi.open)} →</span>
+                      <span className="shrink-0 text-sm font-medium">{t(demoUi.open)} →</span>
                     </a>
                   </li>
                 ))}

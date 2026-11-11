@@ -29,8 +29,6 @@ import { clinicUi as ui } from "./ui";
 
 /** Верхняя и нижняя дуги стоят друг над другом, как на клинической схеме: на десктопе видны обе, на телефоне — одна половина (вкладки «верх / низ»). */
 const VIEW_H = 616;
-/** Ширина области нажатия зуба мудрости, единиц схемы (запас до 44 px на экране 360). */
-const WISDOM_HIT_W = 46;
 const RX: Record<string, number> = { central: 9, lateral: 9, canine: 13, premolar: 11, molar: 8, wisdom: 8 };
 
 /** Метка проблемы внутри зуба: маленький знак своей формы. */
@@ -51,7 +49,6 @@ function Mark({ problem }: { problem: ProblemId }) {
 
 function Tooth({ g, pickedAs, active, focusable, label, onSelect, onKey }: { g: ToothGeom; pickedAs?: ProblemId; active: boolean; focusable: boolean; label: string; onSelect: () => void; onKey: (e: React.KeyboardEvent) => void }) {
   const [w, d] = SIZE[g.kind];
-  const hitW = g.kind === "wisdom" ? WISDOM_HIT_W : HIT_W;
   return (
     <g
       transform={`translate(${g.x} ${g.y})`}
@@ -67,8 +64,7 @@ function Tooth({ g, pickedAs, active, focusable, label, onSelect, onKey }: { g: 
       onClick={onSelect}
       onKeyDown={onKey}
     >
-      {/* У зуба мудрости область нажатия шире: он стоит на краю дуги, и на узком экране 37 px не хватает до 44. */}
-      <rect className="cl-hit" x={-hitW / 2} y={-HIT_D / 2} width={hitW} height={HIT_D} transform={`rotate(${g.rot})`} />
+      <rect className="cl-hit" x={-HIT_W / 2} y={-HIT_D / 2} width={HIT_W} height={HIT_D} transform={`rotate(${g.rot})`} />
       <g transform={`rotate(${g.rot})`}>
         <rect className="cl-crown" x={-w / 2 + 1} y={-d / 2 + 1} width={w - 2} height={d - 2} rx={RX[g.kind]} />
         {g.kind === "molar" || g.kind === "wisdom" ? <path className="cl-fissure" d={`M${-w / 4} 0H${w / 4}M0 ${-d / 4}V${d / 4}`} /> : null}

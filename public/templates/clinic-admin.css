@@ -861,38 +861,3 @@
 .adm[data-tpl="clinic"] .adm-teeth { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0; }
 .adm[data-tpl="clinic"] .adm-teeth span { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 0 9px; font-size: 13px; font-weight: 600; color: var(--ink); border: 1.5px solid var(--acc); background: var(--surface); }
 .adm[data-tpl="clinic"] .adm-teeth b { font-variant-numeric: tabular-nums; color: var(--acc); }
-
-/* ——— мобильный аудит: зоны нажатия ≥ 44 px (язык ≥ 40) и текст ≥ 15 px ——— */
-.adm-lang a {
-  min-width: 40px;
-  min-height: 40px;
-  font-size: 14px;
-}
-.adm-link,
-.adm-item .adm-link,
-.adm-foot .adm-link {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  font-size: 15px;
-}
-a[href^="tel:"] {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-}
-.adm-plan,
-.adm-hint,
-.adm-digest > p,
-.adm-digest pre,
-.adm-lead-main span,
-.adm-lead-main i {
-  font-size: 15px !important;
-}
-.adm-foot {
-  font-size: 15px;
-}
-
-/* ——— кнопка «Получить в Telegram» под превью сводки ——— */
-.adm .adm-btn.adm-tg { color: var(--on-acc); gap: 8px; min-height: 48px; text-decoration: none; justify-self: start; align-self: start; width: fit-content; max-width: 100%; white-space: normal; text-align: center; }
-.adm .adm-btn.adm-tg:hover { color: var(--on-acc); text-decoration: none; }

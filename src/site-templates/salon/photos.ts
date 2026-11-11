@@ -8,10 +8,7 @@ import type { SalonData } from "./data";
  * Подробности и список ожидаемых файлов: docs/DESIGN-GAPS.md, раздел «Салон».
  */
 export const READY_OPTIONAL: ReadonlySet<string> = new Set<string>([
-  "m-work-7",
-  "m-work-8",
-  "m-master-4",
-  "m-hero-wide",
+  // "m-work-7", "m-work-8", "m-master-4", "m-hero-wide",
 ]);
 
 /** Данные без необязательных элементов, чьи фото ещё не лежат на месте. Исходный объект не меняется. */

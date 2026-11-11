@@ -898,36 +898,3 @@
 .adm[data-tpl="salon"] .adm-items[data-kind="packages"] .adm-item-name small {
   max-width: 46ch;
 }
-.adm-lang a {
-  min-width: 40px;
-  min-height: 40px;
-  font-size: 14px;
-}
-.adm-link,
-.adm-item .adm-link,
-.adm-foot .adm-link {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  font-size: 15px;
-}
-a[href^="tel:"] {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-}
-.adm-plan,
-.adm-hint,
-.adm-digest > p,
-.adm-digest pre,
-.adm-lead-main span,
-.adm-lead-main i {
-  font-size: 15px !important;
-}
-.adm-foot {
-  font-size: 15px;
-}
-
-/* ——— кнопка «Получить в Telegram» под превью сводки ——— */
-.adm .adm-btn.adm-tg { color: var(--on-acc); gap: 8px; min-height: 48px; text-decoration: none; justify-self: start; align-self: start; width: fit-content; max-width: 100%; white-space: normal; text-align: center; }
-.adm .adm-btn.adm-tg:hover { color: var(--on-acc); text-decoration: none; }

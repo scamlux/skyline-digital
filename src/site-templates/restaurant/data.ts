@@ -1,13 +1,13 @@
-import type { L, StyleId } from "../types";
+import type { L } from "../types";
 
 /**
- * Демо-данные ресторана. Бизнес, адрес, телефон, цены, отзывы и цифры — вымышленные:
- * это витрина шаблона, а не чужой бренд. В боевом сайте владелец меняет их в кабинете.
+ * Демо-данные ресторана. Бизнес, адрес, телефон, цены и тексты — вымышленные:
+ * это витрина шаблона, а не чужой бренд. В боевом сайте владелец меняет их в админке.
  */
 export type Tag = "spicy" | "veg" | "hit";
 
 export interface MenuItem {
-  /** Стабильный ключ блюда: по нему хранятся правки владельца (цена, стоп-лист, скрытие). */
+  /** Стабильный ключ блюда: по нему хранятся правки владельца (цена, стоп-лист, фото). */
   id: string;
   name: L;
   desc?: L;
@@ -16,7 +16,10 @@ export interface MenuItem {
   tags?: Tag[];
   /** false — позиция в стоп-листе: остаётся в меню, но помечена «сегодня нет». */
   available?: boolean;
-  /** Базовое имя файла в public/templates/restaurant/img (набор ширин — в media.tsx). */
+  /**
+   * Необязательное фото блюда: базовое имя файла в public/templates/restaurant/img
+   * (лежат -480/-960 .webp). Без фото меню остаётся чисто типографским.
+   */
   photo?: string;
 }
 
@@ -26,48 +29,26 @@ export interface MenuCategory {
   items: MenuItem[];
 }
 
-/** Набор «на компанию»: одна порция каждого блюда на `per` гостей (округление вверх). */
-export interface SetPreset {
-  id: string;
-  name: L;
-  blurb: L;
-  photo: string;
-  /** Скидка на набор, %. Владелец меняет в кабинете. */
-  discount: number;
-  items: { id: string; per: number }[];
-}
-
-export interface Review {
-  name: string;
-  when: L;
-  text: L;
-}
-
-export type DeliveryId = "uzum" | "yandex";
-
 export interface RestaurantData {
   name: string;
-  /** Короткая подпись для превью в соцсетях и схемы. */
   tagline: L;
-  /** Первый экран по стилям: заголовок до пяти слов и одна строка пояснения. */
-  hero: Record<StyleId, { title: L; lead: L }>;
+  intro: L;
   phone: { e164: string; display: string };
-  /** Telegram без @ — на него уходит бронь. */
+  /** Telegram без @ — на него уходит бронь, если mode = "telegram". */
   telegram: string;
   address: L;
   mapUrl: string;
   hours: { open: string; close: string };
-  /** Агрегаторы доставки: плитки в блоке «Заказать домой». */
-  delivery: { id: DeliveryId; name: string; url: string }[];
-  /** Баннер-акция над меню; владелец включает/выключает и меняет текст в кабинете. */
+  /** Агрегаторы доставки: кнопки в блоке «Заказать домой». */
+  delivery: { name: string; url: string }[];
+  /** Ссылки на карточки на картах — отзывы читают там, а не копируются на сайт. */
+  reviews: { name: string; url: string }[];
+  /** Баннер-акция под шапкой; владелец включает/выключает и меняет текст в кабинете. */
   promo: L;
-  /** Первый экран: у стиля A — казан (с лёгким кеном-бернсом), у B — зал при свечах. */
-  photos: { hero: Record<StyleId, string> };
-  /** Полоса «цифры вместо абзацев»: фото, число и подпись. */
-  facts: { photo: string; value: string; label: L }[];
+  /** Фото: hero (первый экран), about (о нас), gallery (3 кадра в «О нас»). Базовые имена файлов. */
+  photos: { hero: string; about: string; gallery: string[] };
   menu: MenuCategory[];
-  sets: SetPreset[];
-  reviews: Review[];
+  about: { title: L; paragraphs: L[]; facts: { k: L; v: L }[] };
   booking: {
     /** demo — показать подтверждение; telegram — открыть чат владельца с готовым текстом. */
     mode: "demo" | "telegram";
@@ -81,23 +62,10 @@ export const restaurantDemo: RestaurantData = {
     en: "Home-style plov, lagman and samsa — every day",
     uz: "Uyda pishirilgan osh, lagʻmon va somsa — har kuni",
   },
-  hero: {
-    a: {
-      title: { ru: "Плов, как дома", en: "Plov, the home way", uz: "Osh, uydagidek" },
-      lead: {
-        ru: "Казан с утра, тандыр до ночи. Столик — за три касания.",
-        en: "Kazan since morning, tandoor till night. A table in three taps.",
-        uz: "Ertalabdan qozon, kechgacha tandir. Stol — uch bosishda.",
-      },
-    },
-    b: {
-      title: { ru: "Вечер на углях", en: "An evening by the coals", uz: "Choʻgʻ yonida kech" },
-      lead: {
-        ru: "Огонь, лампы и стол на вечер. Бронь займёт минуту.",
-        en: "Fire, lanterns and a table for the evening. Booking takes a minute.",
-        uz: "Olov, chiroqlar va kechga stol. Bron bir daqiqa oladi.",
-      },
-    },
+  intro: {
+    ru: "Узбекская кухня на казане и на углях. Столик можно занять заранее, а плов — взять с собой.",
+    en: "Uzbek cooking over a kazan and coals. Reserve a table ahead, or take the plov to go.",
+    uz: "Qozonda va choʻgʻda pishadigan oʻzbek taomlari. Stolni oldindan band qiling yoki oshni olib keting.",
   },
   phone: { e164: "+998900000000", display: "+998 90 000 00 00" },
   telegram: "dasturxon_demo",
@@ -109,20 +77,19 @@ export const restaurantDemo: RestaurantData = {
   mapUrl: "https://www.google.com/maps/search/?api=1&query=Tashkent",
   hours: { open: "10:00", close: "23:00" },
   delivery: [
-    { id: "uzum", name: "Uzum Tezkor", url: "#" },
-    { id: "yandex", name: "Yandex Eats", url: "#" },
+    { name: "Uzum Tezkor", url: "#" },
+    { name: "Yandex Eats", url: "#" },
+  ],
+  reviews: [
+    { name: "Google Maps", url: "#" },
+    { name: "2GIS", url: "#" },
   ],
   promo: {
     ru: "Бизнес-ланч с 12:00 до 15:00 — плов и чай за 70 000 сум",
     en: "Business lunch 12:00–15:00 — plov and tea for 70,000 UZS",
     uz: "Biznes-lanch 12:00–15:00 — osh va choy 70 000 soʻm",
   },
-  photos: { hero: { a: "kazan", b: "hero" } },
-  facts: [
-    { photo: "tandir", value: "06:00", label: { ru: "тандыр горит", en: "tandoor lit", uz: "tandir yonadi" } },
-    { photo: "interior", value: "40", label: { ru: "мест в зале", en: "hall seats", uz: "zalda oʻrin" } },
-    { photo: "table", value: "15", label: { ru: "минут до ответа", en: "min to confirm", uz: "daqiqada javob" } },
-  ],
+  photos: { hero: "hero", about: "kazan", gallery: ["interior", "tandir", "table"] },
   menu: [
     {
       id: "hot",
@@ -157,7 +124,7 @@ export const restaurantDemo: RestaurantData = {
           photo: "manti",
           name: { ru: "Манты с тыквой", en: "Pumpkin manti", uz: "Qovoqli manti" },
           desc: {
-            ru: "Пять штук, на пару, со сметаной.",
+            ru: "Пять штук, на пару, с сметаной.",
             en: "Five pieces, steamed, with sour cream.",
             uz: "Beshta, bugʻda pishirilgan, qaymoq bilan.",
           },
@@ -169,7 +136,7 @@ export const restaurantDemo: RestaurantData = {
           photo: "naryn",
           name: { ru: "Нарын", en: "Naryn", uz: "Norin" },
           desc: {
-            ru: "Тонкая лапша с кониной по-домашнему.",
+            ru: "Тонкая лапша с конониной по-домашнему.",
             en: "Thin noodles with horse meat, home style.",
             uz: "Ot goʻshti bilan yupqa lagʻmon, uycha.",
           },
@@ -230,7 +197,11 @@ export const restaurantDemo: RestaurantData = {
           id: "achichuk",
           photo: "achichuk",
           name: { ru: "Ачичук", en: "Achichuk", uz: "Achchiq-chuchuk" },
-          desc: { ru: "Помидоры, лук, базилик.", en: "Tomato, onion, basil.", uz: "Pomidor, piyoz, rayhon." },
+          desc: {
+            ru: "Помидоры, лук, базилик.",
+            en: "Tomato, onion, basil.",
+            uz: "Pomidor, piyoz, rayhon.",
+          },
           price: 22000,
           tags: ["veg"],
         },
@@ -252,78 +223,40 @@ export const restaurantDemo: RestaurantData = {
           name: { ru: "Чай зелёный, чайник", en: "Green tea, pot", uz: "Koʻk choy, choynak" },
           price: 12000,
         },
-        { id: "ayran", photo: "ayran", name: { ru: "Айран", en: "Ayran", uz: "Ayron" }, price: 15000 },
-        { id: "mors", photo: "mors", name: { ru: "Морс ягодный", en: "Berry mors", uz: "Rezavor mors" }, price: 18000 },
+        {
+          id: "ayran",
+          photo: "ayran",
+          name: { ru: "Айран", en: "Ayran", uz: "Ayron" },
+          price: 15000,
+        },
+        {
+          id: "mors",
+          photo: "mors",
+          name: { ru: "Морс ягодный", en: "Berry mors", uz: "Rezavor mors" },
+          price: 18000,
+        },
       ],
     },
   ],
-  sets: [
-    {
-      id: "classic",
-      name: { ru: "Классика", en: "Classic", uz: "Klassika" },
-      blurb: { ru: "Плов, самса, салат", en: "Plov, samsa, salad", uz: "Osh, somsa, salat" },
-      photo: "table",
-      discount: 10,
-      items: [
-        { id: "plov", per: 1 },
-        { id: "samsa", per: 2 },
-        { id: "achichuk", per: 3 },
-        { id: "lepyoshka", per: 2 },
-        { id: "tea", per: 3 },
-      ],
-    },
-    {
-      id: "grill",
-      name: { ru: "Мясной стол", en: "Grill table", uz: "Goʻshtli dasturxon" },
-      blurb: { ru: "Шашлык, люля, плов", en: "Skewers, lula, plov", uz: "Kabob, lyulya, osh" },
-      photo: "shashlik",
-      discount: 10,
-      items: [
-        { id: "shashlik", per: 2 },
-        { id: "lula", per: 2 },
-        { id: "plov", per: 2 },
-        { id: "achichuk", per: 3 },
-        { id: "lepyoshka", per: 2 },
-        { id: "tea", per: 3 },
-      ],
-    },
-    {
-      id: "light",
-      name: { ru: "Без мяса", en: "Meat-free", uz: "Goʻshtsiz" },
-      blurb: { ru: "Овощи, манты, морс", en: "Veg, manti, mors", uz: "Sabzavot, manti, mors" },
-      photo: "veg-grill",
-      discount: 10,
-      items: [
-        { id: "veg-grill", per: 2 },
-        { id: "manti", per: 2 },
-        { id: "achichuk", per: 2 },
-        { id: "lepyoshka", per: 2 },
-        { id: "mors", per: 2 },
-        { id: "tea", per: 3 },
-      ],
-    },
-  ],
-  reviews: [
-    {
-      name: "Дилноза",
-      when: { ru: "Неделю назад", en: "A week ago", uz: "Bir hafta oldin" },
-      text: { ru: "Плов как у мамы. Брони хватило одной минуты.", en: "Plov like mom’s. Booking took a minute.", uz: "Osh onamnikidek. Bron bir daqiqa oldi." },
-    },
-    {
-      name: "Jasur",
-      when: { ru: "Две недели назад", en: "Two weeks ago", uz: "Ikki hafta oldin" },
-      text: { ru: "Праздновали день рождения на тапчане — все в восторге.", en: "Birthday on the tapchan — everyone loved it.", uz: "Tugʻilgan kunni tapchanda nishonladik — hamma xursand." },
-    },
-    {
-      name: "Малика",
-      when: { ru: "Месяц назад", en: "A month ago", uz: "Bir oy oldin" },
-      text: { ru: "Самса горячая, подтвердили стол за десять минут.", en: "Hot samsa, the table was confirmed in ten minutes.", uz: "Somsa issiq, stolni oʻn daqiqada tasdiqlashdi." },
-    },
-    {
-      name: "Bobur",
-      when: { ru: "Месяц назад", en: "A month ago", uz: "Bir oy oldin" },
-      text: { ru: "Деловой обед без суеты: тихо и вкусно.", en: "A business lunch without fuss: quiet and tasty.", uz: "Shoshilmasdan biznes tushlik: tinch va mazali." },
-    },
-  ],
+  about: {
+    title: { ru: "Кухня без спешки", en: "Cooking without hurry", uz: "Shoshilmay pishirilgan taom" },
+    paragraphs: [
+      {
+        ru: "Плов варится на казане с утра, лагман тянется вручную — поэтому первые порции готовы к открытию, а последние заканчиваются, когда заканчиваются.",
+        en: "Plov simmers in the kazan from morning and the lagman noodles are pulled by hand — so the first portions are ready at opening, and the last ones go when they go.",
+        uz: "Osh ertalabdan qozonda dimlanadi, lagʻmon qoʻlda choʻziladi — shuning uchun birinchi porsiyalar ochilishga tayyor, oxirgilari tugaguncha beriladi.",
+      },
+      {
+        ru: "Если нужного блюда нет, мы пометим его в меню заранее — вы не придёте зря.",
+        en: "If a dish is out, we mark it in the menu ahead of time — so you never come for nothing.",
+        uz: "Agar taom tugagan boʻlsa, uni menyuda oldindan belgilaymiz — bekorga kelmaysiz.",
+      },
+    ],
+    facts: [
+      { k: { ru: "Кухня", en: "Kitchen", uz: "Oshxona" }, v: { ru: "Узбекская", en: "Uzbek", uz: "Oʻzbek" } },
+      { k: { ru: "Готовим на", en: "Cooked on", uz: "Pishiriladi" }, v: { ru: "Казан и угли", en: "Kazan and coals", uz: "Qozon va choʻgʻ" } },
+      { k: { ru: "С собой", en: "To go", uz: "Olib ketish" }, v: { ru: "Да, плов и шашлык", en: "Yes — plov and grill", uz: "Ha — osh va kabob" } },
+    ],
+  },
   booking: { mode: "demo" },
 };

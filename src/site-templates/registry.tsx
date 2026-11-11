@@ -31,11 +31,8 @@ export interface TemplateDef {
   /** Превью для соцсетей (Telegram/WhatsApp): JPG, а не WebP — WebP там показывается плохо. */
   og: { image: string; description: L };
   render: (p: { locale: Locale; style: StyleId; localeHrefs: Record<Locale, string> }) => ReactElement;
-  /**
-   * Демо-кабинет владельца (если у шаблона он есть). `digestBot` — имя бота сводок в Telegram (без «@»):
-   * с ним под превью сводки появляется кнопка «Получить в Telegram», без него — только превью.
-   */
-  renderAdmin?: (p: { locale: Locale; localeHrefs: Record<Locale, string>; siteHref: string; digestBot?: string }) => ReactElement;
+  /** Демо-кабинет владельца (если у шаблона он есть). */
+  renderAdmin?: (p: { locale: Locale; localeHrefs: Record<Locale, string>; siteHref: string }) => ReactElement;
 }
 
 /**
@@ -47,31 +44,29 @@ export const TEMPLATES: TemplateDef[] = [
     id: "restaurant",
     demoName: restaurantDemo.name,
     og: { image: "/templates/restaurant/img/og-1200.jpg", description: restaurantDemo.tagline },
-    title: { ru: "Ресторан", en: "Restaurant", uz: "Restoran" },
+    title: { ru: "Ресторан и кафе", en: "Restaurant & café", uz: "Restoran va kafe" },
     blurb: {
-      ru: "Меню с фото, набор «на компанию» с ценой, бронь стола в три шага, доставка.",
-      en: "A photo menu, a group set with a live price, table booking in three steps, delivery.",
-      uz: "Rasmli menyu, narxli «davra» toʻplami, uch bosqichda stol bandi, yetkazib berish.",
+      ru: "Меню как печатная карточка, бронь стола в Telegram, кнопки доставки.",
+      en: "A menu like a printed card, table booking on Telegram, delivery buttons.",
+      uz: "Bosma kartochkadek menyu, Telegramda stol bandi, yetkazib berish tugmalari.",
     },
     styles: [
       {
         id: "a",
         name: { ru: "Тёплая трапеза", en: "Warm table", uz: "Issiq dasturxon" },
-        label: { ru: "День", en: "Day", uz: "Kun" },
         mood: {
-          ru: "Кремовая бумага, бирюза и шафран, антиква, фото в арке и пар над казаном. Уютный день.",
-          en: "Cream paper, teal and saffron, a serif, an arched photo and steam over the kazan. A cosy day.",
-          uz: "Qaymoq qogʻoz, firuza va zaʼfaron, antiqua, ark ichidagi surat va qozon ustida bugʻ. Iliq kun.",
+          ru: "Керамическая бирюза, шафран, антиква. Уютно и по-домашнему.",
+          en: "Ceramic teal, saffron, a serif. Cosy and homely.",
+          uz: "Keramik firuza, zaʼfaron, antiqua. Qulay va uyday.",
         },
       },
       {
         id: "b",
         name: { ru: "Чистый вечер", en: "Clean evening", uz: "Sokin kech" },
-        label: { ru: "Вечер", en: "Evening", uz: "Kech" },
         mood: {
-          ru: "Графит и латунь, зал при свечах: тёплая виньетка и мерцающий свет. Вечерний сервис.",
-          en: "Graphite and brass, a candle-lit hall: a warm vignette and flickering light. Evening service.",
-          uz: "Grafit va guruch, shamlar yoritgan zal: iliq vinyetka va miltillovchi yorugʻlik. Kechki xizmat.",
+          ru: "Графит и латунь, строгая типографика. Вечерний сервис.",
+          en: "Graphite and brass, strict typography. Evening service.",
+          uz: "Grafit va guruch, qatʼiy tipografika. Kechki xizmat.",
         },
       },
     ],
@@ -151,8 +146,8 @@ export const TEMPLATES: TemplateDef[] = [
   {
     id: "cafe",
     demoName: cafeDemo.name,
-    // JPG лучше для превью в Telegram/WhatsApp.
-    og: { image: "/templates/cafe/img/og-1200.jpg", description: cafeDemo.tagline },
+    // TODO: когда появится og-1200.jpg (JPG лучше для Telegram/WhatsApp), заменить на него.
+    og: { image: "/templates/cafe/img/hero-1280.webp", description: cafeDemo.tagline },
     title: { ru: "Кафе и кофейня", en: "Café & coffee shop", uz: "Kafe va kofexona" },
     blurb: {
       ru: "Меню с фото, заказ навынос к нужному времени, карта «6-й кофе бесплатно».",
@@ -163,7 +158,6 @@ export const TEMPLATES: TemplateDef[] = [
       {
         id: "a",
         name: { ru: "Утро", en: "Morning", uz: "Tong" },
-        label: { ru: "Утро", en: "Morning", uz: "Tong" },
         mood: {
           ru: "Сливочный и терракота, миндаль и шалфей, круглые шрифты и наклейки. Тёплое утро.",
           en: "Cream and terracotta, almond and sage, round type and stickers. A warm morning.",
@@ -173,7 +167,6 @@ export const TEMPLATES: TemplateDef[] = [
       {
         id: "b",
         name: { ru: "Вечер", en: "Evening", uz: "Kech" },
-        label: { ru: "Вечер", en: "Evening", uz: "Kech" },
         mood: {
           ru: "Тёмный эспрессо, янтарное свечение, десерты и раф после шести. Вечерний уют.",
           en: "Dark espresso, amber glow, desserts and raf after six. An evening hideout.",
